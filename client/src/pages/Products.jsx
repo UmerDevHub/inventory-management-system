@@ -370,10 +370,10 @@ const Products = () => {
         return (
           <div title={tooltip} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: "5px" }}>
-              <span style={{ fontWeight: "800", fontSize: "24px", color: "#0f172a", lineHeight: 1 }}>
+              <span style={{ fontWeight: "700", fontSize: "17px", color: "#0f172a", lineHeight: 1.1 }}>
                 {row.quantity}
               </span>
-              <span style={{ fontSize: "14px", fontWeight: "500", color: "#64748b" }}>Units</span>
+              <span style={{ fontSize: "13px", fontWeight: "500", color: "#64748b" }}>Units</span>
             </div>
 
             {/* Subtle Progress Bar */}

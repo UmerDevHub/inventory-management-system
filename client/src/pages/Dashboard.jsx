@@ -550,6 +550,9 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: "12px",
+    maxHeight: "360px",
+    overflowY: "auto",
+    paddingRight: "6px",
   },
   thLeft: {
     padding: "10px 0",
