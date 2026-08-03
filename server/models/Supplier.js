@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
 
-const userSchema = new mongoose.Schema(
+const supplierSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "Name is required"],
+      required: [true, "Supplier name is required"],
       trim: true,
     },
     email: {
@@ -14,9 +14,14 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-    password: {
+    phone: {
       type: String,
-      required: [true, "Password is required"],
+      required: [true, "Phone number is required"],
+      trim: true,
+    },
+    address: {
+      type: String,
+      required: [true, "Address is required"],
       trim: true,
     },
   },
@@ -25,4 +30,4 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model("Supplier", supplierSchema);
