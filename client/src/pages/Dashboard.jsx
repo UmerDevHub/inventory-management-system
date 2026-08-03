@@ -116,7 +116,7 @@ const Dashboard = () => {
       }),
       badgeClass: "badge-primary",
     })) || []),
-  ].slice(0, 6);
+  ].slice(0, 15);
 
   return (
     <div className="fade-in" style={{ paddingTop: "8px" }}>
@@ -548,6 +548,9 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: "12px",
+    maxHeight: "380px",
+    overflowY: "auto",
+    paddingRight: "6px",
   },
   activityItem: {
     display: "flex",
