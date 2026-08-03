@@ -8,7 +8,6 @@ const createProduct = async (req, res) => {
       price,
       quantity,
       reorderLevel,
-      image,
       category,
       supplier,
       warehouse,
@@ -24,13 +23,15 @@ const createProduct = async (req, res) => {
       return res.status(400).json({ message: "Product with this SKU already exists" });
     }
 
+    const imagePath = req.file ? req.file.path.replace(/\\/g, "/") : req.body.image || "";
+
     const product = await Product.create({
       name,
       sku,
       price,
       quantity: quantity || 0,
       reorderLevel: reorderLevel !== undefined ? reorderLevel : 10,
-      image,
+      image: imagePath,
       category,
       supplier,
       warehouse,
@@ -85,7 +86,6 @@ const updateProduct = async (req, res) => {
       price,
       quantity,
       reorderLevel,
-      image,
       category,
       supplier,
       warehouse,
@@ -105,11 +105,16 @@ const updateProduct = async (req, res) => {
       product.sku = sku;
     }
 
+    if (req.file) {
+      product.image = req.file.path.replace(/\\/g, "/");
+    } else if (req.body.image !== undefined) {
+      product.image = req.body.image;
+    }
+
     if (name) product.name = name;
     if (price !== undefined) product.price = price;
     if (quantity !== undefined) product.quantity = quantity;
     if (reorderLevel !== undefined) product.reorderLevel = reorderLevel;
-    if (image !== undefined) product.image = image;
     if (category) product.category = category;
     if (supplier) product.supplier = supplier;
     if (warehouse) product.warehouse = warehouse;
