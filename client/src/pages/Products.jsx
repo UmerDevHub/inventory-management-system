@@ -612,6 +612,11 @@ const Products = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={editingProduct ? "Edit Product" : "Add New Product"}
+        subtitle={
+          editingProduct
+            ? "Update pricing, quantity, or warehouse allocation for this item."
+            : "Create a new inventory item and allocate it to a warehouse."
+        }
       >
         <form onSubmit={handleSubmit}>
           {formError && (
@@ -621,9 +626,14 @@ const Products = () => {
             </div>
           )}
 
+          {/* Section 1: Product Information */}
+          <div style={styles.sectionHeader}>Product Information</div>
+
           <div style={styles.gridTwo}>
             <div className="form-group">
-              <label className="form-label">Product Name *</label>
+              <label className="form-label">
+                Product Name <span style={{ color: "#ef4444" }}>*</span>
+              </label>
               <input
                 type="text"
                 className="form-input"
@@ -637,7 +647,9 @@ const Products = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">SKU Code *</label>
+              <label className="form-label">
+                SKU Code <span style={{ color: "#ef4444" }}>*</span>
+              </label>
               <input
                 type="text"
                 className="form-input"
@@ -651,9 +663,14 @@ const Products = () => {
             </div>
           </div>
 
+          {/* Section 2: Pricing & Inventory */}
+          <div style={styles.sectionHeader}>Pricing & Stock Levels</div>
+
           <div style={styles.gridThree}>
             <div className="form-group">
-              <label className="form-label">Price ($) *</label>
+              <label className="form-label">
+                Unit Price ($) <span style={{ color: "#ef4444" }}>*</span>
+              </label>
               <input
                 type="number"
                 step="0.01"
@@ -669,7 +686,9 @@ const Products = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Stock Quantity *</label>
+              <label className="form-label">
+                Stock Quantity <span style={{ color: "#ef4444" }}>*</span>
+              </label>
               <input
                 type="number"
                 min="0"
@@ -684,7 +703,9 @@ const Products = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Reorder Level *</label>
+              <label className="form-label">
+                Reorder Level <span style={{ color: "#ef4444" }}>*</span>
+              </label>
               <input
                 type="number"
                 min="0"
@@ -701,7 +722,9 @@ const Products = () => {
 
           <div style={styles.gridThree}>
             <div className="form-group">
-              <label className="form-label">Category *</label>
+              <label className="form-label">
+                Category <span style={{ color: "#ef4444" }}>*</span>
+              </label>
               <select
                 className="form-select"
                 value={formData.category}
@@ -720,7 +743,9 @@ const Products = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Supplier *</label>
+              <label className="form-label">
+                Supplier <span style={{ color: "#ef4444" }}>*</span>
+              </label>
               <select
                 className="form-select"
                 value={formData.supplier}
@@ -739,7 +764,9 @@ const Products = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Warehouse *</label>
+              <label className="form-label">
+                Warehouse <span style={{ color: "#ef4444" }}>*</span>
+              </label>
               <select
                 className="form-select"
                 value={formData.warehouse}
@@ -758,8 +785,10 @@ const Products = () => {
             </div>
           </div>
 
+          {/* Section 3: Product Image Upload */}
+          <div style={styles.sectionHeader}>Product Media</div>
+
           <div className="form-group">
-            <label className="form-label">Product Image Upload</label>
             <div style={styles.uploadArea}>
               {imagePreview ? (
                 <div style={styles.previewBox}>
@@ -781,8 +810,13 @@ const Products = () => {
                 </div>
               ) : (
                 <label style={styles.uploadLabel}>
-                  <Upload size={24} color="#64748b" />
-                  <span>Click to select JPG, JPEG, or PNG (Max 5MB)</span>
+                  <Upload size={28} color="#2563eb" />
+                  <span style={{ fontWeight: "700", color: "#0f172a", fontSize: "15px" }}>
+                    Drag & Drop Image or Click to Browse
+                  </span>
+                  <span style={{ fontSize: "13px", color: "#64748b" }}>
+                    Supports PNG, JPG, JPEG (Max 5MB)
+                  </span>
                   <input
                     type="file"
                     accept="image/png, image/jpeg, image/jpg"
@@ -799,6 +833,7 @@ const Products = () => {
               type="button"
               onClick={() => setIsModalOpen(false)}
               className="btn btn-secondary"
+              style={styles.footerCancelBtn}
             >
               Cancel
             </button>
@@ -806,6 +841,7 @@ const Products = () => {
               type="submit"
               className="btn btn-primary"
               disabled={submitting}
+              style={styles.footerSubmitBtn}
             >
               {submitting
                 ? "Saving Product..."
@@ -999,22 +1035,34 @@ const styles = {
     color: "#ffffff",
     borderColor: "#2563eb",
   },
+  sectionHeader: {
+    fontSize: "12px",
+    fontWeight: "700",
+    color: "#64748b",
+    textTransform: "uppercase",
+    letterSpacing: "0.06em",
+    marginTop: "16px",
+    marginBottom: "16px",
+    paddingBottom: "8px",
+    borderBottom: "1px solid #f1f5f9",
+  },
   gridTwo: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
-    gap: "16px",
+    gap: "20px",
   },
   gridThree: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr 1fr",
-    gap: "16px",
+    gap: "20px",
   },
   uploadArea: {
     border: "2px dashed #cbd5e1",
-    borderRadius: "12px",
-    padding: "16px",
+    borderRadius: "16px",
+    padding: "24px",
     textAlign: "center",
     backgroundColor: "#f8fafc",
+    transition: "border-color 0.15s ease",
   },
   uploadLabel: {
     display: "flex",
@@ -1022,28 +1070,25 @@ const styles = {
     alignItems: "center",
     gap: "8px",
     cursor: "pointer",
-    color: "#64748b",
-    fontSize: "13px",
   },
   previewBox: {
     display: "flex",
-    alignItems: "center",
     justifyContent: "space-between",
     gap: "16px",
   },
   previewImg: {
-    width: "60px",
-    height: "60px",
-    borderRadius: "10px",
+    width: "72px",
+    height: "72px",
+    borderRadius: "12px",
     objectFit: "cover",
   },
   removeImgBtn: {
     backgroundColor: "#fef2f2",
     color: "#ef4444",
     border: "1px solid #fecaca",
-    padding: "6px 12px",
-    borderRadius: "8px",
-    fontSize: "12px",
+    padding: "8px 16px",
+    borderRadius: "10px",
+    fontSize: "13px",
     fontWeight: "600",
     cursor: "pointer",
   },
@@ -1063,7 +1108,23 @@ const styles = {
     display: "flex",
     justifyContent: "flex-end",
     gap: "12px",
-    marginTop: "24px",
+    marginTop: "32px",
+    paddingTop: "20px",
+    borderTop: "1px solid #f1f5f9",
+  },
+  footerCancelBtn: {
+    height: "54px",
+    borderRadius: "14px",
+    padding: "0 28px",
+    fontSize: "15px",
+    fontWeight: "600",
+  },
+  footerSubmitBtn: {
+    height: "54px",
+    borderRadius: "14px",
+    padding: "0 28px",
+    fontSize: "15px",
+    fontWeight: "600",
   },
 };
 

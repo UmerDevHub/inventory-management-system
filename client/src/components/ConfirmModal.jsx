@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertTriangle, X } from "lucide-react";
+import { Trash2, X } from "lucide-react";
 
 const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, loading }) => {
   if (!isOpen) return null;
@@ -7,18 +7,19 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, loading }) =
   return (
     <div style={styles.overlay} onClick={onClose}>
       <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <button style={styles.closeBtn} onClick={onClose}>
-          <X size={18} />
+        <button style={styles.closeBtn} onClick={onClose} title="Close modal">
+          <X size={20} color="#64748b" />
         </button>
 
         <div style={styles.content}>
           <div style={styles.iconCircle}>
-            <AlertTriangle size={24} color="#ef4444" />
+            <Trash2 size={26} color="#ef4444" />
           </div>
 
-          <h3 style={styles.title}>{title || "Confirm Action"}</h3>
+          <h2 style={styles.title}>{title || "Delete Item"}</h2>
+          <p style={styles.warningTag}>This action cannot be undone.</p>
           <p style={styles.message}>
-            {message || "Are you sure you want to proceed? This action cannot be undone."}
+            {message || "Are you sure you want to proceed? The selected record will be permanently removed from inventory."}
           </p>
 
           <div style={styles.actions}>
@@ -26,7 +27,7 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, loading }) =
               onClick={onClose}
               className="btn btn-secondary"
               disabled={loading}
-              style={{ flex: 1 }}
+              style={styles.cancelBtn}
             >
               Cancel
             </button>
@@ -34,9 +35,9 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, loading }) =
               onClick={onConfirm}
               className="btn btn-danger"
               disabled={loading}
-              style={{ flex: 1 }}
+              style={styles.deleteBtn}
             >
-              {loading ? "Deleting..." : "Delete"}
+              {loading ? "Deleting..." : "Delete Item"}
             </button>
           </div>
         </div>
@@ -52,32 +53,37 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(15, 23, 42, 0.6)",
-    backdropFilter: "blur(4px)",
+    backgroundColor: "rgba(15, 23, 42, 0.45)",
+    backdropFilter: "blur(6px)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     zIndex: 1100,
-    padding: "1rem",
+    padding: "20px",
   },
   modal: {
     backgroundColor: "#ffffff",
-    border: "1px solid #e2e8f0",
-    borderRadius: "16px",
+    border: "1px solid #e8ecf3",
+    borderRadius: "24px",
     width: "100%",
-    maxWidth: "420px",
-    padding: "1.75rem",
-    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+    maxWidth: "520px",
+    padding: "36px",
+    boxShadow: "0 24px 60px rgba(15, 23, 42, 0.12)",
     position: "relative",
     animation: "fadeIn 0.2s ease forwards",
   },
   closeBtn: {
     position: "absolute",
-    top: "1rem",
-    right: "1rem",
-    background: "none",
-    border: "none",
-    color: "#94a3b8",
+    top: "24px",
+    right: "24px",
+    width: "40px",
+    height: "40px",
+    borderRadius: "50%",
+    backgroundColor: "#f8fafc",
+    border: "1px solid #e5e7eb",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     cursor: "pointer",
   },
   content: {
@@ -87,32 +93,57 @@ const styles = {
     textAlign: "center",
   },
   iconCircle: {
-    width: "52px",
-    height: "52px",
-    borderRadius: "50%",
+    width: "56px",
+    height: "56px",
+    borderRadius: "16px",
     backgroundColor: "#fef2f2",
+    border: "1px solid #fecaca",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: "1rem",
+    marginBottom: "20px",
   },
   title: {
-    fontSize: "1.2rem",
+    fontSize: "28px",
     fontWeight: "700",
     color: "#0f172a",
     margin: 0,
+    letterSpacing: "-0.01em",
+  },
+  warningTag: {
+    fontSize: "13px",
+    fontWeight: "700",
+    color: "#ef4444",
+    backgroundColor: "#fef2f2",
+    padding: "4px 12px",
+    borderRadius: "999px",
+    margin: "8px 0 12px 0",
   },
   message: {
-    fontSize: "0.875rem",
+    fontSize: "14px",
     color: "#64748b",
-    marginTop: "0.4rem",
-    marginBottom: "1.5rem",
+    marginBottom: "28px",
     lineHeight: 1.5,
   },
   actions: {
     display: "flex",
-    gap: "0.75rem",
+    gap: "12px",
     width: "100%",
+  },
+  cancelBtn: {
+    height: "54px",
+    borderRadius: "14px",
+    flex: 1,
+    fontSize: "15px",
+    fontWeight: "600",
+  },
+  deleteBtn: {
+    height: "54px",
+    borderRadius: "14px",
+    flex: 1,
+    fontSize: "15px",
+    fontWeight: "600",
+    backgroundColor: "#ef4444",
   },
 };
 

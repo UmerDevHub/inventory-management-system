@@ -1,15 +1,19 @@
 import React from "react";
+import { X } from "lucide-react";
 
-const Modal = ({ isOpen, onClose, title, children }) => {
+const Modal = ({ isOpen, onClose, title, subtitle, children }) => {
   if (!isOpen) return null;
 
   return (
     <div style={styles.overlay} onClick={onClose}>
       <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div style={styles.header}>
-          <h3 style={styles.title}>{title}</h3>
-          <button style={styles.closeBtn} onClick={onClose}>
-            ✕
+          <div>
+            <h2 style={styles.title}>{title}</h2>
+            {subtitle && <p style={styles.subtitle}>{subtitle}</p>}
+          </div>
+          <button style={styles.closeBtn} onClick={onClose} title="Close modal">
+            <X size={20} color="#64748b" />
           </button>
         </div>
         <div style={styles.body}>{children}</div>
@@ -25,49 +29,60 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(15, 23, 42, 0.8)",
-    backdropFilter: "blur(4px)",
+    backgroundColor: "rgba(15, 23, 42, 0.45)",
+    backdropFilter: "blur(6px)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     zIndex: 1000,
-    padding: "1rem",
+    padding: "20px",
   },
   modal: {
-    backgroundColor: "#1e293b",
-    border: "1px solid #334155",
-    borderRadius: "16px",
+    backgroundColor: "#ffffff",
+    border: "1px solid #e8ecf3",
+    borderRadius: "24px",
     width: "100%",
-    maxWidth: "560px",
+    maxWidth: "760px",
     maxHeight: "90vh",
     overflowY: "auto",
-    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.5)",
+    boxShadow: "0 24px 60px rgba(15, 23, 42, 0.12)",
     animation: "fadeIn 0.2s ease forwards",
   },
   header: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center",
-    padding: "1.25rem 1.5rem",
-    borderBottom: "1px solid #334155",
+    alignItems: "flex-start",
+    padding: "32px 32px 20px 32px",
+    borderBottom: "1px solid #f1f5f9",
   },
   title: {
     margin: 0,
-    fontSize: "1.25rem",
-    color: "#f8fafc",
+    fontSize: "32px",
+    fontWeight: "700",
+    color: "#0f172a",
+    letterSpacing: "-0.02em",
+  },
+  subtitle: {
+    margin: 0,
+    fontSize: "15px",
+    color: "#64748b",
+    marginTop: "4px",
   },
   closeBtn: {
-    background: "none",
-    border: "none",
-    color: "#94a3b8",
-    fontSize: "1.25rem",
+    width: "44px",
+    height: "44px",
+    borderRadius: "50%",
+    backgroundColor: "#f8fafc",
+    border: "1px solid #e5e7eb",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     cursor: "pointer",
-    padding: "0.25rem",
-    borderRadius: "4px",
-    transition: "color 0.2s",
+    transition: "all 0.15s ease",
+    flexShrink: 0,
   },
   body: {
-    padding: "1.5rem",
+    padding: "32px",
   },
 };
 
