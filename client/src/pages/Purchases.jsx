@@ -302,6 +302,7 @@ const Purchases = () => {
     },
     {
       header: "Quantity",
+      style: { width: "110px", minWidth: "110px", textAlign: "center" },
       render: (row) => (
         <span style={styles.softBlueBadge}>
           +{row.quantity} units
@@ -841,6 +842,8 @@ const styles = {
     borderRadius: "999px",
     fontSize: "13px",
     fontWeight: "700",
+    whiteSpace: "nowrap",
+    display: "inline-block",
   },
   actionBtn: {
     width: "36px",
