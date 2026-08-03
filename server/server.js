@@ -9,6 +9,7 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const supplierRoutes = require("./routes/supplierRoutes");
 const warehouseRoutes = require("./routes/warehouseRoutes");
 const productRoutes = require("./routes/productRoutes");
+const stockInRoutes = require("./routes/stockInRoutes");
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/suppliers", supplierRoutes);
 app.use("/api/warehouses", warehouseRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/stock-in", stockInRoutes);
 
 const PORT = process.env.PORT || 5000;
 
