@@ -119,8 +119,8 @@ const Dashboard = () => {
   ].slice(0, 6);
 
   return (
-    <div className="fade-in" style={{ paddingTop: "12px" }}>
-      {/* 1. Header (32-40px top margin spacing) */}
+    <div className="fade-in" style={{ paddingTop: "8px" }}>
+      {/* 1. Header (32px top margin spacing) */}
       <div className="page-header" style={{ marginBottom: "32px" }}>
         <div>
           <h1 className="page-title">Inventory Dashboard</h1>
@@ -132,7 +132,11 @@ const Dashboard = () => {
 
       {/* Group 1: Inventory Overview Section */}
       <div style={{ marginBottom: "32px" }}>
-        <h2 style={styles.groupHeading}>Inventory Overview</h2>
+        <div style={styles.sectionDividerRow}>
+          <span style={styles.groupHeading}>INVENTORY OVERVIEW</span>
+          <div style={styles.sectionDividerLine}></div>
+        </div>
+
         <div style={styles.cardsGrid}>
           <div className="card" style={styles.summaryCard}>
             <div style={styles.cardMain}>
@@ -190,7 +194,11 @@ const Dashboard = () => {
 
       {/* Group 2: Operations & Alerts Section */}
       <div style={{ marginBottom: "36px" }}>
-        <h2 style={styles.groupHeading}>Operations & Alerts</h2>
+        <div style={styles.sectionDividerRow}>
+          <span style={styles.groupHeading}>OPERATIONS & ALERTS</span>
+          <div style={styles.sectionDividerLine}></div>
+        </div>
+
         <div style={styles.cardsGrid}>
           <div className="card" style={styles.summaryCard}>
             <div style={styles.cardMain}>
@@ -428,13 +436,24 @@ const styles = {
     borderRadius: "16px",
     marginBottom: "24px",
   },
-  groupHeading: {
-    fontSize: "14px",
-    fontWeight: "700",
-    color: "#64748b",
-    textTransform: "uppercase",
-    letterSpacing: "0.05em",
+  sectionDividerRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
     marginBottom: "14px",
+  },
+  groupHeading: {
+    fontSize: "11px",
+    fontWeight: "700",
+    color: "#94a3b8",
+    textTransform: "uppercase",
+    letterSpacing: "0.06em",
+    whiteSpace: "nowrap",
+  },
+  sectionDividerLine: {
+    flex: 1,
+    height: "1px",
+    backgroundColor: "#e5e7eb",
   },
   cardsGrid: {
     display: "grid",
@@ -442,7 +461,7 @@ const styles = {
     gap: "24px",
   },
   summaryCard: {
-    minHeight: "115px",
+    minHeight: "125px",
     padding: "24px",
     display: "flex",
     alignItems: "flex-start",
@@ -450,22 +469,23 @@ const styles = {
     backgroundColor: "#ffffff",
     border: "1px solid #e5e7eb",
     borderRadius: "16px",
+    boxShadow: "0 4px 16px rgba(15, 23, 42, 0.04)",
   },
   cardMain: {
     display: "flex",
     flexDirection: "column",
   },
   cardLabel: {
-    fontSize: "12px",
+    fontSize: "11px",
     fontWeight: "700",
     color: "#64748b",
-    letterSpacing: "0.04em",
+    letterSpacing: "0.05em",
   },
   cardValue: {
-    fontSize: "38px",
+    fontSize: "42px",
     fontWeight: "800",
     color: "#0f172a",
-    lineHeight: 1.1,
+    lineHeight: 1.05,
     marginTop: "4px",
     marginBottom: "6px",
   },

@@ -78,15 +78,15 @@ const Sidebar = () => {
         width: collapsed ? "80px" : "260px",
       }}
     >
-      {/* Logo Header Area */}
+      {/* Rich Logo Header Area */}
       <div style={styles.logoContainer}>
         <div style={styles.logoIcon}>
-          <Boxes size={22} color="#ffffff" />
+          <Boxes size={24} color="#ffffff" />
         </div>
         {!collapsed && (
           <div style={styles.logoTextWrapper}>
             <h2 style={styles.logoTitle}>WarehouseOS</h2>
-            <span style={styles.logoSub}>Inventory Management</span>
+            <span style={styles.logoSub}>Inventory Management Platform</span>
           </div>
         )}
         <button
@@ -137,7 +137,7 @@ const Sidebar = () => {
         ))}
       </div>
 
-      {/* Fixed Bottom Logout Section */}
+      {/* Pinned Bottom Logout Section */}
       <div style={styles.footer}>
         <button
           onClick={handleLogout}
@@ -169,23 +169,23 @@ const styles = {
     transition: "width 0.2s ease",
   },
   logoContainer: {
-    height: "72px",
+    height: "80px",
     display: "flex",
     alignItems: "center",
     gap: "12px",
-    padding: "0 16px",
+    padding: "0 18px",
     borderBottom: "1px solid #e5e7eb",
     position: "relative",
   },
   logoIcon: {
-    width: "40px",
-    height: "40px",
+    width: "44px",
+    height: "44px",
     backgroundColor: "#2563eb",
     borderRadius: "12px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    boxShadow: "0 4px 12px rgba(37, 99, 235, 0.25)",
+    boxShadow: "0 4px 14px rgba(37, 99, 235, 0.25)",
     flexShrink: 0,
   },
   logoTextWrapper: {
@@ -202,9 +202,12 @@ const styles = {
     lineHeight: 1.2,
   },
   logoSub: {
-    fontSize: "11px",
+    fontSize: "10.5px",
     color: "#64748b",
     fontWeight: "500",
+    whiteSpace: "nowrap",
+    textOverflow: "ellipsis",
+    overflow: "hidden",
   },
   collapseBtn: {
     background: "#f8fafc",
@@ -226,7 +229,7 @@ const styles = {
     overflowY: "auto",
     display: "flex",
     flexDirection: "column",
-    gap: "24px",
+    gap: "22px",
   },
   groupWrapper: {
     display: "flex",
@@ -265,12 +268,14 @@ const styles = {
   navItemActive: {
     backgroundColor: "#2563eb",
     color: "#ffffff",
-    boxShadow: "0 6px 18px rgba(37, 99, 235, 0.22)",
+    boxShadow: "0 4px 14px rgba(37, 99, 235, 0.2)",
     border: "none",
   },
   footer: {
+    marginTop: "auto",
     padding: "16px 12px",
     borderTop: "1px solid #e5e7eb",
+    backgroundColor: "#ffffff",
   },
   logoutBtn: {
     width: "100%",
