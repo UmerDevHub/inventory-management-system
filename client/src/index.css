@@ -346,3 +346,35 @@ button, input, select, textarea {
     width: 100%;
   }
 }
+
+/* Professional Print Stylesheet */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .sidebar, .navbar, .btn, .no-print, input, select, button, .modal-overlay {
+    display: none !important;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+    padding: 0 !important;
+  }
+
+  .page-container {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .card, .table-container {
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .custom-table th {
+    background-color: #f1f5f9 !important;
+    color: #000000 !important;
+  }
+}

@@ -8,12 +8,12 @@ import {
   AlertTriangle,
   Download,
   Printer,
-  FileSpreadsheet,
+  FileText,
   DollarSign,
   Boxes,
   ChevronLeft,
   ChevronRight,
-  Filter,
+  Calendar,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -22,14 +22,13 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  PieChart,
-  Pie,
-  Cell,
 } from "recharts";
 import API from "../api/axios";
 import Table from "../components/Table";
 import SearchBar from "../components/SearchBar";
 import Loader from "../components/Loader";
+import { exportToCSV } from "../utils/csvExport";
+import { exportToPDF } from "../utils/pdfExport";
 
 const Reports = () => {
   const [activeTab, setActiveTab] = useState("stock");
@@ -38,6 +37,7 @@ const Reports = () => {
 
   // Search & Filter State
   const [searchTerm, setSearchTerm] = useState("");
+  const [dateFilter, setDateFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 7;
 
@@ -65,91 +65,27 @@ const Reports = () => {
     fetchReport(activeTab);
   }, [activeTab]);
 
-  const handleExportCSV = () => {
-    if (!reportData) return;
+  const filterByDate = (dateString) => {
+    if (!dateString || dateFilter === "all") return true;
+    const date = new Date(dateString);
+    const now = new Date();
 
-    let csvContent = "data:text/csv;charset=utf-8,";
-    let rows = [];
-
-    if (activeTab === "stock") {
-      rows.push(["Product Name", "SKU", "Category", "Warehouse", "Price", "Quantity", "Total Value"]);
-      reportData.products?.forEach((p) => {
-        rows.push([
-          `"${p.name}"`,
-          p.sku?.toUpperCase() || "N/A",
-          `"${p.category?.name || "N/A"}"`,
-          `"${p.warehouse?.name || "N/A"}"`,
-          p.price,
-          p.quantity,
-          (p.quantity * p.price).toFixed(2),
-        ]);
-      });
-    } else if (activeTab === "purchases") {
-      rows.push(["Purchase Date", "Product", "Supplier", "Unit Price", "Quantity", "Total Spent"]);
-      reportData.purchases?.forEach((p) => {
-        rows.push([
-          new Date(p.purchaseDate || p.createdAt).toLocaleDateString(),
-          `"${p.product?.name || "N/A"}"`,
-          `"${p.supplier?.name || "N/A"}"`,
-          p.price,
-          p.quantity,
-          p.totalAmount,
-        ]);
-      });
-    } else if (activeTab === "stock-in") {
-      rows.push(["Received Date", "Product", "SKU", "Quantity Received", "Notes"]);
-      reportData.stockInRecords?.forEach((s) => {
-        rows.push([
-          new Date(s.receivedDate || s.createdAt).toLocaleDateString(),
-          `"${s.product?.name || "N/A"}"`,
-          s.product?.sku?.toUpperCase() || "N/A",
-          s.quantity,
-          `"${s.notes || ""}"`,
-        ]);
-      });
-    } else if (activeTab === "stock-out") {
-      rows.push(["Issued Date", "Product", "SKU", "Quantity Issued", "Notes"]);
-      reportData.stockOutRecords?.forEach((s) => {
-        rows.push([
-          new Date(s.issuedDate || s.createdAt).toLocaleDateString(),
-          `"${s.product?.name || "N/A"}"`,
-          s.product?.sku?.toUpperCase() || "N/A",
-          s.quantity,
-          `"${s.notes || ""}"`,
-        ]);
-      });
-    } else if (activeTab === "low-stock") {
-      rows.push(["Product Name", "SKU", "Category", "Current Stock", "Reorder Level"]);
-      reportData.lowStockProducts?.forEach((p) => {
-        rows.push([
-          `"${p.name}"`,
-          p.sku?.toUpperCase() || "N/A",
-          `"${p.category?.name || "N/A"}"`,
-          p.quantity,
-          p.reorderLevel,
-        ]);
-      });
+    if (dateFilter === "today") {
+      return date.toDateString() === now.toDateString();
     }
-
-    csvContent += rows.map((e) => e.join(",")).join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `${activeTab}_analytics_report_${new Date().toISOString().split("T")[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (dateFilter === "7days") {
+      return now - date <= 7 * 24 * 60 * 60 * 1000;
+    }
+    if (dateFilter === "30days") {
+      return now - date <= 30 * 24 * 60 * 60 * 1000;
+    }
+    if (dateFilter === "month") {
+      return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+    }
+    return true;
   };
 
-  const tabs = [
-    { key: "stock", label: "Current Stock", icon: Package },
-    { key: "purchases", label: "Purchases Report", icon: ShoppingCart },
-    { key: "stock-in", label: "Stock In Report", icon: ArrowDownLeft },
-    { key: "stock-out", label: "Stock Out Report", icon: ArrowUpRight },
-    { key: "low-stock", label: "Low Stock Alerts", icon: AlertTriangle },
-  ];
-
-  // Tab Specific Data Filtering
+  // Filtered Dataset Computation
   const getFilteredData = () => {
     if (!reportData) return [];
 
@@ -161,25 +97,31 @@ const Reports = () => {
       );
     }
     if (activeTab === "purchases") {
-      return (reportData.purchases || []).filter(
-        (p) =>
+      return (reportData.purchases || []).filter((p) => {
+        const matchesSearch =
           (p.product?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (p.supplier?.name || "").toLowerCase().includes(searchTerm.toLowerCase())
-      );
+          (p.supplier?.name || "").toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesDate = filterByDate(p.purchaseDate || p.createdAt);
+        return matchesSearch && matchesDate;
+      });
     }
     if (activeTab === "stock-in") {
-      return (reportData.stockInRecords || []).filter(
-        (s) =>
+      return (reportData.stockInRecords || []).filter((s) => {
+        const matchesSearch =
           (s.product?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (s.notes || "").toLowerCase().includes(searchTerm.toLowerCase())
-      );
+          (s.notes || "").toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesDate = filterByDate(s.receivedDate || s.createdAt);
+        return matchesSearch && matchesDate;
+      });
     }
     if (activeTab === "stock-out") {
-      return (reportData.stockOutRecords || []).filter(
-        (s) =>
+      return (reportData.stockOutRecords || []).filter((s) => {
+        const matchesSearch =
           (s.product?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (s.notes || "").toLowerCase().includes(searchTerm.toLowerCase())
-      );
+          (s.notes || "").toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesDate = filterByDate(s.issuedDate || s.createdAt);
+        return matchesSearch && matchesDate;
+      });
     }
     if (activeTab === "low-stock") {
       return (reportData.lowStockProducts || []).filter(
@@ -192,25 +134,200 @@ const Reports = () => {
   };
 
   const filteredDataset = getFilteredData();
+
+  // CSV Export Trigger
+  const handleCSVExport = () => {
+    if (activeTab === "stock") {
+      const headers = ["Product Name", "SKU", "Category", "Warehouse", "Unit Price", "Stock Quantity", "Total Value"];
+      const rows = filteredDataset.map((p) => [
+        p.name,
+        p.sku?.toUpperCase() || "N/A",
+        p.category?.name || "N/A",
+        p.warehouse?.name || "Central Warehouse",
+        `$${Number(p.price).toFixed(2)}`,
+        p.quantity,
+        `$${(p.quantity * p.price).toFixed(2)}`,
+      ]);
+      exportToCSV("Current-Stock-Report", headers, rows);
+    } else if (activeTab === "purchases") {
+      const headers = ["Purchase Date", "Product Name", "Supplier", "Unit Price", "Quantity", "Total Spent"];
+      const rows = filteredDataset.map((p) => [
+        new Date(p.purchaseDate || p.createdAt).toLocaleDateString(),
+        p.product?.name || "N/A",
+        p.supplier?.name || "N/A",
+        `$${Number(p.price).toFixed(2)}`,
+        p.quantity,
+        `$${Number(p.totalAmount).toFixed(2)}`,
+      ]);
+      exportToCSV("Purchase-Report", headers, rows);
+    } else if (activeTab === "stock-in") {
+      const headers = ["Received Date", "Product Name", "SKU", "Quantity Received", "Notes"];
+      const rows = filteredDataset.map((s) => [
+        new Date(s.receivedDate || s.createdAt).toLocaleDateString(),
+        s.product?.name || "N/A",
+        s.product?.sku?.toUpperCase() || "N/A",
+        `+${s.quantity} units`,
+        s.notes || "N/A",
+      ]);
+      exportToCSV("Stock-In-Report", headers, rows);
+    } else if (activeTab === "stock-out") {
+      const headers = ["Issued Date", "Product Name", "SKU", "Quantity Issued", "Notes"];
+      const rows = filteredDataset.map((s) => [
+        new Date(s.issuedDate || s.createdAt).toLocaleDateString(),
+        s.product?.name || "N/A",
+        s.product?.sku?.toUpperCase() || "N/A",
+        `-${s.quantity} units`,
+        s.notes || "N/A",
+      ]);
+      exportToCSV("Stock-Out-Report", headers, rows);
+    } else if (activeTab === "low-stock") {
+      const headers = ["Product Name", "SKU", "Category", "Warehouse", "Current Stock", "Reorder Level"];
+      const rows = filteredDataset.map((p) => [
+        p.name,
+        p.sku?.toUpperCase() || "N/A",
+        p.category?.name || "N/A",
+        p.warehouse?.name || "Central Warehouse",
+        p.quantity,
+        p.reorderLevel,
+      ]);
+      exportToCSV("Low-Stock-Alerts-Report", headers, rows);
+    }
+  };
+
+  // PDF Export Trigger
+  const handlePDFExport = () => {
+    if (activeTab === "stock") {
+      const totalUnits = filteredDataset.reduce((sum, p) => sum + p.quantity, 0);
+      const totalVal = filteredDataset.reduce((sum, p) => sum + p.quantity * p.price, 0);
+
+      exportToPDF({
+        title: "Current Inventory Stock Valuation Report",
+        subtitle: "Audit report of active product stock quantities and inventory valuation",
+        summaryItems: [
+          { label: "Products Listed", value: filteredDataset.length },
+          { label: "Total Units Available", value: `${totalUnits} Units` },
+          { label: "Inventory Valuation", value: `$${totalVal.toLocaleString(undefined, { minimumFractionDigits: 2 })}` },
+        ],
+        headers: ["Product Name", "SKU", "Category", "Warehouse", "Price", "Stock Qty", "Total Value"],
+        rows: filteredDataset.map((p) => [
+          p.name,
+          p.sku?.toUpperCase() || "N/A",
+          p.category?.name || "N/A",
+          p.warehouse?.name || "Central Warehouse",
+          `$${Number(p.price).toFixed(2)}`,
+          `${p.quantity} units`,
+          `$${(p.quantity * p.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+        ]),
+        filename: "Current-Stock-Valuation-Report",
+      });
+    } else if (activeTab === "purchases") {
+      const totalSpent = filteredDataset.reduce((sum, p) => sum + p.totalAmount, 0);
+
+      exportToPDF({
+        title: "Purchase Expenditure & Procurement Report",
+        subtitle: "Audit report of supplier orders, quantities, and purchasing expenditure",
+        summaryItems: [
+          { label: "Orders Fulfilled", value: filteredDataset.length },
+          { label: "Total Procurement Spend", value: `$${totalSpent.toLocaleString(undefined, { minimumFractionDigits: 2 })}` },
+        ],
+        headers: ["Purchase Date", "Product Name", "Supplier", "Unit Price", "Quantity", "Total Spent"],
+        rows: filteredDataset.map((p) => [
+          new Date(p.purchaseDate || p.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
+          p.product?.name || "N/A",
+          p.supplier?.name || "N/A",
+          `$${Number(p.price).toFixed(2)}`,
+          `${p.quantity} units`,
+          `$${Number(p.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+        ]),
+        filename: "Purchase-Procurement-Report",
+      });
+    } else if (activeTab === "stock-in") {
+      const totalReceived = filteredDataset.reduce((sum, s) => sum + s.quantity, 0);
+
+      exportToPDF({
+        title: "Inbound Inventory Stock In Report",
+        subtitle: "Audit report of received product receipts and stock replenishments",
+        summaryItems: [
+          { label: "Receipt Logs", value: filteredDataset.length },
+          { label: "Units Received", value: `+${totalReceived} Units` },
+        ],
+        headers: ["Received Date", "Product Name", "SKU", "Quantity Received", "Notes / Remarks"],
+        rows: filteredDataset.map((s) => [
+          new Date(s.receivedDate || s.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
+          s.product?.name || "N/A",
+          s.product?.sku?.toUpperCase() || "N/A",
+          `+${s.quantity} units`,
+          s.notes || "Inbound stock entry",
+        ]),
+        filename: "Stock-In-Receipts-Report",
+      });
+    } else if (activeTab === "stock-out") {
+      const totalIssued = filteredDataset.reduce((sum, s) => sum + s.quantity, 0);
+
+      exportToPDF({
+        title: "Outbound Inventory Stock Out Report",
+        subtitle: "Audit report of dispatched product shipments and order fulfillment",
+        summaryItems: [
+          { label: "Dispatch Logs", value: filteredDataset.length },
+          { label: "Units Dispatched", value: `-${totalIssued} Units` },
+        ],
+        headers: ["Issued Date", "Product Name", "SKU", "Quantity Issued", "Notes / Remarks"],
+        rows: filteredDataset.map((s) => [
+          new Date(s.issuedDate || s.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
+          s.product?.name || "N/A",
+          s.product?.sku?.toUpperCase() || "N/A",
+          `-${s.quantity} units`,
+          s.notes || "Outbound stock issue",
+        ]),
+        filename: "Stock-Out-Dispatches-Report",
+      });
+    } else if (activeTab === "low-stock") {
+      exportToPDF({
+        title: "Critical Low Stock Alerts Report",
+        subtitle: "Audit report of products at or below designated reorder levels",
+        summaryItems: [
+          { label: "Critical Products", value: filteredDataset.length },
+        ],
+        headers: ["Product Name", "SKU", "Category", "Warehouse", "Current Stock", "Reorder Threshold"],
+        rows: filteredDataset.map((p) => [
+          p.name,
+          p.sku?.toUpperCase() || "N/A",
+          p.category?.name || "N/A",
+          p.warehouse?.name || "Central Warehouse",
+          `${p.quantity} units`,
+          `${p.reorderLevel} units`,
+        ]),
+        filename: "Low-Stock-Alerts-Report",
+      });
+    }
+  };
+
+  const tabs = [
+    { key: "stock", label: "Current Stock", icon: Package },
+    { key: "purchases", label: "Purchases Report", icon: ShoppingCart },
+    { key: "stock-in", label: "Stock In Report", icon: ArrowDownLeft },
+    { key: "stock-out", label: "Stock Out Report", icon: ArrowUpRight },
+    { key: "low-stock", label: "Low Stock Alerts", icon: AlertTriangle },
+  ];
+
+  // Pagination Logic
   const totalPages = Math.ceil(filteredDataset.length / itemsPerPage) || 1;
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentDisplayedDataset = filteredDataset.slice(indexOfFirstItem, indexOfLastItem);
 
-  const PIE_COLORS = ["#2563eb", "#3b82f6", "#60a5fa", "#93c5fd"];
-
   const renderChart = () => {
     if (!reportData) return null;
 
     if (activeTab === "stock") {
-      const chartData = (reportData.products || []).slice(0, 5).map((p) => ({
+      const chartData = (filteredDataset || []).slice(0, 5).map((p) => ({
         name: p.name,
         value: p.quantity,
       }));
       return (
         <div className="card" style={{ padding: "24px", marginBottom: "28px" }}>
           <h3 style={styles.chartTitle}>Stock Distribution by Product</h3>
-          <p style={styles.chartSub}>Breakdown of units available across inventory items</p>
+          <p style={styles.chartSub}>Breakdown of available stock units across inventory items</p>
           <div style={{ width: "100%", height: "260px" }}>
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={chartData} margin={{ top: 15, right: 10, left: -25, bottom: 0 }}>
@@ -226,14 +343,14 @@ const Reports = () => {
     }
 
     if (activeTab === "purchases") {
-      const chartData = (reportData.purchases || []).slice(0, 5).map((p) => ({
+      const chartData = (filteredDataset || []).slice(0, 5).map((p) => ({
         name: p.product?.name || "Order",
         spent: p.totalAmount,
       }));
       return (
         <div className="card" style={{ padding: "24px", marginBottom: "28px" }}>
           <h3 style={styles.chartTitle}>Purchase Expenditure Breakdown</h3>
-          <p style={styles.chartSub}>Procurement spend per order transaction</p>
+          <p style={styles.chartSub}>Procurement spend per purchase order transaction</p>
           <div style={{ width: "100%", height: "260px" }}>
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={chartData} margin={{ top: 15, right: 10, left: -10, bottom: 0 }}>
@@ -313,7 +430,7 @@ const Reports = () => {
         { header: "Category", render: (r) => <span className="badge badge-primary">{r.category?.name || "N/A"}</span> },
         { header: "Current Stock", render: (r) => <span style={{ fontWeight: "800", color: "#ef4444" }}>{r.quantity}</span> },
         { header: "Reorder Threshold", render: (r) => <span>{r.reorderLevel}</span> },
-        { header: "Status", render: () => <span className="badge badge-danger">CRITICAL LOW</span> },
+        { header: "Status", render: () => <span className="badge badge-danger">● Low Stock</span> },
       ];
       return <Table columns={columns} data={currentDisplayedDataset} />;
     }
@@ -323,7 +440,7 @@ const Reports = () => {
 
   return (
     <div className="fade-in">
-      {/* Header & Export Button Group */}
+      {/* Header & Export Action Button Group */}
       <div className="page-header" style={{ marginBottom: "24px" }}>
         <div>
           <h1 className="page-title">Inventory Reports</h1>
@@ -332,26 +449,26 @@ const Reports = () => {
           </p>
         </div>
 
-        <div style={styles.btnGroup}>
+        <div style={styles.btnGroup} className="no-print">
           <button onClick={() => window.print()} className="btn btn-secondary" style={styles.actionBtn}>
             <Printer size={16} />
-            <span>Print</span>
+            <span>Print Report</span>
           </button>
 
-          <button onClick={handleExportCSV} className="btn btn-secondary" style={styles.actionBtn}>
+          <button onClick={handleCSVExport} className="btn btn-secondary" style={styles.actionBtn}>
             <Download size={16} />
             <span>Export CSV</span>
           </button>
 
-          <button onClick={handleExportCSV} className="btn btn-primary" style={styles.actionBtn}>
-            <FileSpreadsheet size={16} />
-            <span>Export Excel</span>
+          <button onClick={handlePDFExport} className="btn btn-primary" style={styles.actionBtn}>
+            <FileText size={16} />
+            <span>Export PDF</span>
           </button>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div style={styles.tabsContainer}>
+      {/* Tabs Bar */}
+      <div style={styles.tabsContainer} className="no-print">
         {tabs.map((t) => {
           const Icon = t.icon;
           const isActive = activeTab === t.key;
@@ -371,7 +488,7 @@ const Reports = () => {
         })}
       </div>
 
-      {/* Top Metrics Cards with Top-Right Icons */}
+      {/* Top Summary Metrics Cards */}
       {reportData && !loading && (
         <div style={styles.metricsGrid}>
           {activeTab === "stock" && (
@@ -379,7 +496,7 @@ const Reports = () => {
               <div className="card" style={styles.metricCard}>
                 <div style={styles.metricCardLeft}>
                   <span style={styles.metricLabel}>PRODUCTS</span>
-                  <span style={styles.metricValue}>{reportData.totalProducts || 0} Listed</span>
+                  <span style={styles.metricValue}>{filteredDataset.length} Listed</span>
                 </div>
                 <div style={styles.iconCircle}>
                   <Package size={22} color="#2563eb" />
@@ -388,7 +505,9 @@ const Reports = () => {
               <div className="card" style={styles.metricCard}>
                 <div style={styles.metricCardLeft}>
                   <span style={styles.metricLabel}>STOCK UNITS</span>
-                  <span style={styles.metricValue}>{reportData.totalStockQuantity || 0} Available</span>
+                  <span style={styles.metricValue}>
+                    {filteredDataset.reduce((sum, p) => sum + p.quantity, 0)} Available
+                  </span>
                 </div>
                 <div style={styles.iconCircle}>
                   <Boxes size={22} color="#2563eb" />
@@ -398,7 +517,10 @@ const Reports = () => {
                 <div style={styles.metricCardLeft}>
                   <span style={styles.metricLabel}>INVENTORY VALUE</span>
                   <span style={{ ...styles.metricValue, color: "#2563eb" }}>
-                    ${Number(reportData.totalStockValue || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    $
+                    {filteredDataset
+                      .reduce((sum, p) => sum + p.quantity * p.price, 0)
+                      .toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </span>
                 </div>
                 <div style={styles.iconCircle}>
@@ -413,7 +535,7 @@ const Reports = () => {
               <div className="card" style={styles.metricCard}>
                 <div style={styles.metricCardLeft}>
                   <span style={styles.metricLabel}>PURCHASES</span>
-                  <span style={styles.metricValue}>{reportData.totalPurchasesCount || 0} Orders</span>
+                  <span style={styles.metricValue}>{filteredDataset.length} Orders</span>
                 </div>
                 <div style={styles.iconCircle}>
                   <ShoppingCart size={22} color="#2563eb" />
@@ -423,7 +545,10 @@ const Reports = () => {
                 <div style={styles.metricCardLeft}>
                   <span style={styles.metricLabel}>TOTAL EXPENDITURE</span>
                   <span style={{ ...styles.metricValue, color: "#2563eb" }}>
-                    ${Number(reportData.totalAmountSpent || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    $
+                    {filteredDataset
+                      .reduce((sum, p) => sum + p.totalAmount, 0)
+                      .toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </span>
                 </div>
                 <div style={styles.iconCircle}>
@@ -438,7 +563,7 @@ const Reports = () => {
               <div className="card" style={styles.metricCard}>
                 <div style={styles.metricCardLeft}>
                   <span style={styles.metricLabel}>STOCK IN LOGS</span>
-                  <span style={styles.metricValue}>{reportData.totalStockInCount || 0} Receipts</span>
+                  <span style={styles.metricValue}>{filteredDataset.length} Receipts</span>
                 </div>
                 <div style={{ ...styles.iconCircle, backgroundColor: "#ecfdf5" }}>
                   <ArrowDownLeft size={22} color="#10b981" />
@@ -448,7 +573,7 @@ const Reports = () => {
                 <div style={styles.metricCardLeft}>
                   <span style={styles.metricLabel}>UNITS RECEIVED</span>
                   <span style={{ ...styles.metricValue, color: "#10b981" }}>
-                    +{reportData.totalQuantityReceived || 0} Units
+                    +{filteredDataset.reduce((sum, s) => sum + s.quantity, 0)} Units
                   </span>
                 </div>
                 <div style={{ ...styles.iconCircle, backgroundColor: "#ecfdf5" }}>
@@ -463,7 +588,7 @@ const Reports = () => {
               <div className="card" style={styles.metricCard}>
                 <div style={styles.metricCardLeft}>
                   <span style={styles.metricLabel}>STOCK OUT LOGS</span>
-                  <span style={styles.metricValue}>{reportData.totalStockOutCount || 0} Issues</span>
+                  <span style={styles.metricValue}>{filteredDataset.length} Issues</span>
                 </div>
                 <div style={{ ...styles.iconCircle, backgroundColor: "#fef2f2" }}>
                   <ArrowUpRight size={22} color="#ef4444" />
@@ -473,7 +598,7 @@ const Reports = () => {
                 <div style={styles.metricCardLeft}>
                   <span style={styles.metricLabel}>UNITS ISSUED</span>
                   <span style={{ ...styles.metricValue, color: "#ef4444" }}>
-                    -{reportData.totalQuantityIssued || 0} Units
+                    -{filteredDataset.reduce((sum, s) => sum + s.quantity, 0)} Units
                   </span>
                 </div>
                 <div style={{ ...styles.iconCircle, backgroundColor: "#fef2f2" }}>
@@ -488,7 +613,7 @@ const Reports = () => {
               <div style={styles.metricCardLeft}>
                 <span style={styles.metricLabel}>LOW STOCK ALERTS</span>
                 <span style={{ ...styles.metricValue, color: "#ef4444" }}>
-                  {reportData.totalLowStockProducts || 0} Items
+                  {filteredDataset.length} Items
                 </span>
               </div>
               <div style={{ ...styles.iconCircle, backgroundColor: "#fef2f2" }}>
@@ -502,18 +627,37 @@ const Reports = () => {
       {/* Analytics Chart above Table */}
       {!loading && renderChart()}
 
-      {/* Toolbar Search Bar */}
-      <div style={styles.toolbar}>
-        <div style={{ width: "420px", maxWidth: "100%" }}>
-          <SearchBar
-            searchTerm={searchTerm}
-            setSearchTerm={(val) => {
-              setSearchTerm(val);
-              setCurrentPage(1);
-            }}
-            placeholder="Search report dataset..."
-          />
-        </div>
+      {/* Toolbar Search Bar & Date Filter */}
+      <div style={styles.toolbar} className="no-print">
+        <SearchBar
+          searchTerm={searchTerm}
+          setSearchTerm={(val) => {
+            setSearchTerm(val);
+            setCurrentPage(1);
+          }}
+          placeholder="Search report dataset..."
+        />
+
+        {(activeTab === "purchases" || activeTab === "stock-in" || activeTab === "stock-out") && (
+          <div style={styles.dateFilterBox}>
+            <Calendar size={16} color="#64748b" />
+            <select
+              className="form-select"
+              value={dateFilter}
+              onChange={(e) => {
+                setDateFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              style={styles.filterSelect}
+            >
+              <option value="all">Date: All Time</option>
+              <option value="today">Date: Today</option>
+              <option value="7days">Date: Last 7 Days</option>
+              <option value="30days">Date: Last 30 Days</option>
+              <option value="month">Date: This Month</option>
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Main Table View */}
@@ -526,7 +670,7 @@ const Reports = () => {
           </div>
           <h3 style={styles.emptyTitle}>No report data available</h3>
           <p style={styles.emptySub}>
-            Create products and inventory records to generate reports.
+            No records matched your search or date filter.
           </p>
         </div>
       ) : (
@@ -535,7 +679,7 @@ const Reports = () => {
 
           {/* Pagination Footer */}
           {filteredDataset.length > 0 && (
-            <div style={styles.paginationFooter}>
+            <div style={styles.paginationFooter} className="no-print">
               <span style={styles.paginationText}>
                 Showing <strong>{indexOfFirstItem + 1}</strong>–
                 <strong>{Math.min(indexOfLastItem, filteredDataset.length)}</strong> of{" "}
@@ -682,6 +826,25 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: "24px",
+    gap: "16px",
+    flexWrap: "wrap",
+  },
+  dateFilterBox: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    backgroundColor: "#ffffff",
+    border: "1px solid #e5e7eb",
+    borderRadius: "14px",
+    padding: "0 14px",
+  },
+  filterSelect: {
+    border: "none",
+    height: "48px",
+    padding: "0 8px",
+    fontSize: "14px",
+    fontWeight: "600",
+    backgroundColor: "transparent",
   },
   paginationFooter: {
     display: "flex",
