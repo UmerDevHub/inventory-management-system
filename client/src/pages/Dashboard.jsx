@@ -19,7 +19,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
   PieChart,
   Pie,
   Cell,
@@ -49,7 +48,7 @@ const Dashboard = () => {
   }, []);
 
   if (loading) {
-    return <Loader message="Loading dashboard metrics..." />;
+    return <Loader message="Loading inventory dashboard..." />;
   }
 
   if (error) {
@@ -77,190 +76,217 @@ const Dashboard = () => {
     { name: "Warehouses", value: data.totalWarehouses || 1 },
   ];
 
-  const PIE_COLORS = ["#2563eb", "#10b981", "#f59e0b", "#8b5cf6"];
+  const PIE_COLORS = ["#2563eb", "#3b82f6", "#60a5fa", "#93c5fd"];
 
   const recentList = [
     ...(data.recentActivities?.recentStockIn?.map((item) => ({
       id: item._id,
+      productName: item.product?.name || "Inventory Product",
       type: "Stock In",
-      title: `Received ${item.quantity} units of ${item.product?.name || "Product"}`,
-      date: new Date(item.receivedDate || item.createdAt).toLocaleDateString(),
-      icon: ArrowDownLeft,
-      color: "#10b981",
-      bgColor: "#d1fae5",
+      quantity: `${item.quantity} Units`,
+      date: new Date(item.receivedDate || item.createdAt).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }),
+      badgeClass: "badge-success",
     })) || []),
     ...(data.recentActivities?.recentStockOut?.map((item) => ({
       id: item._id,
+      productName: item.product?.name || "Inventory Product",
       type: "Stock Out",
-      title: `Issued ${item.quantity} units of ${item.product?.name || "Product"}`,
-      date: new Date(item.issuedDate || item.createdAt).toLocaleDateString(),
-      icon: ArrowUpRight,
-      color: "#ef4444",
-      bgColor: "#fee2e2",
+      quantity: `${item.quantity} Units`,
+      date: new Date(item.issuedDate || item.createdAt).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }),
+      badgeClass: "badge-danger",
     })) || []),
     ...(data.recentActivities?.recentPurchases?.map((item) => ({
       id: item._id,
+      productName: item.product?.name || "Procured Item",
       type: "Purchase",
-      title: `Purchased ${item.quantity} units for $${item.totalAmount}`,
-      date: new Date(item.purchaseDate || item.createdAt).toLocaleDateString(),
-      icon: ShoppingCart,
-      color: "#2563eb",
-      bgColor: "#dbeafe",
+      quantity: `${item.quantity} Units ($${item.totalAmount})`,
+      date: new Date(item.purchaseDate || item.createdAt).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }),
+      badgeClass: "badge-primary",
     })) || []),
   ].slice(0, 6);
 
   return (
     <div className="fade-in">
-      {/* Header */}
+      {/* 1. Header */}
       <div className="page-header">
         <div>
-          <h1 className="page-title">Welcome back, Admin 👋</h1>
+          <h1 className="page-title">Inventory Dashboard</h1>
           <p className="page-subtitle">
-            Here is what's happening with your inventory and warehouses today.
+            Monitor inventory, stock movement, suppliers, and warehouse activity.
           </p>
         </div>
       </div>
 
-      {/* Row 1: Primary Summary Cards */}
-      <div style={styles.statsGrid}>
-        <div className="card" style={styles.statCard}>
-          <div style={{ ...styles.iconBox, backgroundColor: "#eff6ff" }}>
-            <Package size={24} color="#2563eb" />
-          </div>
+      {/* 2. Row 1: Primary Summary Cards (105px Height, 34px Numbers, 24px Padding) */}
+      <div style={styles.primaryCardsGrid}>
+        <div className="card" style={styles.summaryCard}>
           <div>
-            <span style={styles.statLabel}>Total Products</span>
-            <div style={styles.statValue}>{data.totalProducts || 0}</div>
+            <span style={styles.cardLabel}>Total Products</span>
+            <div style={styles.cardValue}>
+              {data.totalProducts?.toLocaleString() || 0}
+            </div>
+          </div>
+          <div style={styles.iconCircle}>
+            <Package size={22} color="#2563eb" />
           </div>
         </div>
 
-        <div className="card" style={styles.statCard}>
-          <div style={{ ...styles.iconBox, backgroundColor: "#d1fae5" }}>
-            <Tags size={24} color="#059669" />
-          </div>
+        <div className="card" style={styles.summaryCard}>
           <div>
-            <span style={styles.statLabel}>Total Categories</span>
-            <div style={styles.statValue}>{data.totalCategories || 0}</div>
+            <span style={styles.cardLabel}>Total Categories</span>
+            <div style={styles.cardValue}>
+              {data.totalCategories?.toLocaleString() || 0}
+            </div>
+          </div>
+          <div style={styles.iconCircle}>
+            <Tags size={22} color="#2563eb" />
           </div>
         </div>
 
-        <div className="card" style={styles.statCard}>
-          <div style={{ ...styles.iconBox, backgroundColor: "#fef3c7" }}>
-            <Truck size={24} color="#d97706" />
-          </div>
+        <div className="card" style={styles.summaryCard}>
           <div>
-            <span style={styles.statLabel}>Total Suppliers</span>
-            <div style={styles.statValue}>{data.totalSuppliers || 0}</div>
+            <span style={styles.cardLabel}>Total Suppliers</span>
+            <div style={styles.cardValue}>
+              {data.totalSuppliers?.toLocaleString() || 0}
+            </div>
+          </div>
+          <div style={styles.iconCircle}>
+            <Truck size={22} color="#2563eb" />
           </div>
         </div>
 
-        <div className="card" style={styles.statCard}>
-          <div style={{ ...styles.iconBox, backgroundColor: "#f3e8ff" }}>
-            <Warehouse size={24} color="#7e22ce" />
-          </div>
+        <div className="card" style={styles.summaryCard}>
           <div>
-            <span style={styles.statLabel}>Total Warehouses</span>
-            <div style={styles.statValue}>{data.totalWarehouses || 0}</div>
+            <span style={styles.cardLabel}>Total Warehouses</span>
+            <div style={styles.cardValue}>
+              {data.totalWarehouses?.toLocaleString() || 0}
+            </div>
+          </div>
+          <div style={styles.iconCircle}>
+            <Warehouse size={22} color="#2563eb" />
           </div>
         </div>
       </div>
 
-      {/* Row 2: Operation Stats */}
-      <div style={styles.secondaryStatsGrid}>
-        <div style={styles.miniStatCard}>
-          <div style={styles.miniHeader}>
-            <span style={styles.statLabel}>Stock In Records</span>
-            <ArrowDownLeft size={18} color="#10b981" />
+      {/* 3. Row 2: Operation Metric Cards */}
+      <div style={styles.secondaryCardsGrid}>
+        <div className="card" style={styles.summaryCard}>
+          <div>
+            <span style={styles.cardLabel}>Stock In Logs</span>
+            <div style={styles.cardValue}>
+              {data.totalStockIn?.toLocaleString() || 0}
+            </div>
           </div>
-          <span style={styles.miniValue}>{data.totalStockIn || 0}</span>
+          <div style={{ ...styles.iconCircle, backgroundColor: "#ecfdf5" }}>
+            <ArrowDownLeft size={22} color="#10b981" />
+          </div>
         </div>
 
-        <div style={styles.miniStatCard}>
-          <div style={styles.miniHeader}>
-            <span style={styles.statLabel}>Stock Out Records</span>
-            <ArrowUpRight size={18} color="#ef4444" />
+        <div className="card" style={styles.summaryCard}>
+          <div>
+            <span style={styles.cardLabel}>Stock Out Logs</span>
+            <div style={styles.cardValue}>
+              {data.totalStockOut?.toLocaleString() || 0}
+            </div>
           </div>
-          <span style={styles.miniValue}>{data.totalStockOut || 0}</span>
+          <div style={{ ...styles.iconCircle, backgroundColor: "#fef2f2" }}>
+            <ArrowUpRight size={22} color="#ef4444" />
+          </div>
         </div>
 
-        <div style={styles.miniStatCard}>
-          <div style={styles.miniHeader}>
-            <span style={styles.statLabel}>Total Purchases</span>
-            <ShoppingCart size={18} color="#2563eb" />
+        <div className="card" style={styles.summaryCard}>
+          <div>
+            <span style={styles.cardLabel}>Purchases Logged</span>
+            <div style={styles.cardValue}>
+              {data.totalPurchases?.toLocaleString() || 0}
+            </div>
           </div>
-          <span style={styles.miniValue}>{data.totalPurchases || 0}</span>
+          <div style={styles.iconCircle}>
+            <ShoppingCart size={22} color="#2563eb" />
+          </div>
         </div>
 
-        <div style={styles.miniStatCard}>
-          <div style={styles.miniHeader}>
-            <span style={styles.statLabel}>Low Stock Items</span>
-            <AlertTriangle
-              size={18}
-              color={data.lowStockProducts?.length > 0 ? "#ef4444" : "#10b981"}
-            />
+        <div className="card" style={styles.summaryCard}>
+          <div>
+            <span style={styles.cardLabel}>Low Stock Alerts</span>
+            <div
+              style={{
+                ...styles.cardValue,
+                color: data.lowStockProducts?.length > 0 ? "#ef4444" : "#0f172a",
+              }}
+            >
+              {data.lowStockProducts?.length || 0}
+            </div>
           </div>
-          <span
+          <div
             style={{
-              ...styles.miniValue,
-              color: data.lowStockProducts?.length > 0 ? "#ef4444" : "#0f172a",
+              ...styles.iconCircle,
+              backgroundColor: data.lowStockProducts?.length > 0 ? "#fef2f2" : "#eff6ff",
             }}
           >
-            {data.lowStockProducts?.length || 0}
-          </span>
+            <AlertTriangle
+              size={22}
+              color={data.lowStockProducts?.length > 0 ? "#ef4444" : "#2563eb"}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Row 3: Recharts Charts */}
+      {/* 4. Row 3: Charts */}
       <div style={styles.chartsGrid}>
         {/* Left Bar Chart */}
-        <div className="card" style={styles.chartCard}>
-          <div style={styles.cardHeader}>
-            <div>
-              <h3 style={styles.cardTitle}>Inventory Operations Overview</h3>
-              <p style={styles.cardSubtitle}>
-                Comparison of purchases vs stock movement
-              </p>
-            </div>
-            <TrendingUp size={20} color="#2563eb" />
+        <div className="card">
+          <div style={styles.sectionHeader}>
+            <h3 style={styles.sectionTitle}>Inventory Overview</h3>
+            <TrendingUp size={18} color="#64748b" />
           </div>
-          <div style={styles.chartContainer}>
+          <div style={styles.chartWrapper}>
             <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <XAxis dataKey="name" stroke="#64748b" fontSize={12} />
-                <YAxis stroke="#64748b" fontSize={12} />
+              <BarChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                <XAxis dataKey="name" stroke="#94a3b8" fontSize={13} axisLine={false} tickLine={false} />
+                <YAxis stroke="#94a3b8" fontSize={13} axisLine={false} tickLine={false} />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "#ffffff",
-                    border: "1px solid #e2e8f0",
+                    border: "1px solid #e5e7eb",
                     borderRadius: "12px",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
                   }}
                 />
-                <Bar dataKey="count" fill="#2563eb" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="count" fill="#2563eb" radius={[8, 8, 0, 0]} barSize={42} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Right Pie Chart */}
-        <div className="card" style={styles.chartCard}>
-          <div style={styles.cardHeader}>
-            <div>
-              <h3 style={styles.cardTitle}>System Entity Share</h3>
-              <p style={styles.cardSubtitle}>
-                Distribution across products, suppliers & warehouses
-              </p>
-            </div>
-            <Boxes size={20} color="#10b981" />
+        <div className="card">
+          <div style={styles.sectionHeader}>
+            <h3 style={styles.sectionTitle}>Inventory Distribution</h3>
+            <Boxes size={18} color="#64748b" />
           </div>
-          <div style={styles.chartContainer}>
+          <div style={styles.chartWrapper}>
             <ResponsiveContainer width="100%" height={260}>
               <PieChart>
                 <Pie
                   data={pieData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={85}
-                  paddingAngle={5}
+                  innerRadius={65}
+                  outerRadius={90}
+                  paddingAngle={6}
                   dataKey="value"
                 >
                   {pieData.map((entry, index) => (
@@ -268,96 +294,79 @@ const Dashboard = () => {
                   ))}
                 </Pie>
                 <Tooltip />
-                <Legend verticalAlign="bottom" height={36} />
               </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
       </div>
 
-      {/* Row 4: Recent Activity & Low Stock Items */}
-      <div style={styles.tablesGrid}>
-        {/* Recent Activity Column */}
+      {/* 5. Row 4: Recent Activity & Low Stock */}
+      <div style={styles.bottomGrid}>
+        {/* Recent Activity Card */}
         <div className="card">
-          <div style={styles.cardHeader}>
-            <div>
-              <h3 style={styles.cardTitle}>Recent Activity Log</h3>
-              <p style={styles.cardSubtitle}>Latest transactions across stock & purchases</p>
-            </div>
-            <Clock size={20} color="#64748b" />
+          <div style={styles.sectionHeader}>
+            <h3 style={styles.sectionTitle}>Recent Activity</h3>
+            <Clock size={18} color="#64748b" />
           </div>
 
           {recentList.length === 0 ? (
             <p style={styles.emptyText}>No recent activity logged yet.</p>
           ) : (
-            <div style={styles.timeline}>
-              {recentList.map((act) => {
-                const IconComponent = act.icon;
-                return (
-                  <div key={act.id} style={styles.timelineItem}>
-                    <div style={{ ...styles.actIcon, backgroundColor: act.bgColor }}>
-                      <IconComponent size={16} color={act.color} />
+            <div style={styles.activityList}>
+              {recentList.map((item) => (
+                <div key={item.id} style={styles.activityItem}>
+                  <div style={styles.activityMain}>
+                    <span style={styles.productBold}>{item.productName}</span>
+                    <div style={styles.activityMeta}>
+                      <span className={`badge ${item.badgeClass}`}>{item.type}</span>
+                      <span style={styles.qtyText}>{item.quantity}</span>
                     </div>
-                    <div style={styles.actDetails}>
-                      <span style={styles.actTitle}>{act.title}</span>
-                      <span style={styles.actDate}>{act.date}</span>
-                    </div>
-                    <span className="badge badge-primary">{act.type}</span>
                   </div>
-                );
-              })}
+                  <span style={styles.dateText}>{item.date}</span>
+                </div>
+              ))}
             </div>
           )}
         </div>
 
-        {/* Low Stock Items Column */}
-        <div className="card">
-          <div style={styles.cardHeader}>
-            <div>
-              <h3 style={styles.cardTitle}>Low Stock Items</h3>
-              <p style={styles.cardSubtitle}>
-                Products at or below reorder threshold
-              </p>
-            </div>
-            <AlertTriangle size={20} color="#ef4444" />
+        {/* Low Stock Table */}
+        <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+          <div style={{ padding: "24px 24px 16px 24px", ...styles.sectionHeader }}>
+            <h3 style={styles.sectionTitle}>Low Stock</h3>
+            <AlertTriangle size={18} color="#ef4444" />
           </div>
 
           {!data.lowStockProducts || data.lowStockProducts.length === 0 ? (
-            <div style={styles.healthyBox}>
-              <span style={{ fontSize: "1.5rem" }}>🎉</span>
-              <p style={{ margin: 0, fontWeight: "600", color: "#065f46" }}>
-                All product stock levels are healthy!
-              </p>
+            <div style={{ padding: "24px", color: "#64748b", fontSize: "14px" }}>
+              No low stock items found.
             </div>
           ) : (
-            <div className="table-container">
-              <table className="custom-table">
-                <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th>SKU</th>
-                    <th>Qty</th>
-                    <th>Reorder</th>
-                    <th>Status</th>
+            <table className="custom-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th style={{ textAlign: "right" }}>Current</th>
+                  <th style={{ textAlign: "right" }}>Reorder</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.lowStockProducts.map((prod) => (
+                  <tr key={prod._id}>
+                    <td style={{ fontWeight: "700", color: "#0f172a" }}>{prod.name}</td>
+                    <td style={{ textAlign: "right", fontWeight: "800", color: "#ef4444" }}>
+                      {prod.quantity}
+                    </td>
+                    <td style={{ textAlign: "right", color: "#64748b" }}>
+                      {prod.reorderLevel}
+                    </td>
+                    <td>
+                      <span className="badge badge-danger">Low</span>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {data.lowStockProducts.map((prod) => (
-                    <tr key={prod._id}>
-                      <td style={{ fontWeight: "600" }}>{prod.name}</td>
-                      <td style={{ color: "#64748b" }}>{prod.sku}</td>
-                      <td style={{ fontWeight: "700", color: "#ef4444" }}>
-                        {prod.quantity}
-                      </td>
-                      <td>{prod.reorderLevel}</td>
-                      <td>
-                        <span className="badge badge-danger">LOW STOCK</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       </div>
@@ -369,159 +378,130 @@ const styles = {
   errorBanner: {
     display: "flex",
     alignItems: "center",
-    gap: "1rem",
+    gap: "16px",
     backgroundColor: "#fef2f2",
     border: "1px solid #fecaca",
     color: "#ef4444",
-    padding: "1rem",
-    borderRadius: "12px",
-    marginBottom: "1.5rem",
+    padding: "16px",
+    borderRadius: "16px",
+    marginBottom: "24px",
   },
-  statsGrid: {
+  primaryCardsGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-    gap: "1.25rem",
-    marginBottom: "1.25rem",
+    gap: "24px",
+    marginBottom: "24px",
   },
-  statCard: {
+  secondaryCardsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+    gap: "24px",
+    marginBottom: "32px",
+  },
+  summaryCard: {
+    height: "105px",
+    padding: "24px",
     display: "flex",
     alignItems: "center",
-    gap: "1.25rem",
-    padding: "1.25rem 1.5rem",
+    justifyContent: "space-between",
+    backgroundColor: "#ffffff",
+    border: "1px solid #e5e7eb",
+    borderRadius: "16px",
   },
-  iconBox: {
-    width: "52px",
-    height: "52px",
-    borderRadius: "14px",
+  cardLabel: {
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "#64748b",
+    textTransform: "uppercase",
+    letterSpacing: "0.03em",
+  },
+  cardValue: {
+    fontSize: "34px",
+    fontWeight: "800",
+    color: "#0f172a",
+    lineHeight: 1.1,
+    marginTop: "4px",
+  },
+  iconCircle: {
+    width: "48px",
+    height: "48px",
+    borderRadius: "12px",
+    backgroundColor: "#eff6ff",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
   },
-  statLabel: {
-    fontSize: "0.825rem",
-    color: "#64748b",
-    fontWeight: "600",
-  },
-  statValue: {
-    fontSize: "1.75rem",
-    fontWeight: "800",
-    color: "#0f172a",
-    lineHeight: 1.1,
-    marginTop: "0.2rem",
-  },
-  secondaryStatsGrid: {
+  chartsGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "1rem",
-    marginBottom: "1.5rem",
+    gridTemplateColumns: "repeat(auto-fit, minmax(420px, 1fr))",
+    gap: "32px",
+    marginBottom: "32px",
   },
-  miniStatCard: {
-    backgroundColor: "#ffffff",
-    border: "1px solid #e2e8f0",
-    borderRadius: "14px",
-    padding: "1rem 1.25rem",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.02)",
-  },
-  miniHeader: {
+  sectionHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: "20px",
   },
-  miniValue: {
-    fontSize: "1.35rem",
-    fontWeight: "800",
-    color: "#0f172a",
-    marginTop: "0.4rem",
-    display: "block",
-  },
-  chartsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
-    gap: "1.5rem",
-    marginBottom: "1.5rem",
-  },
-  chartCard: {
-    display: "flex",
-    flexDirection: "column",
-  },
-  cardHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: "1.25rem",
-  },
-  cardTitle: {
-    fontSize: "1.1rem",
+  sectionTitle: {
+    fontSize: "18px",
     fontWeight: "700",
     color: "#0f172a",
     margin: 0,
   },
-  cardSubtitle: {
-    fontSize: "0.825rem",
-    color: "#64748b",
-    marginTop: "0.2rem",
-  },
-  chartContainer: {
+  chartWrapper: {
     width: "100%",
     height: "260px",
   },
-  tablesGrid: {
+  bottomGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(450px, 1fr))",
-    gap: "1.5rem",
+    gridTemplateColumns: "repeat(auto-fit, minmax(440px, 1fr))",
+    gap: "32px",
   },
-  timeline: {
+  activityList: {
     display: "flex",
     flexDirection: "column",
-    gap: "0.85rem",
-    marginTop: "0.5rem",
+    gap: "12px",
   },
-  timelineItem: {
+  activityItem: {
     display: "flex",
+    justifyContent: "space-between",
     alignItems: "center",
-    gap: "0.85rem",
-    padding: "0.65rem 0.85rem",
+    padding: "12px 16px",
     backgroundColor: "#f8fafc",
     borderRadius: "12px",
     border: "1px solid #f1f5f9",
   },
-  actIcon: {
-    width: "36px",
-    height: "36px",
-    borderRadius: "10px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  actDetails: {
-    flex: 1,
+  activityMain: {
     display: "flex",
     flexDirection: "column",
+    gap: "4px",
   },
-  actTitle: {
-    fontSize: "0.85rem",
-    fontWeight: "600",
+  productBold: {
+    fontSize: "15px",
+    fontWeight: "700",
     color: "#0f172a",
   },
-  actDate: {
-    fontSize: "0.75rem",
+  activityMeta: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+  },
+  qtyText: {
+    fontSize: "13px",
+    color: "#64748b",
+    fontWeight: "500",
+  },
+  dateText: {
+    fontSize: "13px",
     color: "#94a3b8",
+    fontWeight: "500",
   },
   emptyText: {
     color: "#94a3b8",
-    fontSize: "0.9rem",
+    fontSize: "14px",
     fontStyle: "italic",
-    padding: "1rem 0",
-  },
-  healthyBox: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.75rem",
-    backgroundColor: "#ecfdf5",
-    border: "1px solid #a7f3d0",
-    padding: "1.25rem",
-    borderRadius: "12px",
-    marginTop: "0.5rem",
+    padding: "16px 0",
   },
 };
 
