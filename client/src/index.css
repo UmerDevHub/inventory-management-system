@@ -278,34 +278,41 @@ button, input, select, textarea {
   border-bottom: none;
 }
 
-/* Status Badges */
+/* Compact SaaS Status Badges System */
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .badge-success {
-  background-color: #d1fae5;
-  color: #065f46;
+  background-color: #ecfdf3;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
 }
 
 .badge-warning {
-  background-color: #fef3c7;
-  color: #92400e;
+  background-color: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #b45309;
 }
 
 .badge-danger {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
 }
 
 .badge-primary {
-  background-color: #dbeafe;
-  color: #1e40af;
+  background-color: #eff6ff;
+  border: 1px solid #dbeafe;
+  color: #1d4ed8;
 }
 
 /* Animations */

@@ -355,19 +355,38 @@ const Products = () => {
           ? "badge badge-warning"
           : "badge badge-success";
 
-        const label = isOut ? "OUT OF STOCK" : isLow ? "LOW STOCK" : "IN STOCK";
+        const dotColor = isOut ? "#ef4444" : isLow ? "#f59e0b" : "#22c55e";
+        const label = isOut ? "Out of Stock" : isLow ? "Low Stock" : "In Stock";
+        const tooltip = isOut
+          ? "No units available. Restocking required."
+          : isLow
+          ? "Inventory has reached the reorder threshold."
+          : "Quantity is above the reorder level.";
+
+        // Progress ratio
+        const maxRatio = Math.min(Math.max((row.quantity / (row.reorderLevel * 3 || 15)) * 100, 4), 100);
+        const progressColor = isOut ? "#ef4444" : isLow ? "#f59e0b" : "#22c55e";
 
         return (
-          <div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: "4px" }}>
-              <span style={{ fontWeight: "800", fontSize: "16px", color: "#0f172a" }}>
+          <div title={tooltip} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: "5px" }}>
+              <span style={{ fontWeight: "800", fontSize: "24px", color: "#0f172a", lineHeight: 1 }}>
                 {row.quantity}
               </span>
-              <span style={{ fontSize: "12px", color: "#64748b" }}>Units</span>
+              <span style={{ fontSize: "14px", fontWeight: "500", color: "#64748b" }}>Units</span>
             </div>
-            <span className={badgeClass} style={{ marginTop: "4px" }}>
-              {label}
-            </span>
+
+            {/* Subtle Progress Bar */}
+            <div style={{ width: "90px", height: "4px", backgroundColor: "#f1f5f9", borderRadius: "999px", overflow: "hidden", margin: "2px 0 4px 0" }}>
+              <div style={{ width: `${maxRatio}%`, height: "100%", backgroundColor: progressColor, borderRadius: "999px" }}></div>
+            </div>
+
+            <div>
+              <span className={badgeClass}>
+                <span style={{ width: "7px", height: "7px", borderRadius: "50%", backgroundColor: dotColor, display: "inline-block" }}></span>
+                {label}
+              </span>
+            </div>
           </div>
         );
       },
