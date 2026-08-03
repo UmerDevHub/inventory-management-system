@@ -17,11 +17,8 @@ const ProductQRModal = ({ product, onClose }) => {
 
   if (!product) return null;
 
-  const qrPayload = JSON.stringify({
-    id:  product._id,
-    sku: product.sku?.toUpperCase() || "N/A",
-    name: product.name,
-  });
+  // Encode a real navigable URL so any QR scanner opens the product page
+  const qrPayload = `${window.location.origin}/products/${product._id}`;
 
   const imageUrl = product.image
     ? product.image.startsWith("http")

@@ -11,6 +11,10 @@ const upload = require("../middleware/uploadMiddleware");
 
 const router = express.Router();
 
+// Public — no auth needed (for QR code scanning from any device)
+router.get("/public/:id", getProductById);
+
+// Protected routes
 router.post("/", protect, upload.single("image"), createProduct);
 router.get("/", protect, getProducts);
 router.get("/:id", protect, getProductById);

@@ -390,3 +390,8 @@ button, input, select, textarea {
     transform: scale(1) translateY(0);
   }
 }
+
+/* Product Scan page loading spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

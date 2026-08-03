@@ -15,6 +15,7 @@ import StockOut from "./pages/StockOut";
 import Purchases from "./pages/Purchases";
 import Reports from "./pages/Reports";
 import Profile from "./pages/Profile";
+import ProductScan from "./pages/ProductScan";
 import NotFound from "./pages/NotFound";
 
 function App() {
@@ -38,6 +39,9 @@ function App() {
               <Route path="/profile" element={<Profile />} />
             </Route>
           </Route>
+
+          {/* Public product scan page — no auth required for QR scanning */}
+          <Route path="/products/:id" element={<ProductScan />} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>
