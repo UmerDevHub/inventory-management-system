@@ -1,18 +1,34 @@
 import React, { useContext, useState, useEffect } from "react";
-import { useLocation, Link } from "react-router-dom";
-import { Search, Bell, ChevronRight, AlertTriangle, ArrowDownLeft, ShoppingCart, Check, X } from "lucide-react";
+import { useLocation, Link, useNavigate } from "react-router-dom";
+import {
+  Search,
+  Bell,
+  ChevronRight,
+  ChevronDown,
+  AlertTriangle,
+  ArrowDownLeft,
+  ShoppingCart,
+  Check,
+  User as UserIcon,
+  Key,
+  LogOut,
+  ShieldCheck,
+} from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
 import API from "../api/axios";
 
 const Navbar = () => {
-  const { user } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
   const displayName = user?.name || "System Admin";
+  const userEmail = user?.email || "admin@gmail.com";
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -65,6 +81,12 @@ const Navbar = () => {
   const markAllAsRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
     setUnreadCount(0);
+  };
+
+  const handleLogout = () => {
+    setShowUserMenu(false);
+    logout();
+    navigate("/login");
   };
 
   const getInitials = (name) => {
@@ -134,7 +156,7 @@ const Navbar = () => {
 
   return (
     <header style={styles.navbar}>
-      {/* Breadcrumb & Global Search */}
+      {/* Breadcrumb Navigation */}
       <div style={styles.leftNavSection}>
         <div style={styles.breadcrumbWrapper}>
           {crumbs.map((crumb, idx) => (
@@ -153,26 +175,21 @@ const Navbar = () => {
             </React.Fragment>
           ))}
         </div>
-
-        <div style={styles.searchWrapper}>
-          <Search size={18} color="#94a3b8" style={styles.searchIcon} />
-          <input
-            type="text"
-            placeholder="Search products, suppliers, orders, warehouses..."
-            style={styles.searchInput}
-          />
-        </div>
       </div>
 
-      {/* Right Section */}
+      {/* Right Controls Section */}
       <div style={styles.rightSection}>
+        {/* Notifications Icon Button */}
         <div style={{ position: "relative" }}>
           <button
-            onClick={() => setShowNotifications(!showNotifications)}
+            onClick={() => {
+              setShowNotifications(!showNotifications);
+              setShowUserMenu(false);
+            }}
             style={styles.iconBtn}
             title="Notifications"
           >
-            <Bell size={20} color="#64748b" />
+            <Bell size={19} color="#64748b" />
             {unreadCount > 0 && <span style={styles.notificationDot}></span>}
           </button>
 
@@ -240,15 +257,79 @@ const Navbar = () => {
 
         <div style={styles.divider}></div>
 
-        <Link to="/profile" style={styles.userProfile}>
-          <div style={styles.avatarInitials}>
-            <span>{getInitials(displayName)}</span>
+        {/* Premium Enterprise User Profile Pill & Dropdown */}
+        <div style={{ position: "relative" }}>
+          <div
+            onClick={() => {
+              setShowUserMenu(!showUserMenu);
+              setShowNotifications(false);
+            }}
+            style={styles.userProfilePill}
+          >
+            <div style={styles.avatarWrapper}>
+              <div style={styles.avatarInitials}>
+                <span>{getInitials(displayName)}</span>
+              </div>
+              <span style={styles.activeDot}></span>
+            </div>
+
+            <div style={styles.userInfo}>
+              <span style={styles.userName}>{displayName}</span>
+              <span style={styles.userRole}>Administrator</span>
+            </div>
+
+            <ChevronDown
+              size={15}
+              color="#64748b"
+              style={{
+                transform: showUserMenu ? "rotate(180deg)" : "rotate(0deg)",
+                transition: "transform 0.2s ease",
+              }}
+            />
           </div>
-          <div style={styles.userInfo}>
-            <span style={styles.userName}>{displayName}</span>
-            <span style={styles.userRole}>Administrator</span>
-          </div>
-        </Link>
+
+          {/* Interactive User Dropdown Menu */}
+          {showUserMenu && (
+            <div style={styles.userDropdownMenu} className="fade-in">
+              <div style={styles.userDropdownHeader}>
+                <div style={styles.headerAvatarCircle}>
+                  <span>{getInitials(displayName)}</span>
+                </div>
+                <div style={{ overflow: "hidden" }}>
+                  <div style={styles.headerName}>{displayName}</div>
+                  <div style={styles.headerEmail}>{userEmail}</div>
+                </div>
+              </div>
+
+              <div style={styles.menuDivider}></div>
+
+              <Link
+                to="/profile"
+                onClick={() => setShowUserMenu(false)}
+                style={styles.menuItem}
+              >
+                <UserIcon size={16} color="#64748b" />
+                <span>Account Profile</span>
+              </Link>
+
+              <Link
+                to="/profile"
+                onClick={() => setShowUserMenu(false)}
+                style={styles.menuItem}
+              >
+                <Key size={16} color="#64748b" />
+                <span>Change Password</span>
+              </Link>
+
+              <div style={styles.menuDivider}></div>
+
+              <button onClick={handleLogout} style={styles.logoutMenuItem}>
+                <LogOut size={16} color="#ef4444" />
+                <span>Sign Out Account</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );
@@ -281,27 +362,6 @@ const styles = {
   crumbLink: {
     textDecoration: "none",
     transition: "color 0.15s ease",
-  },
-  searchWrapper: {
-    position: "relative",
-    width: "440px",
-    display: "flex",
-    alignItems: "center",
-  },
-  searchIcon: {
-    position: "absolute",
-    left: "14px",
-  },
-  searchInput: {
-    width: "100%",
-    padding: "10px 16px 10px 42px",
-    backgroundColor: "#f8fafc",
-    border: "1px solid #e5e7eb",
-    borderRadius: "12px",
-    fontSize: "14px",
-    outline: "none",
-    color: "#0f172a",
-    transition: "border-color 0.15s ease, box-shadow 0.15s ease",
   },
   rightSection: {
     display: "flex",
@@ -419,12 +479,21 @@ const styles = {
     height: "28px",
     backgroundColor: "#e5e7eb",
   },
-  userProfile: {
+  userProfilePill: {
     display: "flex",
     alignItems: "center",
     gap: "12px",
+    padding: "6px 12px 6px 8px",
+    borderRadius: "14px",
+    backgroundColor: "#ffffff",
+    border: "1px solid #e5e7eb",
     cursor: "pointer",
-    textDecoration: "none",
+    transition: "all 0.15s ease",
+    boxShadow: "0 2px 6px rgba(15, 23, 42, 0.03)",
+  },
+  avatarWrapper: {
+    position: "relative",
+    display: "inline-flex",
   },
   avatarInitials: {
     width: "40px",
@@ -439,6 +508,16 @@ const styles = {
     fontWeight: "800",
     fontSize: "14px",
   },
+  activeDot: {
+    position: "absolute",
+    bottom: "1px",
+    right: "1px",
+    width: "10px",
+    height: "10px",
+    borderRadius: "50%",
+    backgroundColor: "#22c55e",
+    border: "2px solid #ffffff",
+  },
   userInfo: {
     display: "flex",
     flexDirection: "column",
@@ -447,12 +526,93 @@ const styles = {
     fontSize: "14px",
     fontWeight: "700",
     color: "#0f172a",
-    lineHeight: 1.2,
+    lineHeight: 1.15,
   },
   userRole: {
-    fontSize: "11px",
+    fontSize: "12px",
     color: "#64748b",
     fontWeight: "500",
+    marginTop: "1px",
+  },
+  userDropdownMenu: {
+    position: "absolute",
+    top: "54px",
+    right: 0,
+    width: "240px",
+    backgroundColor: "#ffffff",
+    border: "1px solid #e5e7eb",
+    borderRadius: "16px",
+    boxShadow: "0 16px 40px rgba(15, 23, 42, 0.12)",
+    zIndex: 1000,
+    padding: "8px",
+  },
+  userDropdownHeader: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    padding: "12px 12px 10px 12px",
+  },
+  headerAvatarCircle: {
+    width: "36px",
+    height: "36px",
+    borderRadius: "50%",
+    backgroundColor: "#eff6ff",
+    border: "1px solid #dbeafe",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#2563eb",
+    fontWeight: "800",
+    fontSize: "13px",
+    flexShrink: 0,
+  },
+  headerName: {
+    fontSize: "14px",
+    fontWeight: "700",
+    color: "#0f172a",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
+  headerEmail: {
+    fontSize: "12px",
+    color: "#64748b",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
+  menuDivider: {
+    height: "1px",
+    backgroundColor: "#f1f5f9",
+    margin: "6px 0",
+  },
+  menuItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    padding: "10px 12px",
+    borderRadius: "10px",
+    color: "#334155",
+    fontSize: "13.5px",
+    fontWeight: "600",
+    textDecoration: "none",
+    transition: "background-color 0.15s ease",
+  },
+  logoutMenuItem: {
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    padding: "10px 12px",
+    borderRadius: "10px",
+    backgroundColor: "transparent",
+    border: "none",
+    color: "#ef4444",
+    fontSize: "13.5px",
+    fontWeight: "600",
+    cursor: "pointer",
+    textAlign: "left",
+    transition: "background-color 0.15s ease",
   },
 };
 
