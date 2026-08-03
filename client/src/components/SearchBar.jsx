@@ -1,32 +1,42 @@
-import React from "react";
+import React, { useState } from "react";
+import { Search, X } from "lucide-react";
 
-const SearchBar = ({ searchTerm, setSearchTerm, placeholder = "Search..." }) => {
+const SearchBar = ({ searchTerm, setSearchTerm, placeholder = "Search products, SKU, category..." }) => {
+  const [isFocused, setIsFocused] = useState(false);
+
   return (
-    <div style={styles.wrapper}>
-      <svg
-        style={styles.icon}
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="2"
-          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-        />
-      </svg>
+    <div
+      style={{
+        ...styles.wrapper,
+        ...(isFocused ? styles.wrapperFocused : {}),
+      }}
+    >
+      <Search
+        size={20}
+        color={isFocused ? "#2563eb" : "#64748b"}
+        style={styles.searchIcon}
+      />
+
       <input
         type="text"
         placeholder={placeholder}
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         style={styles.input}
       />
-      {searchTerm && (
-        <button style={styles.clearBtn} onClick={() => setSearchTerm("")}>
-          ✕
+
+      {searchTerm ? (
+        <button
+          style={styles.clearBtn}
+          onClick={() => setSearchTerm("")}
+          title="Clear search"
+        >
+          <X size={16} color="#64748b" />
         </button>
+      ) : (
+        <div style={styles.shortcutBadge}>⌘ K</div>
       )}
     </div>
   );
@@ -37,35 +47,60 @@ const styles = {
     position: "relative",
     display: "flex",
     alignItems: "center",
-    maxWidth: "350px",
-    width: "100%",
+    width: "440px",
+    maxWidth: "100%",
+    height: "56px",
+    backgroundColor: "#ffffff",
+    border: "1px solid #e2e8f0",
+    borderRadius: "16px",
+    padding: "0 16px 0 46px",
+    boxShadow: "0 2px 8px rgba(15, 23, 42, 0.04)",
+    transition: "all 0.2s ease-in-out",
   },
-  icon: {
+  wrapperFocused: {
+    borderColor: "#2563eb",
+    boxShadow: "0 0 0 4px rgba(37, 99, 235, 0.12)",
+  },
+  searchIcon: {
     position: "absolute",
-    left: "12px",
-    width: "18px",
-    height: "18px",
-    color: "#94a3b8",
+    left: "16px",
+    transition: "color 0.2s ease",
+    flexShrink: 0,
   },
   input: {
     width: "100%",
-    padding: "0.65rem 2.25rem 0.65rem 2.4rem",
-    backgroundColor: "#1e293b",
-    border: "1px solid #334155",
-    borderRadius: "10px",
-    color: "#f8fafc",
-    fontSize: "0.875rem",
+    height: "100%",
+    backgroundColor: "transparent",
+    border: "none",
+    color: "#0f172a",
+    fontSize: "15px",
+    fontWeight: "500",
     outline: "none",
-    transition: "border-color 0.2s ease",
+  },
+  shortcutBadge: {
+    fontSize: "12px",
+    fontWeight: "700",
+    color: "#64748b",
+    backgroundColor: "#f8fafc",
+    border: "1px solid #e2e8f0",
+    borderRadius: "10px",
+    padding: "4px 9px",
+    letterSpacing: "0.05em",
+    flexShrink: 0,
+    userSelect: "none",
   },
   clearBtn: {
-    position: "absolute",
-    right: "10px",
-    background: "none",
+    width: "28px",
+    height: "28px",
+    borderRadius: "50%",
+    backgroundColor: "#f1f5f9",
     border: "none",
-    color: "#94a3b8",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     cursor: "pointer",
-    fontSize: "0.85rem",
+    flexShrink: 0,
+    transition: "all 0.15s ease",
   },
 };
 
