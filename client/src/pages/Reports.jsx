@@ -29,6 +29,7 @@ import SearchBar from "../components/SearchBar";
 import Loader from "../components/Loader";
 import { exportToCSV } from "../utils/csvExport";
 import { exportToPDF } from "../utils/pdfExport";
+import { compactNumber, compactCurrency } from "../utils/formatNumber";
 
 const Reports = () => {
   const [activeTab, setActiveTab] = useState("stock");
@@ -517,10 +518,9 @@ const Reports = () => {
                 <div style={styles.metricCardLeft}>
                   <span style={styles.metricLabel}>INVENTORY VALUE</span>
                   <span style={{ ...styles.metricValue, color: "#2563eb" }}>
-                    $
-                    {filteredDataset
-                      .reduce((sum, p) => sum + p.quantity * p.price, 0)
-                      .toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    {compactCurrency(
+                      filteredDataset.reduce((sum, p) => sum + p.quantity * p.price, 0)
+                    )}
                   </span>
                 </div>
                 <div style={styles.iconCircle}>
@@ -545,10 +545,9 @@ const Reports = () => {
                 <div style={styles.metricCardLeft}>
                   <span style={styles.metricLabel}>TOTAL EXPENDITURE</span>
                   <span style={{ ...styles.metricValue, color: "#2563eb" }}>
-                    $
-                    {filteredDataset
-                      .reduce((sum, p) => sum + p.totalAmount, 0)
-                      .toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    {compactCurrency(
+                      filteredDataset.reduce((sum, p) => sum + p.totalAmount, 0)
+                    )}
                   </span>
                 </div>
                 <div style={styles.iconCircle}>
@@ -573,7 +572,7 @@ const Reports = () => {
                 <div style={styles.metricCardLeft}>
                   <span style={styles.metricLabel}>UNITS RECEIVED</span>
                   <span style={{ ...styles.metricValue, color: "#10b981" }}>
-                    +{filteredDataset.reduce((sum, s) => sum + s.quantity, 0)} Units
+                    +{compactNumber(filteredDataset.reduce((sum, s) => sum + s.quantity, 0))} Units
                   </span>
                 </div>
                 <div style={{ ...styles.iconCircle, backgroundColor: "#ecfdf5" }}>
@@ -598,7 +597,7 @@ const Reports = () => {
                 <div style={styles.metricCardLeft}>
                   <span style={styles.metricLabel}>UNITS ISSUED</span>
                   <span style={{ ...styles.metricValue, color: "#ef4444" }}>
-                    -{filteredDataset.reduce((sum, s) => sum + s.quantity, 0)} Units
+                    -{compactNumber(filteredDataset.reduce((sum, s) => sum + s.quantity, 0))} Units
                   </span>
                 </div>
                 <div style={{ ...styles.iconCircle, backgroundColor: "#fef2f2" }}>
@@ -794,7 +793,7 @@ const styles = {
     letterSpacing: "0.05em",
   },
   metricValue: {
-    fontSize: "26px",
+    fontSize: "36px",
     fontWeight: "800",
     color: "#0f172a",
     lineHeight: 1.1,

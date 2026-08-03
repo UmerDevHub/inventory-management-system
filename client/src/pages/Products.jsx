@@ -22,6 +22,7 @@ import SearchBar from "../components/SearchBar";
 import Loader from "../components/Loader";
 import ConfirmModal from "../components/ConfirmModal";
 import Toast from "../components/Toast";
+import { compactNumber } from "../utils/formatNumber";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -468,7 +469,7 @@ const Products = () => {
         <div className="card" style={styles.statCard}>
           <div style={styles.statCardLeft}>
             <span style={styles.statCardLabel}>TOTAL PRODUCTS</span>
-            <span style={styles.statCardValue}>{totalProductsCount}</span>
+            <span style={styles.statCardValue}>{compactNumber(totalProductsCount)}</span>
           </div>
           <div style={{ ...styles.statIconBox, backgroundColor: "#eff6ff" }}>
             <Boxes size={22} color="#2563eb" />
@@ -478,7 +479,7 @@ const Products = () => {
         <div className="card" style={styles.statCard}>
           <div style={styles.statCardLeft}>
             <span style={styles.statCardLabel}>IN STOCK</span>
-            <span style={{ ...styles.statCardValue, color: "#10b981" }}>{inStockCount}</span>
+            <span style={{ ...styles.statCardValue, color: "#10b981" }}>{compactNumber(inStockCount)}</span>
           </div>
           <div style={{ ...styles.statIconBox, backgroundColor: "#ecfdf5" }}>
             <CheckCircle2 size={22} color="#10b981" />
@@ -488,7 +489,7 @@ const Products = () => {
         <div className="card" style={styles.statCard}>
           <div style={styles.statCardLeft}>
             <span style={styles.statCardLabel}>LOW STOCK</span>
-            <span style={{ ...styles.statCardValue, color: "#f59e0b" }}>{lowStockCount}</span>
+            <span style={{ ...styles.statCardValue, color: "#f59e0b" }}>{compactNumber(lowStockCount)}</span>
           </div>
           <div style={{ ...styles.statIconBox, backgroundColor: "#fef3c7" }}>
             <AlertTriangle size={22} color="#d97706" />
@@ -498,7 +499,7 @@ const Products = () => {
         <div className="card" style={styles.statCard}>
           <div style={styles.statCardLeft}>
             <span style={styles.statCardLabel}>OUT OF STOCK</span>
-            <span style={{ ...styles.statCardValue, color: "#ef4444" }}>{outOfStockCount}</span>
+            <span style={{ ...styles.statCardValue, color: "#ef4444" }}>{compactNumber(outOfStockCount)}</span>
           </div>
           <div style={{ ...styles.statIconBox, backgroundColor: "#fef2f2" }}>
             <XCircle size={22} color="#ef4444" />
@@ -925,7 +926,7 @@ const styles = {
     letterSpacing: "0.05em",
   },
   statCardValue: {
-    fontSize: "34px",
+    fontSize: "36px",
     fontWeight: "800",
     color: "#0f172a",
     lineHeight: 1.1,

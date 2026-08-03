@@ -24,6 +24,7 @@ import SearchBar from "../components/SearchBar";
 import Loader from "../components/Loader";
 import ConfirmModal from "../components/ConfirmModal";
 import Toast from "../components/Toast";
+import { compactNumber, compactCurrency } from "../utils/formatNumber";
 
 const Purchases = () => {
   const [purchases, setPurchases] = useState([]);
@@ -380,7 +381,7 @@ const Purchases = () => {
         <div className="card" style={styles.statCard}>
           <div style={styles.statCardLeft}>
             <span style={styles.statCardLabel}>TOTAL PURCHASES</span>
-            <span style={styles.statCardValue}>{totalPurchasesCount}</span>
+            <span style={styles.statCardValue}>{compactNumber(totalPurchasesCount)}</span>
           </div>
           <div style={{ ...styles.statIconBox, backgroundColor: "#eff6ff" }}>
             <ShoppingCart size={22} color="#2563eb" />
@@ -391,7 +392,7 @@ const Purchases = () => {
           <div style={styles.statCardLeft}>
             <span style={styles.statCardLabel}>THIS MONTH</span>
             <span style={{ ...styles.statCardValue, color: "#10b981" }}>
-              ${thisMonthSpent.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              {compactCurrency(thisMonthSpent)}
             </span>
           </div>
           <div style={{ ...styles.statIconBox, backgroundColor: "#ecfdf5" }}>
@@ -402,7 +403,7 @@ const Purchases = () => {
         <div className="card" style={styles.statCard}>
           <div style={styles.statCardLeft}>
             <span style={styles.statCardLabel}>ITEMS PURCHASED</span>
-            <span style={{ ...styles.statCardValue, color: "#2563eb" }}>{totalItemsPurchased}</span>
+            <span style={{ ...styles.statCardValue, color: "#2563eb" }}>{compactNumber(totalItemsPurchased)}</span>
           </div>
           <div style={{ ...styles.statIconBox, backgroundColor: "#eff6ff" }}>
             <Package size={22} color="#2563eb" />
@@ -413,7 +414,7 @@ const Purchases = () => {
           <div style={styles.statCardLeft}>
             <span style={styles.statCardLabel}>TOTAL EXPENDITURE</span>
             <span style={{ ...styles.statCardValue, color: "#0f172a" }}>
-              ${totalExpenditure.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              {compactCurrency(totalExpenditure)}
             </span>
           </div>
           <div style={{ ...styles.statIconBox, backgroundColor: "#f8fafc" }}>
@@ -776,7 +777,7 @@ const styles = {
     letterSpacing: "0.05em",
   },
   statCardValue: {
-    fontSize: "34px",
+    fontSize: "36px",
     fontWeight: "800",
     color: "#0f172a",
     lineHeight: 1.1,

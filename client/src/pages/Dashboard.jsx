@@ -26,6 +26,7 @@ import {
 } from "recharts";
 import API from "../api/axios";
 import Loader from "../components/Loader";
+import { compactNumber } from "../utils/formatNumber";
 
 const Dashboard = () => {
   const [data, setData] = useState(null);
@@ -142,7 +143,7 @@ const Dashboard = () => {
             <div style={styles.cardMain}>
               <span style={styles.cardLabel}>TOTAL PRODUCTS</span>
               <div style={styles.cardValue}>
-                {data.totalProducts?.toLocaleString() || 0}
+                {compactNumber(data.totalProducts || 0)}
               </div>
               <span style={styles.trendPill}>Updated today</span>
             </div>
@@ -155,7 +156,7 @@ const Dashboard = () => {
             <div style={styles.cardMain}>
               <span style={styles.cardLabel}>CATEGORIES</span>
               <div style={styles.cardValue}>
-                {data.totalCategories?.toLocaleString() || 0}
+                {compactNumber(data.totalCategories || 0)}
               </div>
               <span style={styles.trendPill}>Active tags</span>
             </div>
@@ -168,7 +169,7 @@ const Dashboard = () => {
             <div style={styles.cardMain}>
               <span style={styles.cardLabel}>SUPPLIERS</span>
               <div style={styles.cardValue}>
-                {data.totalSuppliers?.toLocaleString() || 0}
+                {compactNumber(data.totalSuppliers || 0)}
               </div>
               <span style={styles.trendPill}>Verified vendors</span>
             </div>
@@ -181,7 +182,7 @@ const Dashboard = () => {
             <div style={styles.cardMain}>
               <span style={styles.cardLabel}>WAREHOUSES</span>
               <div style={styles.cardValue}>
-                {data.totalWarehouses?.toLocaleString() || 0}
+                {compactNumber(data.totalWarehouses || 0)}
               </div>
               <span style={styles.trendPill}>Active depots</span>
             </div>
@@ -205,7 +206,7 @@ const Dashboard = () => {
             <div style={styles.cardMain}>
               <span style={styles.cardLabel}>STOCK IN LOGS</span>
               <div style={styles.cardValue}>
-                {data.totalStockIn?.toLocaleString() || 0}
+                {compactNumber(data.totalStockIn || 0)}
               </div>
               <span style={{ ...styles.trendPill, color: "#10b981", fontWeight: "600" }}>
                 145 units received
@@ -221,7 +222,7 @@ const Dashboard = () => {
             <div style={styles.cardMain}>
               <span style={styles.cardLabel}>STOCK OUT LOGS</span>
               <div style={styles.cardValue}>
-                {data.totalStockOut?.toLocaleString() || 0}
+                {compactNumber(data.totalStockOut || 0)}
               </div>
               <span style={{ ...styles.trendPill, color: "#64748b" }}>
                 121 units dispatched
@@ -237,7 +238,7 @@ const Dashboard = () => {
             <div style={styles.cardMain}>
               <span style={styles.cardLabel}>PURCHASES LOGGED</span>
               <div style={styles.cardValue}>
-                {data.totalPurchases?.toLocaleString() || 0}
+                {compactNumber(data.totalPurchases || 0)}
               </div>
               <span style={styles.trendPill}>Orders fulfilled</span>
             </div>
@@ -492,12 +493,12 @@ const styles = {
     letterSpacing: "0.05em",
   },
   cardValue: {
-    fontSize: "42px",
+    fontSize: "36px",
     fontWeight: "800",
     color: "#0f172a",
-    lineHeight: 1.05,
+    lineHeight: 1.1,
     marginTop: "4px",
-    marginBottom: "6px",
+    marginBottom: "4px",
   },
   trendPill: {
     fontSize: "12px",

@@ -20,6 +20,7 @@ import SearchBar from "../components/SearchBar";
 import Loader from "../components/Loader";
 import ConfirmModal from "../components/ConfirmModal";
 import Toast from "../components/Toast";
+import { compactNumber } from "../utils/formatNumber";
 
 const StockIn = () => {
   const [records, setRecords] = useState([]);
@@ -296,7 +297,7 @@ const StockIn = () => {
         <div className="card" style={styles.statCard}>
           <div style={styles.statCardLeft}>
             <span style={styles.statCardLabel}>STOCK IN LOGS</span>
-            <span style={styles.statCardValue}>{totalStockInLogs}</span>
+            <span style={styles.statCardValue}>{compactNumber(totalStockInLogs)}</span>
             <span style={styles.trendPill}>Inventory replenished</span>
           </div>
           <div style={{ ...styles.iconCircle56, backgroundColor: "#eafbf3" }}>
@@ -308,7 +309,7 @@ const StockIn = () => {
           <div style={styles.statCardLeft}>
             <span style={styles.statCardLabel}>UNITS RECEIVED</span>
             <span style={{ ...styles.statCardValue, color: "#10b981" }}>
-              +{totalUnitsReceived}
+              +{compactNumber(totalUnitsReceived)}
             </span>
             <span style={{ ...styles.trendPill, color: "#10b981", fontWeight: "600" }}>
               Incoming stock
@@ -556,10 +557,10 @@ const styles = {
     letterSpacing: "0.05em",
   },
   statCardValue: {
-    fontSize: "42px",
+    fontSize: "36px",
     fontWeight: "800",
     color: "#0f172a",
-    lineHeight: 1.05,
+    lineHeight: 1.1,
     marginTop: "4px",
     marginBottom: "4px",
   },

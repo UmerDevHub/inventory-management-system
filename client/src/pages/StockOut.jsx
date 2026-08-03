@@ -20,6 +20,7 @@ import SearchBar from "../components/SearchBar";
 import Loader from "../components/Loader";
 import ConfirmModal from "../components/ConfirmModal";
 import Toast from "../components/Toast";
+import { compactNumber } from "../utils/formatNumber";
 
 const StockOut = () => {
   const [records, setRecords] = useState([]);
@@ -296,7 +297,7 @@ const StockOut = () => {
         <div className="card" style={styles.statCard}>
           <div style={styles.statCardLeft}>
             <span style={styles.statCardLabel}>STOCK OUT LOGS</span>
-            <span style={styles.statCardValue}>{totalStockOutLogs}</span>
+            <span style={styles.statCardValue}>{compactNumber(totalStockOutLogs)}</span>
             <span style={styles.trendPill}>Orders fulfilled</span>
           </div>
           <div style={{ ...styles.iconCircle56, backgroundColor: "#fdeeee" }}>
@@ -308,7 +309,7 @@ const StockOut = () => {
           <div style={styles.statCardLeft}>
             <span style={styles.statCardLabel}>UNITS DISPATCHED</span>
             <span style={{ ...styles.statCardValue, color: "#0f172a" }}>
-              {totalUnitsDispatched}
+              {compactNumber(totalUnitsDispatched)}
             </span>
             <span style={{ ...styles.trendPill, color: "#64748b" }}>
               121 units dispatched
@@ -322,7 +323,7 @@ const StockOut = () => {
         <div className="card" style={styles.statCard}>
           <div style={styles.statCardLeft}>
             <span style={styles.statCardLabel}>RECENT DISPATCHES</span>
-            <span style={{ ...styles.statCardValue, color: "#2563eb" }}>{recentDispatches}</span>
+            <span style={{ ...styles.statCardValue, color: "#2563eb" }}>{compactNumber(recentDispatches)}</span>
             <span style={styles.trendPill}>Dispatched this month</span>
           </div>
           <div style={{ ...styles.iconCircle56, backgroundColor: "#eff6ff" }}>

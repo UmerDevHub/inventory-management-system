@@ -564,7 +564,7 @@ const styles = {
     letterSpacing: "0.05em",
   },
   statCardValue: {
-    fontSize: "34px",
+    fontSize: "36px",
     fontWeight: "800",
     color: "#0f172a",
     lineHeight: 1.1,
