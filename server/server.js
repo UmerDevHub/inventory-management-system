@@ -11,6 +11,9 @@ const warehouseRoutes = require("./routes/warehouseRoutes");
 const productRoutes = require("./routes/productRoutes");
 const stockInRoutes = require("./routes/stockInRoutes");
 const stockOutRoutes = require("./routes/stockOutRoutes");
+const purchaseRoutes = require("./routes/purchaseRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
+const reportRoutes = require("./routes/reportRoutes");
 
 dotenv.config();
 
@@ -35,6 +38,9 @@ app.use("/api/warehouses", warehouseRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/stock-in", stockInRoutes);
 app.use("/api/stock-out", stockOutRoutes);
+app.use("/api/purchases", purchaseRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/reports", reportRoutes);
 
 const PORT = process.env.PORT || 5000;
 
