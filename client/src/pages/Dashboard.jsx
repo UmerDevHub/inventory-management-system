@@ -83,7 +83,7 @@ const Dashboard = () => {
     ...(data.recentActivities?.recentStockIn?.map((item) => ({
       id: item._id,
       productName: item.product?.name || "Inventory Product",
-      actionText: `${item.quantity} Units Added`,
+      actionText: `${item.quantity} units received`,
       type: "Stock In",
       date: new Date(item.receivedDate || item.createdAt).toLocaleDateString("en-GB", {
         day: "numeric",
@@ -95,7 +95,7 @@ const Dashboard = () => {
     ...(data.recentActivities?.recentStockOut?.map((item) => ({
       id: item._id,
       productName: item.product?.name || "Inventory Product",
-      actionText: `${item.quantity} Units Issued`,
+      actionText: `${item.quantity} units dispatched`,
       type: "Stock Out",
       date: new Date(item.issuedDate || item.createdAt).toLocaleDateString("en-GB", {
         day: "numeric",
@@ -107,7 +107,7 @@ const Dashboard = () => {
     ...(data.recentActivities?.recentPurchases?.map((item) => ({
       id: item._id,
       productName: item.product?.name || "Procured Item",
-      actionText: `${item.quantity} Units Purchased ($${item.totalAmount})`,
+      actionText: `${item.quantity} units purchased ($${item.totalAmount})`,
       type: "Purchase",
       date: new Date(item.purchaseDate || item.createdAt).toLocaleDateString("en-GB", {
         day: "numeric",
@@ -120,7 +120,7 @@ const Dashboard = () => {
 
   return (
     <div className="fade-in" style={{ paddingTop: "8px" }}>
-      {/* 1. Header (32px top margin spacing) */}
+      {/* 1. Header */}
       <div className="page-header" style={{ marginBottom: "32px" }}>
         <div>
           <h1 className="page-title">Inventory Dashboard</h1>
@@ -146,8 +146,8 @@ const Dashboard = () => {
               </div>
               <span style={styles.trendPill}>Updated today</span>
             </div>
-            <div style={styles.iconCircle}>
-              <Package size={22} color="#2563eb" />
+            <div style={styles.iconCircle56}>
+              <Package size={24} color="#2563eb" />
             </div>
           </div>
 
@@ -159,8 +159,8 @@ const Dashboard = () => {
               </div>
               <span style={styles.trendPill}>Active tags</span>
             </div>
-            <div style={styles.iconCircle}>
-              <Tags size={22} color="#2563eb" />
+            <div style={styles.iconCircle56}>
+              <Tags size={24} color="#2563eb" />
             </div>
           </div>
 
@@ -172,8 +172,8 @@ const Dashboard = () => {
               </div>
               <span style={styles.trendPill}>Verified vendors</span>
             </div>
-            <div style={styles.iconCircle}>
-              <Truck size={22} color="#2563eb" />
+            <div style={styles.iconCircle56}>
+              <Truck size={24} color="#2563eb" />
             </div>
           </div>
 
@@ -185,14 +185,14 @@ const Dashboard = () => {
               </div>
               <span style={styles.trendPill}>Active depots</span>
             </div>
-            <div style={styles.iconCircle}>
-              <Warehouse size={22} color="#2563eb" />
+            <div style={styles.iconCircle56}>
+              <Warehouse size={24} color="#2563eb" />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Group 2: Operations & Alerts Section */}
+      {/* Group 2: Operations & Alerts Section (Premium Stock In & Stock Out KPI Cards) */}
       <div style={{ marginBottom: "36px" }}>
         <div style={styles.sectionDividerRow}>
           <span style={styles.groupHeading}>OPERATIONS & ALERTS</span>
@@ -200,45 +200,53 @@ const Dashboard = () => {
         </div>
 
         <div style={styles.cardsGrid}>
+          {/* Stock In KPI Card */}
           <div className="card" style={styles.summaryCard}>
             <div style={styles.cardMain}>
               <span style={styles.cardLabel}>STOCK IN LOGS</span>
               <div style={styles.cardValue}>
                 {data.totalStockIn?.toLocaleString() || 0}
               </div>
-              <span style={{ ...styles.trendPill, color: "#10b981" }}>+12% this month</span>
+              <span style={{ ...styles.trendPill, color: "#10b981", fontWeight: "600" }}>
+                145 units received
+              </span>
             </div>
-            <div style={{ ...styles.iconCircle, backgroundColor: "#ecfdf5" }}>
-              <ArrowDownLeft size={22} color="#10b981" />
+            <div style={{ ...styles.iconCircle56, backgroundColor: "#eafbf3" }}>
+              <ArrowDownLeft size={24} color="#10b981" />
             </div>
           </div>
 
+          {/* Stock Out KPI Card */}
           <div className="card" style={styles.summaryCard}>
             <div style={styles.cardMain}>
               <span style={styles.cardLabel}>STOCK OUT LOGS</span>
               <div style={styles.cardValue}>
                 {data.totalStockOut?.toLocaleString() || 0}
               </div>
-              <span style={styles.trendPill}>Dispatched issues</span>
+              <span style={{ ...styles.trendPill, color: "#64748b" }}>
+                121 units dispatched
+              </span>
             </div>
-            <div style={{ ...styles.iconCircle, backgroundColor: "#fef2f2" }}>
-              <ArrowUpRight size={22} color="#ef4444" />
+            <div style={{ ...styles.iconCircle56, backgroundColor: "#fdeeee" }}>
+              <ArrowUpRight size={24} color="#ef4444" />
             </div>
           </div>
 
+          {/* Purchases KPI Card */}
           <div className="card" style={styles.summaryCard}>
             <div style={styles.cardMain}>
               <span style={styles.cardLabel}>PURCHASES LOGGED</span>
               <div style={styles.cardValue}>
                 {data.totalPurchases?.toLocaleString() || 0}
               </div>
-              <span style={styles.trendPill}>Orders placed</span>
+              <span style={styles.trendPill}>Orders fulfilled</span>
             </div>
-            <div style={styles.iconCircle}>
-              <ShoppingCart size={22} color="#2563eb" />
+            <div style={styles.iconCircle56}>
+              <ShoppingCart size={24} color="#2563eb" />
             </div>
           </div>
 
+          {/* Low Stock KPI Card */}
           <div className="card" style={styles.summaryCard}>
             <div style={styles.cardMain}>
               <span style={styles.cardLabel}>LOW STOCK ALERTS</span>
@@ -261,12 +269,12 @@ const Dashboard = () => {
             </div>
             <div
               style={{
-                ...styles.iconCircle,
-                backgroundColor: data.lowStockProducts?.length > 0 ? "#fef2f2" : "#eff6ff",
+                ...styles.iconCircle56,
+                backgroundColor: data.lowStockProducts?.length > 0 ? "#fdeeee" : "#eff6ff",
               }}
             >
               <AlertTriangle
-                size={22}
+                size={24}
                 color={data.lowStockProducts?.length > 0 ? "#ef4444" : "#2563eb"}
               />
             </div>
@@ -494,14 +502,15 @@ const styles = {
     color: "#64748b",
     fontWeight: "500",
   },
-  iconCircle: {
-    width: "48px",
-    height: "48px",
-    borderRadius: "12px",
+  iconCircle56: {
+    width: "56px",
+    height: "56px",
+    borderRadius: "14px",
     backgroundColor: "#eff6ff",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    flexShrink: 0,
   },
   chartsGrid: {
     display: "grid",
