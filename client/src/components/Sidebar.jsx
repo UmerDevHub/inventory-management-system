@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -13,12 +13,15 @@ import {
   User,
   LogOut,
   Boxes,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
 
 const Sidebar = () => {
   const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -69,21 +72,39 @@ const Sidebar = () => {
   ];
 
   return (
-    <aside style={styles.sidebar}>
+    <aside
+      style={{
+        ...styles.sidebar,
+        width: collapsed ? "80px" : "260px",
+      }}
+    >
+      {/* Logo Header Area */}
       <div style={styles.logoContainer}>
         <div style={styles.logoIcon}>
-          <Boxes size={24} color="#ffffff" />
+          <Boxes size={22} color="#ffffff" />
         </div>
-        <div style={styles.logoTextWrapper}>
-          <h2 style={styles.logoTitle}>StockFlow</h2>
-          <span style={styles.logoSub}>Inventory SaaS</span>
-        </div>
+        {!collapsed && (
+          <div style={styles.logoTextWrapper}>
+            <h2 style={styles.logoTitle}>WarehouseOS</h2>
+            <span style={styles.logoSub}>Inventory Management</span>
+          </div>
+        )}
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          style={styles.collapseBtn}
+          title={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+        >
+          {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+        </button>
       </div>
 
+      {/* Navigation Groups */}
       <div style={styles.navContent}>
         {navGroups.map((group, idx) => (
           <div key={idx} style={styles.groupWrapper}>
-            <span style={styles.groupTitle}>{group.group}</span>
+            {!collapsed && (
+              <span style={styles.groupTitle}>{group.group}</span>
+            )}
             <div style={styles.groupItems}>
               {group.items.map((item) => {
                 const Icon = item.icon;
@@ -95,15 +116,17 @@ const Sidebar = () => {
                     style={({ isActive }) => ({
                       ...styles.navItem,
                       ...(isActive ? styles.navItemActive : {}),
+                      justifyContent: collapsed ? "center" : "flex-start",
                     })}
                   >
                     {({ isActive }) => (
                       <>
                         <Icon
-                          size={18}
+                          size={19}
                           color={isActive ? "#ffffff" : "#64748b"}
+                          style={{ flexShrink: 0 }}
                         />
-                        <span>{item.name}</span>
+                        {!collapsed && <span>{item.name}</span>}
                       </>
                     )}
                   </NavLink>
@@ -114,10 +137,18 @@ const Sidebar = () => {
         ))}
       </div>
 
+      {/* Fixed Bottom Logout Section */}
       <div style={styles.footer}>
-        <button onClick={handleLogout} style={styles.logoutBtn}>
-          <LogOut size={18} />
-          <span>Logout</span>
+        <button
+          onClick={handleLogout}
+          style={{
+            ...styles.logoutBtn,
+            justifyContent: collapsed ? "center" : "flex-start",
+          }}
+          title="Logout"
+        >
+          <LogOut size={19} color="#ef4444" style={{ flexShrink: 0 }} />
+          {!collapsed && <span>Logout</span>}
         </button>
       </div>
     </aside>
@@ -126,24 +157,25 @@ const Sidebar = () => {
 
 const styles = {
   sidebar: {
-    width: "var(--sidebar-width)",
     height: "100vh",
     backgroundColor: "#ffffff",
-    borderRight: "1px solid #e2e8f0",
+    borderRight: "1px solid #e5e7eb",
     position: "fixed",
     top: 0,
     left: 0,
     display: "flex",
     flexDirection: "column",
     zIndex: 100,
+    transition: "width 0.2s ease",
   },
   logoContainer: {
-    height: "var(--navbar-height)",
+    height: "72px",
     display: "flex",
     alignItems: "center",
-    gap: "0.75rem",
-    padding: "0 1.5rem",
-    borderBottom: "1px solid #f1f5f9",
+    gap: "12px",
+    padding: "0 16px",
+    borderBottom: "1px solid #e5e7eb",
+    position: "relative",
   },
   logoIcon: {
     width: "40px",
@@ -153,83 +185,106 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    boxShadow: "0 4px 10px rgba(37, 99, 235, 0.25)",
+    boxShadow: "0 4px 12px rgba(37, 99, 235, 0.25)",
+    flexShrink: 0,
   },
   logoTextWrapper: {
     display: "flex",
     flexDirection: "column",
+    flex: 1,
+    overflow: "hidden",
   },
   logoTitle: {
-    fontSize: "1.15rem",
+    fontSize: "17px",
     fontWeight: "800",
     color: "#0f172a",
     margin: 0,
     lineHeight: 1.2,
   },
   logoSub: {
-    fontSize: "0.725rem",
+    fontSize: "11px",
     color: "#64748b",
     fontWeight: "500",
   },
+  collapseBtn: {
+    background: "#f8fafc",
+    border: "1px solid #e5e7eb",
+    borderRadius: "8px",
+    width: "28px",
+    height: "28px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#64748b",
+    cursor: "pointer",
+    padding: 0,
+    transition: "all 0.15s ease",
+  },
   navContent: {
     flex: 1,
-    padding: "1.25rem 1rem",
+    padding: "20px 12px",
     overflowY: "auto",
     display: "flex",
     flexDirection: "column",
-    gap: "1.25rem",
+    gap: "24px",
   },
   groupWrapper: {
     display: "flex",
     flexDirection: "column",
-    gap: "0.4rem",
+    gap: "6px",
   },
   groupTitle: {
-    fontSize: "0.7rem",
+    fontSize: "11px",
     fontWeight: "700",
     color: "#94a3b8",
     letterSpacing: "0.06em",
-    paddingLeft: "0.75rem",
-    marginBottom: "0.2rem",
+    paddingLeft: "10px",
+    marginBottom: "4px",
+    textTransform: "uppercase",
   },
   groupItems: {
     display: "flex",
     flexDirection: "column",
-    gap: "0.25rem",
+    gap: "4px",
   },
   navItem: {
     display: "flex",
     alignItems: "center",
-    gap: "0.75rem",
-    padding: "0.65rem 0.85rem",
+    gap: "12px",
+    height: "46px",
+    padding: "0 14px",
     borderRadius: "12px",
     color: "#475569",
     fontWeight: "600",
-    fontSize: "0.875rem",
+    fontSize: "14px",
     transition: "all 0.15s ease",
     textDecoration: "none",
+    border: "none",
+    outline: "none",
   },
   navItemActive: {
     backgroundColor: "#2563eb",
     color: "#ffffff",
-    boxShadow: "0 4px 12px rgba(37, 99, 235, 0.25)",
+    boxShadow: "0 6px 18px rgba(37, 99, 235, 0.22)",
+    border: "none",
   },
   footer: {
-    padding: "1rem",
-    borderTop: "1px solid #f1f5f9",
+    padding: "16px 12px",
+    borderTop: "1px solid #e5e7eb",
   },
   logoutBtn: {
     width: "100%",
+    height: "46px",
     display: "flex",
     alignItems: "center",
-    gap: "0.75rem",
-    padding: "0.65rem 0.85rem",
+    gap: "12px",
+    padding: "0 14px",
     borderRadius: "12px",
     backgroundColor: "#fef2f2",
     color: "#ef4444",
     border: "none",
     fontWeight: "600",
-    fontSize: "0.875rem",
+    fontSize: "14px",
     cursor: "pointer",
     transition: "background-color 0.15s ease",
   },
