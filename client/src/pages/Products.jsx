@@ -5,15 +5,23 @@ import {
   Trash2,
   Package,
   Filter,
-  Image as ImageIcon,
   AlertTriangle,
   Upload,
+  Download,
+  Printer,
+  ChevronLeft,
+  ChevronRight,
+  Boxes,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import API from "../api/axios";
 import Table from "../components/Table";
 import Modal from "../components/Modal";
 import SearchBar from "../components/SearchBar";
 import Loader from "../components/Loader";
+import ConfirmModal from "../components/ConfirmModal";
+import Toast from "../components/Toast";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -25,8 +33,13 @@ const Products = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedWarehouse, setSelectedWarehouse] = useState("");
-  const [showLowStockOnly, setShowLowStockOnly] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("all");
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 7;
+
+  // Add / Edit Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -45,6 +58,20 @@ const Products = () => {
 
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+
+  // Delete Confirm Modal State
+  const [deleteId, setDeleteId] = useState(null);
+  const [deleteName, setDeleteName] = useState("");
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  // Toast Notification State
+  const [toast, setToast] = useState({ message: "", type: "success" });
+
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast({ message: "", type: "success" }), 3500);
+  };
 
   const fetchDropdownData = async () => {
     try {
@@ -165,10 +192,12 @@ const Products = () => {
         await API.put(`/products/${editingProduct._id}`, data, {
           headers: { "Content-Type": "multipart/form-data" },
         });
+        showToast(`Product "${formData.name}" updated successfully!`);
       } else {
         await API.post("/products", data, {
           headers: { "Content-Type": "multipart/form-data" },
         });
+        showToast(`Product "${formData.name}" added to inventory!`);
       }
 
       setIsModalOpen(false);
@@ -182,17 +211,54 @@ const Products = () => {
     }
   };
 
-  const handleDelete = async (id, name) => {
-    if (window.confirm(`Are you sure you want to delete product "${name}"?`)) {
-      try {
-        await API.delete(`/products/${id}`);
-        fetchProducts();
-      } catch (err) {
-        alert(err.response?.data?.message || "Failed to delete product");
-      }
+  const promptDelete = (id, name) => {
+    setDeleteId(id);
+    setDeleteName(name);
+    setIsDeleteOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      setDeleting(true);
+      await API.delete(`/products/${deleteId}`);
+      setIsDeleteOpen(false);
+      showToast(`Product "${deleteName}" removed from inventory.`);
+      fetchProducts();
+    } catch (err) {
+      showToast(err.response?.data?.message || "Failed to delete product", "error");
+    } finally {
+      setDeleting(false);
     }
   };
 
+  const handleExportCSV = () => {
+    let csvContent = "data:text/csv;charset=utf-8,";
+    const rows = [["Product Name", "SKU", "Category", "Price", "Stock Quantity", "Reorder Level", "Supplier", "Warehouse"]];
+
+    filteredProducts.forEach((p) => {
+      rows.push([
+        `"${p.name}"`,
+        p.sku,
+        `"${p.category?.name || "N/A"}"`,
+        p.price,
+        p.quantity,
+        p.reorderLevel,
+        `"${p.supplier?.name || "N/A"}"`,
+        `"${p.warehouse?.name || "N/A"}"`,
+      ]);
+    });
+
+    csvContent += rows.map((e) => e.join(",")).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `products_export_${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Filter Logic
   const filteredProducts = products.filter((prod) => {
     const matchesSearch =
       prod.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -206,13 +272,31 @@ const Products = () => {
       !selectedWarehouse ||
       (prod.warehouse?._id || prod.warehouse) === selectedWarehouse;
 
-    const matchesLowStock =
-      !showLowStockOnly || prod.quantity <= prod.reorderLevel;
+    let matchesStatus = true;
+    if (statusFilter === "in-stock") {
+      matchesStatus = prod.quantity > prod.reorderLevel;
+    } else if (statusFilter === "low-stock") {
+      matchesStatus = prod.quantity > 0 && prod.quantity <= prod.reorderLevel;
+    } else if (statusFilter === "out-stock") {
+      matchesStatus = prod.quantity === 0;
+    }
 
     return (
-      matchesSearch && matchesCategory && matchesWarehouse && matchesLowStock
+      matchesSearch && matchesCategory && matchesWarehouse && matchesStatus
     );
   });
+
+  // Calculate Statistics
+  const totalProductsCount = products.length;
+  const inStockCount = products.filter((p) => p.quantity > p.reorderLevel).length;
+  const lowStockCount = products.filter((p) => p.quantity > 0 && p.quantity <= p.reorderLevel).length;
+  const outOfStockCount = products.filter((p) => p.quantity === 0).length;
+
+  // Pagination Logic
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage) || 1;
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentDisplayedProducts = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
 
   const columns = [
     {
@@ -225,16 +309,16 @@ const Products = () => {
           : null;
 
         return (
-          <div style={{ display: "flex", alignItems: "center", gap: "0.85rem" }}>
-            <div style={styles.imageThumb}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px", padding: "4px 0" }}>
+            <div style={styles.imageThumbLarge}>
               {imageUrl ? (
                 <img src={imageUrl} alt={row.name} style={styles.img} />
               ) : (
-                <Package size={20} color="#2563eb" />
+                <Package size={26} color="#2563eb" />
               )}
             </div>
             <div>
-              <div style={{ fontWeight: "700", color: "#0f172a" }}>
+              <div style={{ fontWeight: "700", fontSize: "15px", color: "#0f172a" }}>
                 {row.name}
               </div>
               <span style={styles.skuBadge}>SKU: {row.sku}</span>
@@ -246,7 +330,7 @@ const Products = () => {
     {
       header: "Category",
       render: (row) => (
-        <span className="badge badge-primary">
+        <span style={styles.softCategoryBadge}>
           {row.category?.name || "Unassigned"}
         </span>
       ),
@@ -254,22 +338,35 @@ const Products = () => {
     {
       header: "Price",
       render: (row) => (
-        <span style={{ fontWeight: "700", color: "#0f172a" }}>
+        <span style={{ fontWeight: "700", color: "#0f172a", fontSize: "15px" }}>
           ${Number(row.price).toFixed(2)}
         </span>
       ),
     },
     {
-      header: "Stock Qty",
+      header: "Stock",
       render: (row) => {
-        const isLow = row.quantity <= row.reorderLevel;
+        const isOut = row.quantity === 0;
+        const isLow = row.quantity > 0 && row.quantity <= row.reorderLevel;
+
+        const badgeClass = isOut
+          ? "badge badge-danger"
+          : isLow
+          ? "badge badge-warning"
+          : "badge badge-success";
+
+        const label = isOut ? "OUT OF STOCK" : isLow ? "LOW STOCK" : "IN STOCK";
+
         return (
           <div>
-            <div style={{ fontWeight: "800", fontSize: "0.95rem" }}>
-              {row.quantity} units
+            <div style={{ display: "flex", alignItems: "baseline", gap: "4px" }}>
+              <span style={{ fontWeight: "800", fontSize: "16px", color: "#0f172a" }}>
+                {row.quantity}
+              </span>
+              <span style={{ fontSize: "12px", color: "#64748b" }}>Units</span>
             </div>
-            <span className={isLow ? "badge badge-danger" : "badge badge-success"}>
-              {isLow ? "LOW STOCK" : "IN STOCK"}
+            <span className={badgeClass} style={{ marginTop: "4px" }}>
+              {label}
             </span>
           </div>
         );
@@ -278,7 +375,7 @@ const Products = () => {
     {
       header: "Supplier",
       render: (row) => (
-        <span style={{ color: "#475569" }}>
+        <span style={{ color: "#475569", fontWeight: "500" }}>
           {row.supplier?.name || "N/A"}
         </span>
       ),
@@ -286,7 +383,7 @@ const Products = () => {
     {
       header: "Warehouse",
       render: (row) => (
-        <span style={{ color: "#475569" }}>
+        <span style={{ color: "#475569", fontWeight: "500" }}>
           {row.warehouse?.name || "N/A"}
         </span>
       ),
@@ -295,7 +392,7 @@ const Products = () => {
       header: "Actions",
       style: { width: "120px", textAlign: "right" },
       render: (row) => (
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
           <button
             onClick={() => handleOpenEditModal(row)}
             style={styles.actionBtn}
@@ -304,7 +401,7 @@ const Products = () => {
             <Edit3 size={16} color="#2563eb" />
           </button>
           <button
-            onClick={() => handleDelete(row._id, row.name)}
+            onClick={() => promptDelete(row._id, row.name)}
             style={{ ...styles.actionBtn, backgroundColor: "#fef2f2" }}
             title="Delete Product"
           >
@@ -317,33 +414,98 @@ const Products = () => {
 
   return (
     <div className="fade-in">
-      {/* Header */}
-      <div className="page-header">
+      {/* Toast Notification */}
+      <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: "", type: "success" })} />
+
+      {/* Header & Quick Actions */}
+      <div className="page-header" style={{ marginBottom: "24px" }}>
         <div>
           <h1 className="page-title">Products Inventory</h1>
           <p className="page-subtitle">
-            Manage inventory items, SKUs, pricing, stock levels, and warehouse allocations
+            Manage inventory items, pricing, stock levels and warehouse allocation.
           </p>
         </div>
-        <button onClick={handleOpenAddModal} className="btn btn-primary">
-          <Plus size={18} />
-          <span>Add Product</span>
-        </button>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <button onClick={() => window.print()} className="btn btn-secondary" style={styles.quickActionBtn}>
+            <Printer size={16} />
+            <span>Print</span>
+          </button>
+
+          <button onClick={handleExportCSV} className="btn btn-secondary" style={styles.quickActionBtn}>
+            <Download size={16} />
+            <span>Export CSV</span>
+          </button>
+
+          <button onClick={handleOpenAddModal} className="btn btn-primary" style={styles.addProductBtn}>
+            <Plus size={18} />
+            <span>Add Product</span>
+          </button>
+        </div>
       </div>
 
-      {/* Toolbar & Filters */}
+      {/* Top Statistics Cards Row */}
+      <div style={styles.statsCardsGrid}>
+        <div className="card" style={styles.statCard}>
+          <div style={styles.statCardLeft}>
+            <span style={styles.statCardLabel}>TOTAL PRODUCTS</span>
+            <span style={styles.statCardValue}>{totalProductsCount}</span>
+          </div>
+          <div style={{ ...styles.statIconBox, backgroundColor: "#eff6ff" }}>
+            <Boxes size={22} color="#2563eb" />
+          </div>
+        </div>
+
+        <div className="card" style={styles.statCard}>
+          <div style={styles.statCardLeft}>
+            <span style={styles.statCardLabel}>IN STOCK</span>
+            <span style={{ ...styles.statCardValue, color: "#10b981" }}>{inStockCount}</span>
+          </div>
+          <div style={{ ...styles.statIconBox, backgroundColor: "#ecfdf5" }}>
+            <CheckCircle2 size={22} color="#10b981" />
+          </div>
+        </div>
+
+        <div className="card" style={styles.statCard}>
+          <div style={styles.statCardLeft}>
+            <span style={styles.statCardLabel}>LOW STOCK</span>
+            <span style={{ ...styles.statCardValue, color: "#f59e0b" }}>{lowStockCount}</span>
+          </div>
+          <div style={{ ...styles.statIconBox, backgroundColor: "#fef3c7" }}>
+            <AlertTriangle size={22} color="#d97706" />
+          </div>
+        </div>
+
+        <div className="card" style={styles.statCard}>
+          <div style={styles.statCardLeft}>
+            <span style={styles.statCardLabel}>OUT OF STOCK</span>
+            <span style={{ ...styles.statCardValue, color: "#ef4444" }}>{outOfStockCount}</span>
+          </div>
+          <div style={{ ...styles.statIconBox, backgroundColor: "#fef2f2" }}>
+            <XCircle size={22} color="#ef4444" />
+          </div>
+        </div>
+      </div>
+
+      {/* Search & Filters Bar (Single Row Alignment) */}
       <div style={styles.toolbar}>
         <SearchBar
           searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          placeholder="Search product name, SKU..."
+          setSearchTerm={(val) => {
+            setSearchTerm(val);
+            setCurrentPage(1);
+          }}
+          placeholder="Search products by name or SKU..."
         />
 
         <div style={styles.filterGroup}>
           <select
             className="form-select"
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+            onChange={(e) => {
+              setSelectedCategory(e.target.value);
+              setCurrentPage(1);
+            }}
             style={styles.filterSelect}
           >
             <option value="">All Categories</option>
@@ -357,7 +519,10 @@ const Products = () => {
           <select
             className="form-select"
             value={selectedWarehouse}
-            onChange={(e) => setSelectedWarehouse(e.target.value)}
+            onChange={(e) => {
+              setSelectedWarehouse(e.target.value);
+              setCurrentPage(1);
+            }}
             style={styles.filterSelect}
           >
             <option value="">All Warehouses</option>
@@ -368,29 +533,81 @@ const Products = () => {
             ))}
           </select>
 
-          <button
-            onClick={() => setShowLowStockOnly(!showLowStockOnly)}
-            className={`btn ${showLowStockOnly ? "btn-danger" : "btn-secondary"}`}
-            style={styles.lowStockBtn}
+          <select
+            className="form-select"
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            style={styles.filterSelect}
           >
-            <AlertTriangle size={16} />
-            <span>Low Stock</span>
-          </button>
+            <option value="all">Status: All</option>
+            <option value="in-stock">Status: In Stock</option>
+            <option value="low-stock">Status: Low Stock</option>
+            <option value="out-stock">Status: Out of Stock</option>
+          </select>
         </div>
       </div>
 
-      {/* Table */}
+      {/* Main Table */}
       {loading ? (
         <Loader message="Loading products inventory..." />
       ) : (
-        <Table
-          columns={columns}
-          data={filteredProducts}
-          emptyMessage="No products found matching your search and filters."
-        />
+        <>
+          <Table
+            columns={columns}
+            data={currentDisplayedProducts}
+            emptyMessage="No products found matching your search and filter criteria."
+          />
+
+          {/* Pagination Footer */}
+          {filteredProducts.length > 0 && (
+            <div style={styles.paginationFooter}>
+              <span style={styles.paginationText}>
+                Showing <strong>{indexOfFirstItem + 1}</strong>–
+                <strong>{Math.min(indexOfLastItem, filteredProducts.length)}</strong> of{" "}
+                <strong>{filteredProducts.length}</strong> products
+              </span>
+
+              <div style={styles.paginationBtnGroup}>
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  style={styles.pageArrowBtn}
+                >
+                  <ChevronLeft size={16} />
+                  <span>Previous</span>
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    style={{
+                      ...styles.pageNumBtn,
+                      ...(currentPage === pageNum ? styles.pageNumActive : {}),
+                    }}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  style={styles.pageArrowBtn}
+                >
+                  <span>Next</span>
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
-      {/* Modal Form */}
+      {/* Add / Edit Product Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -424,7 +641,7 @@ const Products = () => {
               <input
                 type="text"
                 className="form-input"
-                placeholder="e.g. PROD-1002"
+                placeholder="e.g. PRD-102"
                 value={formData.sku}
                 onChange={(e) =>
                   setFormData({ ...formData, sku: e.target.value })
@@ -452,7 +669,7 @@ const Products = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Initial Quantity *</label>
+              <label className="form-label">Stock Quantity *</label>
               <input
                 type="number"
                 min="0"
@@ -542,7 +759,7 @@ const Products = () => {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Product Image (Multer Upload)</label>
+            <label className="form-label">Product Image Upload</label>
             <div style={styles.uploadArea}>
               {imagePreview ? (
                 <div style={styles.previewBox}>
@@ -599,44 +816,105 @@ const Products = () => {
           </div>
         </form>
       </Modal>
+
+      {/* Confirm Delete Modal */}
+      <ConfirmModal
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        onConfirm={confirmDelete}
+        title="Delete Product"
+        message={`Are you sure you want to remove product "${deleteName}" from inventory?`}
+        loading={deleting}
+      />
     </div>
   );
 };
 
 const styles = {
+  addProductBtn: {
+    height: "48px",
+    borderRadius: "14px",
+    padding: "0 24px",
+    fontSize: "14px",
+  },
+  quickActionBtn: {
+    height: "48px",
+    borderRadius: "14px",
+    padding: "0 18px",
+  },
+  statsCardsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "24px",
+    marginBottom: "28px",
+  },
+  statCard: {
+    height: "100px",
+    padding: "20px 24px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#ffffff",
+    border: "1px solid #e5e7eb",
+    borderRadius: "16px",
+    boxShadow: "0 4px 16px rgba(15, 23, 42, 0.04)",
+  },
+  statCardLeft: {
+    display: "flex",
+    flexDirection: "column",
+  },
+  statCardLabel: {
+    fontSize: "11px",
+    fontWeight: "700",
+    color: "#64748b",
+    letterSpacing: "0.05em",
+  },
+  statCardValue: {
+    fontSize: "34px",
+    fontWeight: "800",
+    color: "#0f172a",
+    lineHeight: 1.1,
+    marginTop: "2px",
+  },
+  statIconBox: {
+    width: "44px",
+    height: "44px",
+    borderRadius: "12px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   toolbar: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "1.5rem",
-    gap: "1rem",
+    marginBottom: "24px",
+    gap: "16px",
     flexWrap: "wrap",
   },
   filterGroup: {
     display: "flex",
     alignItems: "center",
-    gap: "0.75rem",
+    gap: "12px",
     flexWrap: "wrap",
   },
   filterSelect: {
-    padding: "0.55rem 0.85rem",
-    fontSize: "0.85rem",
-    minWidth: "160px",
+    padding: "10px 16px",
+    fontSize: "14px",
+    minWidth: "165px",
+    borderRadius: "12px",
   },
-  lowStockBtn: {
-    padding: "0.55rem 0.85rem",
-    fontSize: "0.85rem",
-  },
-  imageThumb: {
-    width: "42px",
-    height: "42px",
-    borderRadius: "10px",
+  imageThumbLarge: {
+    width: "56px",
+    height: "56px",
+    borderRadius: "12px",
     backgroundColor: "#eff6ff",
     border: "1px solid #dbeafe",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
+    flexShrink: 0,
   },
   img: {
     width: "100%",
@@ -644,35 +922,97 @@ const styles = {
     objectFit: "cover",
   },
   skuBadge: {
-    fontSize: "0.75rem",
+    fontSize: "12px",
     color: "#64748b",
     fontFamily: "monospace",
+    marginTop: "2px",
+    display: "block",
+  },
+  softCategoryBadge: {
+    backgroundColor: "#eff6ff",
+    color: "#2563eb",
+    padding: "4px 10px",
+    borderRadius: "999px",
+    fontSize: "12px",
+    fontWeight: "600",
   },
   actionBtn: {
-    width: "34px",
-    height: "34px",
-    borderRadius: "8px",
+    width: "36px",
+    height: "36px",
+    borderRadius: "10px",
     backgroundColor: "#f8fafc",
-    border: "1px solid #e2e8f0",
+    border: "1px solid #e5e7eb",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     cursor: "pointer",
+    transition: "all 0.15s ease",
+  },
+  paginationFooter: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "16px 24px",
+    backgroundColor: "#ffffff",
+    border: "1px solid #e5e7eb",
+    borderTop: "none",
+    borderBottomLeftRadius: "16px",
+    borderBottomRightRadius: "16px",
+    flexWrap: "wrap",
+    gap: "12px",
+  },
+  paginationText: {
+    fontSize: "13px",
+    color: "#64748b",
+  },
+  paginationBtnGroup: {
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+  },
+  pageArrowBtn: {
+    display: "flex",
+    alignItems: "center",
+    gap: "4px",
+    padding: "6px 12px",
+    borderRadius: "8px",
+    backgroundColor: "#ffffff",
+    border: "1px solid #e5e7eb",
+    color: "#475569",
+    fontSize: "13px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+  pageNumBtn: {
+    width: "32px",
+    height: "32px",
+    borderRadius: "8px",
+    backgroundColor: "#ffffff",
+    border: "1px solid #e5e7eb",
+    color: "#475569",
+    fontSize: "13px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+  pageNumActive: {
+    backgroundColor: "#2563eb",
+    color: "#ffffff",
+    borderColor: "#2563eb",
   },
   gridTwo: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
-    gap: "1rem",
+    gap: "16px",
   },
   gridThree: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr 1fr",
-    gap: "1rem",
+    gap: "16px",
   },
   uploadArea: {
     border: "2px dashed #cbd5e1",
     borderRadius: "12px",
-    padding: "1rem",
+    padding: "16px",
     textAlign: "center",
     backgroundColor: "#f8fafc",
   },
@@ -680,50 +1020,50 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    gap: "0.5rem",
+    gap: "8px",
     cursor: "pointer",
     color: "#64748b",
-    fontSize: "0.85rem",
+    fontSize: "13px",
   },
   previewBox: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: "1rem",
+    gap: "16px",
   },
   previewImg: {
     width: "60px",
     height: "60px",
-    borderRadius: "8px",
+    borderRadius: "10px",
     objectFit: "cover",
   },
   removeImgBtn: {
     backgroundColor: "#fef2f2",
     color: "#ef4444",
     border: "1px solid #fecaca",
-    padding: "0.4rem 0.75rem",
+    padding: "6px 12px",
     borderRadius: "8px",
-    fontSize: "0.8rem",
+    fontSize: "12px",
     fontWeight: "600",
     cursor: "pointer",
   },
   errorBox: {
     display: "flex",
     alignItems: "center",
-    gap: "0.5rem",
+    gap: "8px",
     backgroundColor: "#fef2f2",
     border: "1px solid #fecaca",
     color: "#ef4444",
-    padding: "0.75rem 1rem",
+    padding: "12px 16px",
     borderRadius: "10px",
-    fontSize: "0.875rem",
-    marginBottom: "1.25rem",
+    fontSize: "14px",
+    marginBottom: "20px",
   },
   modalFooter: {
     display: "flex",
     justifyContent: "flex-end",
-    gap: "0.75rem",
-    marginTop: "1.5rem",
+    gap: "12px",
+    marginTop: "24px",
   },
 };
 
