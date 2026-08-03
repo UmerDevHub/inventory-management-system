@@ -66,38 +66,109 @@ const ProductQRModal = ({ product, onClose }) => {
     link.click();
   };
 
-  // ── Print ──────────────────────────────────────────────────
+  // ── Print via hidden iframe (never blocked by popup blockers) ──
   const handlePrint = () => {
     const canvas = document.getElementById("product-qr-canvas");
     if (!canvas) return;
     const dataUrl = canvas.toDataURL("image/png");
 
-    const win = window.open("", "_blank");
-    win.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>QR Code – ${product.name}</title>
-          <style>
-            body { margin: 0; display: flex; flex-direction: column;
-                   align-items: center; justify-content: center;
-                   min-height: 100vh; font-family: system-ui, sans-serif; }
-            img  { width: 240px; height: 240px; display: block; margin-bottom: 12px; }
-            h2   { font-size: 18px; font-weight: 700; margin: 0 0 4px; color: #0f172a; }
-            p    { font-size: 13px; color: #64748b; margin: 0; font-family: monospace; }
-          </style>
-        </head>
-        <body>
-          <img src="${dataUrl}" />
-          <h2>${product.name}</h2>
-          <p>SKU: ${product.sku?.toUpperCase() || "N/A"}</p>
-        </body>
-      </html>
-    `);
-    win.document.close();
-    win.focus();
-    win.print();
-    win.close();
+    // Remove any stale iframe
+    const old = document.getElementById("qr-print-frame");
+    if (old) old.remove();
+
+    const iframe = document.createElement("iframe");
+    iframe.id    = "qr-print-frame";
+    iframe.style.cssText =
+      "position:fixed;top:-9999px;left:-9999px;width:0;height:0;border:none;";
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(`<!DOCTYPE html>
+<html>
+  <head>
+    <title>QR Label – ${product.name}</title>
+    <style>
+      @page { margin: 10mm; size: 80mm 100mm; }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: #fff;
+        padding: 16px;
+      }
+      .label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 16px;
+        border: 2px solid #0f172a;
+        border-radius: 10px;
+        width: 100%;
+        max-width: 260px;
+      }
+      .brand {
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: #64748b;
+      }
+      img { width: 180px; height: 180px; display: block; }
+      .name {
+        font-size: 13px;
+        font-weight: 800;
+        color: #0f172a;
+        text-align: center;
+        line-height: 1.3;
+      }
+      .sku {
+        font-size: 11px;
+        font-family: monospace;
+        color: #475569;
+        background: #f1f5f9;
+        padding: 3px 10px;
+        border-radius: 4px;
+        letter-spacing: 0.06em;
+      }
+      .qty {
+        font-size: 10px;
+        color: #94a3b8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="label">
+      <span class="brand">StockSense Inventory</span>
+      <img src="${dataUrl}" alt="QR Code" />
+      <span class="name">${product.name}</span>
+      <span class="sku">SKU: ${product.sku?.toUpperCase() || "N/A"}</span>
+      <span class="qty">Stock: ${product.quantity ?? "–"} units · $${Number(product.price || 0).toFixed(2)}</span>
+    </div>
+  </body>
+</html>`);
+    doc.close();
+
+    // iframe.onload may not fire with doc.write — use setTimeout as reliable fallback
+    const triggerPrint = () => {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+      setTimeout(() => iframe.remove(), 1000);
+    };
+
+    iframe.onload = triggerPrint;
+    // Fallback: if onload doesn't fire within 300ms, print anyway
+    setTimeout(() => {
+      if (document.getElementById("qr-print-frame")) {
+        triggerPrint();
+      }
+    }, 300);
+
   };
 
   return (
