@@ -8,17 +8,38 @@ import {
   AlertTriangle,
   Download,
   Printer,
+  FileSpreadsheet,
   DollarSign,
   Boxes,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
 } from "lucide-react";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 import API from "../api/axios";
 import Table from "../components/Table";
+import SearchBar from "../components/SearchBar";
 import Loader from "../components/Loader";
 
 const Reports = () => {
   const [activeTab, setActiveTab] = useState("stock");
   const [loading, setLoading] = useState(true);
   const [reportData, setReportData] = useState(null);
+
+  // Search & Filter State
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 7;
 
   const fetchReport = async (tabKey) => {
     try {
@@ -31,6 +52,8 @@ const Reports = () => {
 
       const res = await API.get(endpoint);
       setReportData(res.data);
+      setCurrentPage(1);
+      setSearchTerm("");
     } catch (err) {
       console.error("Failed to fetch report data", err);
     } finally {
@@ -53,7 +76,7 @@ const Reports = () => {
       reportData.products?.forEach((p) => {
         rows.push([
           `"${p.name}"`,
-          p.sku,
+          p.sku?.toUpperCase() || "N/A",
           `"${p.category?.name || "N/A"}"`,
           `"${p.warehouse?.name || "N/A"}"`,
           p.price,
@@ -79,7 +102,7 @@ const Reports = () => {
         rows.push([
           new Date(s.receivedDate || s.createdAt).toLocaleDateString(),
           `"${s.product?.name || "N/A"}"`,
-          s.product?.sku || "N/A",
+          s.product?.sku?.toUpperCase() || "N/A",
           s.quantity,
           `"${s.notes || ""}"`,
         ]);
@@ -90,7 +113,7 @@ const Reports = () => {
         rows.push([
           new Date(s.issuedDate || s.createdAt).toLocaleDateString(),
           `"${s.product?.name || "N/A"}"`,
-          s.product?.sku || "N/A",
+          s.product?.sku?.toUpperCase() || "N/A",
           s.quantity,
           `"${s.notes || ""}"`,
         ]);
@@ -100,7 +123,7 @@ const Reports = () => {
       reportData.lowStockProducts?.forEach((p) => {
         rows.push([
           `"${p.name}"`,
-          p.sku,
+          p.sku?.toUpperCase() || "N/A",
           `"${p.category?.name || "N/A"}"`,
           p.quantity,
           p.reorderLevel,
@@ -112,7 +135,7 @@ const Reports = () => {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `${activeTab}_report_${new Date().toISOString().split("T")[0]}.csv`);
+    link.setAttribute("download", `${activeTab}_analytics_report_${new Date().toISOString().split("T")[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -126,73 +149,173 @@ const Reports = () => {
     { key: "low-stock", label: "Low Stock Alerts", icon: AlertTriangle },
   ];
 
-  const renderTable = () => {
+  // Tab Specific Data Filtering
+  const getFilteredData = () => {
+    if (!reportData) return [];
+
+    if (activeTab === "stock") {
+      return (reportData.products || []).filter(
+        (p) =>
+          p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          p.sku.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    if (activeTab === "purchases") {
+      return (reportData.purchases || []).filter(
+        (p) =>
+          (p.product?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (p.supplier?.name || "").toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    if (activeTab === "stock-in") {
+      return (reportData.stockInRecords || []).filter(
+        (s) =>
+          (s.product?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (s.notes || "").toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    if (activeTab === "stock-out") {
+      return (reportData.stockOutRecords || []).filter(
+        (s) =>
+          (s.product?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (s.notes || "").toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    if (activeTab === "low-stock") {
+      return (reportData.lowStockProducts || []).filter(
+        (p) =>
+          p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          p.sku.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    return [];
+  };
+
+  const filteredDataset = getFilteredData();
+  const totalPages = Math.ceil(filteredDataset.length / itemsPerPage) || 1;
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentDisplayedDataset = filteredDataset.slice(indexOfFirstItem, indexOfLastItem);
+
+  const PIE_COLORS = ["#2563eb", "#3b82f6", "#60a5fa", "#93c5fd"];
+
+  const renderChart = () => {
     if (!reportData) return null;
 
     if (activeTab === "stock") {
+      const chartData = (reportData.products || []).slice(0, 5).map((p) => ({
+        name: p.name,
+        value: p.quantity,
+      }));
+      return (
+        <div className="card" style={{ padding: "24px", marginBottom: "28px" }}>
+          <h3 style={styles.chartTitle}>Stock Distribution by Product</h3>
+          <p style={styles.chartSub}>Breakdown of units available across inventory items</p>
+          <div style={{ width: "100%", height: "260px" }}>
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={chartData} margin={{ top: 15, right: 10, left: -25, bottom: 0 }}>
+                <XAxis dataKey="name" stroke="#94a3b8" fontSize={13} axisLine={false} tickLine={false} />
+                <YAxis stroke="#94a3b8" fontSize={13} axisLine={false} tickLine={false} />
+                <Tooltip />
+                <Bar dataKey="value" fill="#2563eb" radius={[8, 8, 0, 0]} barSize={42} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      );
+    }
+
+    if (activeTab === "purchases") {
+      const chartData = (reportData.purchases || []).slice(0, 5).map((p) => ({
+        name: p.product?.name || "Order",
+        spent: p.totalAmount,
+      }));
+      return (
+        <div className="card" style={{ padding: "24px", marginBottom: "28px" }}>
+          <h3 style={styles.chartTitle}>Purchase Expenditure Breakdown</h3>
+          <p style={styles.chartSub}>Procurement spend per order transaction</p>
+          <div style={{ width: "100%", height: "260px" }}>
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={chartData} margin={{ top: 15, right: 10, left: -10, bottom: 0 }}>
+                <XAxis dataKey="name" stroke="#94a3b8" fontSize={13} axisLine={false} tickLine={false} />
+                <YAxis stroke="#94a3b8" fontSize={13} axisLine={false} tickLine={false} />
+                <Tooltip />
+                <Bar dataKey="spent" fill="#2563eb" radius={[8, 8, 0, 0]} barSize={42} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  const renderTable = () => {
+    if (activeTab === "stock") {
       const columns = [
-        { header: "Product Item", render: (r) => <span style={{ fontWeight: "700" }}>{r.name}</span> },
-        { header: "SKU", render: (r) => <span style={{ fontFamily: "monospace", color: "#64748b" }}>{r.sku}</span> },
+        { header: "Product", render: (r) => <span style={{ fontWeight: "700", color: "#0f172a" }}>{r.name}</span> },
+        { header: "SKU", render: (r) => <span style={{ fontFamily: "monospace", color: "#64748b" }}>{r.sku?.toUpperCase()}</span> },
         { header: "Category", render: (r) => <span className="badge badge-primary">{r.category?.name || "N/A"}</span> },
-        { header: "Warehouse", render: (r) => <span>{r.warehouse?.name || "N/A"}</span> },
+        { header: "Warehouse", render: (r) => <span>{r.warehouse?.name || "Central Warehouse"}</span> },
         { header: "Price", render: (r) => <span>${Number(r.price).toFixed(2)}</span> },
         { header: "Stock Quantity", render: (r) => <span style={{ fontWeight: "700" }}>{r.quantity} units</span> },
         {
           header: "Inventory Value",
           render: (r) => (
-            <span style={{ fontWeight: "800", color: "#0f172a" }}>
-              ${(r.quantity * r.price).toFixed(2)}
+            <span style={{ fontWeight: "800", color: "#0f172a", fontSize: "16px" }}>
+              ${(r.quantity * r.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
             </span>
           ),
         },
       ];
-      return <Table columns={columns} data={reportData.products || []} />;
+      return <Table columns={columns} data={currentDisplayedDataset} />;
     }
 
     if (activeTab === "purchases") {
       const columns = [
-        { header: "Date", render: (r) => new Date(r.purchaseDate || r.createdAt).toLocaleDateString() },
-        { header: "Product Item", render: (r) => <span style={{ fontWeight: "700" }}>{r.product?.name || "Deleted"}</span> },
+        { header: "Date", render: (r) => new Date(r.purchaseDate || r.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) },
+        { header: "Product", render: (r) => <span style={{ fontWeight: "700" }}>{r.product?.name || "Deleted"}</span> },
         { header: "Supplier", render: (r) => <span>{r.supplier?.name || "N/A"}</span> },
         { header: "Unit Price", render: (r) => <span>${Number(r.price).toFixed(2)}</span> },
         { header: "Quantity", render: (r) => <span className="badge badge-primary">+{r.quantity}</span> },
-        { header: "Total Spent", render: (r) => <span style={{ fontWeight: "800" }}>${Number(r.totalAmount).toFixed(2)}</span> },
+        { header: "Total Spent", render: (r) => <span style={{ fontWeight: "800", fontSize: "16px" }}>${Number(r.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span> },
       ];
-      return <Table columns={columns} data={reportData.purchases || []} />;
+      return <Table columns={columns} data={currentDisplayedDataset} />;
     }
 
     if (activeTab === "stock-in") {
       const columns = [
-        { header: "Received Date", render: (r) => new Date(r.receivedDate || r.createdAt).toLocaleDateString() },
-        { header: "Product Item", render: (r) => <span style={{ fontWeight: "700" }}>{r.product?.name || "Deleted"}</span> },
-        { header: "SKU", render: (r) => <span style={{ fontFamily: "monospace" }}>{r.product?.sku || "N/A"}</span> },
+        { header: "Received Date", render: (r) => new Date(r.receivedDate || r.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) },
+        { header: "Product", render: (r) => <span style={{ fontWeight: "700" }}>{r.product?.name || "Deleted"}</span> },
+        { header: "SKU", render: (r) => <span style={{ fontFamily: "monospace" }}>{r.product?.sku?.toUpperCase() || "N/A"}</span> },
         { header: "Quantity Added", render: (r) => <span className="badge badge-success">+{r.quantity} units</span> },
         { header: "Notes", render: (r) => <span style={{ color: "#64748b" }}>{r.notes || "No notes"}</span> },
       ];
-      return <Table columns={columns} data={reportData.stockInRecords || []} />;
+      return <Table columns={columns} data={currentDisplayedDataset} />;
     }
 
     if (activeTab === "stock-out") {
       const columns = [
-        { header: "Issued Date", render: (r) => new Date(r.issuedDate || r.createdAt).toLocaleDateString() },
-        { header: "Product Item", render: (r) => <span style={{ fontWeight: "700" }}>{r.product?.name || "Deleted"}</span> },
-        { header: "SKU", render: (r) => <span style={{ fontFamily: "monospace" }}>{r.product?.sku || "N/A"}</span> },
+        { header: "Issued Date", render: (r) => new Date(r.issuedDate || r.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) },
+        { header: "Product", render: (r) => <span style={{ fontWeight: "700" }}>{r.product?.name || "Deleted"}</span> },
+        { header: "SKU", render: (r) => <span style={{ fontFamily: "monospace" }}>{r.product?.sku?.toUpperCase() || "N/A"}</span> },
         { header: "Quantity Issued", render: (r) => <span className="badge badge-danger">-{r.quantity} units</span> },
         { header: "Notes", render: (r) => <span style={{ color: "#64748b" }}>{r.notes || "No notes"}</span> },
       ];
-      return <Table columns={columns} data={reportData.stockOutRecords || []} />;
+      return <Table columns={columns} data={currentDisplayedDataset} />;
     }
 
     if (activeTab === "low-stock") {
       const columns = [
-        { header: "Product Item", render: (r) => <span style={{ fontWeight: "700" }}>{r.name}</span> },
-        { header: "SKU", render: (r) => <span style={{ fontFamily: "monospace" }}>{r.sku}</span> },
+        { header: "Product", render: (r) => <span style={{ fontWeight: "700" }}>{r.name}</span> },
+        { header: "SKU", render: (r) => <span style={{ fontFamily: "monospace" }}>{r.sku?.toUpperCase()}</span> },
         { header: "Category", render: (r) => <span className="badge badge-primary">{r.category?.name || "N/A"}</span> },
         { header: "Current Stock", render: (r) => <span style={{ fontWeight: "800", color: "#ef4444" }}>{r.quantity}</span> },
         { header: "Reorder Threshold", render: (r) => <span>{r.reorderLevel}</span> },
         { header: "Status", render: () => <span className="badge badge-danger">CRITICAL LOW</span> },
       ];
-      return <Table columns={columns} data={reportData.lowStockProducts || []} />;
+      return <Table columns={columns} data={currentDisplayedDataset} />;
     }
 
     return null;
@@ -200,22 +323,29 @@ const Reports = () => {
 
   return (
     <div className="fade-in">
-      {/* Header */}
-      <div className="page-header">
+      {/* Header & Export Button Group */}
+      <div className="page-header" style={{ marginBottom: "24px" }}>
         <div>
           <h1 className="page-title">Inventory Reports</h1>
           <p className="page-subtitle">
-            Exportable financial, stock level, movement, and procurement audit reports
+            Generate inventory, purchasing, stock movement, and valuation reports.
           </p>
         </div>
-        <div style={{ display: "flex", gap: "0.75rem" }}>
-          <button onClick={() => window.print()} className="btn btn-secondary">
+
+        <div style={styles.btnGroup}>
+          <button onClick={() => window.print()} className="btn btn-secondary" style={styles.actionBtn}>
             <Printer size={16} />
-            <span>Print Report</span>
+            <span>Print</span>
           </button>
-          <button onClick={handleExportCSV} className="btn btn-primary">
+
+          <button onClick={handleExportCSV} className="btn btn-secondary" style={styles.actionBtn}>
             <Download size={16} />
             <span>Export CSV</span>
+          </button>
+
+          <button onClick={handleExportCSV} className="btn btn-primary" style={styles.actionBtn}>
+            <FileSpreadsheet size={16} />
+            <span>Export Excel</span>
           </button>
         </div>
       </div>
@@ -241,24 +371,39 @@ const Reports = () => {
         })}
       </div>
 
-      {/* Top Metrics Cards for Active Tab */}
+      {/* Top Metrics Cards with Top-Right Icons */}
       {reportData && !loading && (
         <div style={styles.metricsGrid}>
           {activeTab === "stock" && (
             <>
               <div className="card" style={styles.metricCard}>
-                <span style={styles.metricLabel}>Total Products Listed</span>
-                <span style={styles.metricValue}>{reportData.totalProducts || 0}</span>
+                <div style={styles.metricCardLeft}>
+                  <span style={styles.metricLabel}>PRODUCTS</span>
+                  <span style={styles.metricValue}>{reportData.totalProducts || 0} Listed</span>
+                </div>
+                <div style={styles.iconCircle}>
+                  <Package size={22} color="#2563eb" />
+                </div>
               </div>
               <div className="card" style={styles.metricCard}>
-                <span style={styles.metricLabel}>Total Inventory Stock Units</span>
-                <span style={styles.metricValue}>{reportData.totalStockQuantity || 0}</span>
+                <div style={styles.metricCardLeft}>
+                  <span style={styles.metricLabel}>STOCK UNITS</span>
+                  <span style={styles.metricValue}>{reportData.totalStockQuantity || 0} Available</span>
+                </div>
+                <div style={styles.iconCircle}>
+                  <Boxes size={22} color="#2563eb" />
+                </div>
               </div>
               <div className="card" style={styles.metricCard}>
-                <span style={styles.metricLabel}>Total Stock Valuation ($)</span>
-                <span style={{ ...styles.metricValue, color: "#2563eb" }}>
-                  ${Number(reportData.totalStockValue || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                </span>
+                <div style={styles.metricCardLeft}>
+                  <span style={styles.metricLabel}>INVENTORY VALUE</span>
+                  <span style={{ ...styles.metricValue, color: "#2563eb" }}>
+                    ${Number(reportData.totalStockValue || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+                <div style={styles.iconCircle}>
+                  <DollarSign size={22} color="#2563eb" />
+                </div>
               </div>
             </>
           )}
@@ -266,14 +411,24 @@ const Reports = () => {
           {activeTab === "purchases" && (
             <>
               <div className="card" style={styles.metricCard}>
-                <span style={styles.metricLabel}>Total Purchase Orders</span>
-                <span style={styles.metricValue}>{reportData.totalPurchasesCount || 0}</span>
+                <div style={styles.metricCardLeft}>
+                  <span style={styles.metricLabel}>PURCHASES</span>
+                  <span style={styles.metricValue}>{reportData.totalPurchasesCount || 0} Orders</span>
+                </div>
+                <div style={styles.iconCircle}>
+                  <ShoppingCart size={22} color="#2563eb" />
+                </div>
               </div>
               <div className="card" style={styles.metricCard}>
-                <span style={styles.metricLabel}>Total Procurement Spent ($)</span>
-                <span style={{ ...styles.metricValue, color: "#2563eb" }}>
-                  ${Number(reportData.totalAmountSpent || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                </span>
+                <div style={styles.metricCardLeft}>
+                  <span style={styles.metricLabel}>TOTAL EXPENDITURE</span>
+                  <span style={{ ...styles.metricValue, color: "#2563eb" }}>
+                    ${Number(reportData.totalAmountSpent || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+                <div style={styles.iconCircle}>
+                  <DollarSign size={22} color="#2563eb" />
+                </div>
               </div>
             </>
           )}
@@ -281,14 +436,24 @@ const Reports = () => {
           {activeTab === "stock-in" && (
             <>
               <div className="card" style={styles.metricCard}>
-                <span style={styles.metricLabel}>Total Stock In Logs</span>
-                <span style={styles.metricValue}>{reportData.totalStockInCount || 0}</span>
+                <div style={styles.metricCardLeft}>
+                  <span style={styles.metricLabel}>STOCK IN LOGS</span>
+                  <span style={styles.metricValue}>{reportData.totalStockInCount || 0} Receipts</span>
+                </div>
+                <div style={{ ...styles.iconCircle, backgroundColor: "#ecfdf5" }}>
+                  <ArrowDownLeft size={22} color="#10b981" />
+                </div>
               </div>
               <div className="card" style={styles.metricCard}>
-                <span style={styles.metricLabel}>Total Units Received</span>
-                <span style={{ ...styles.metricValue, color: "#10b981" }}>
-                  +{reportData.totalQuantityReceived || 0} units
-                </span>
+                <div style={styles.metricCardLeft}>
+                  <span style={styles.metricLabel}>UNITS RECEIVED</span>
+                  <span style={{ ...styles.metricValue, color: "#10b981" }}>
+                    +{reportData.totalQuantityReceived || 0} Units
+                  </span>
+                </div>
+                <div style={{ ...styles.iconCircle, backgroundColor: "#ecfdf5" }}>
+                  <Boxes size={22} color="#10b981" />
+                </div>
               </div>
             </>
           )}
@@ -296,58 +461,157 @@ const Reports = () => {
           {activeTab === "stock-out" && (
             <>
               <div className="card" style={styles.metricCard}>
-                <span style={styles.metricLabel}>Total Stock Out Logs</span>
-                <span style={styles.metricValue}>{reportData.totalStockOutCount || 0}</span>
+                <div style={styles.metricCardLeft}>
+                  <span style={styles.metricLabel}>STOCK OUT LOGS</span>
+                  <span style={styles.metricValue}>{reportData.totalStockOutCount || 0} Issues</span>
+                </div>
+                <div style={{ ...styles.iconCircle, backgroundColor: "#fef2f2" }}>
+                  <ArrowUpRight size={22} color="#ef4444" />
+                </div>
               </div>
               <div className="card" style={styles.metricCard}>
-                <span style={styles.metricLabel}>Total Units Issued</span>
-                <span style={{ ...styles.metricValue, color: "#ef4444" }}>
-                  -{reportData.totalQuantityIssued || 0} units
-                </span>
+                <div style={styles.metricCardLeft}>
+                  <span style={styles.metricLabel}>UNITS ISSUED</span>
+                  <span style={{ ...styles.metricValue, color: "#ef4444" }}>
+                    -{reportData.totalQuantityIssued || 0} Units
+                  </span>
+                </div>
+                <div style={{ ...styles.iconCircle, backgroundColor: "#fef2f2" }}>
+                  <Boxes size={22} color="#ef4444" />
+                </div>
               </div>
             </>
           )}
 
           {activeTab === "low-stock" && (
             <div className="card" style={styles.metricCard}>
-              <span style={styles.metricLabel}>Low Stock Alert Count</span>
-              <span style={{ ...styles.metricValue, color: "#ef4444" }}>
-                {reportData.totalLowStockProducts || 0} products
-              </span>
+              <div style={styles.metricCardLeft}>
+                <span style={styles.metricLabel}>LOW STOCK ALERTS</span>
+                <span style={{ ...styles.metricValue, color: "#ef4444" }}>
+                  {reportData.totalLowStockProducts || 0} Items
+                </span>
+              </div>
+              <div style={{ ...styles.iconCircle, backgroundColor: "#fef2f2" }}>
+                <AlertTriangle size={22} color="#ef4444" />
+              </div>
             </div>
           )}
         </div>
       )}
 
-      {/* Main Table */}
+      {/* Analytics Chart above Table */}
+      {!loading && renderChart()}
+
+      {/* Toolbar Search Bar */}
+      <div style={styles.toolbar}>
+        <div style={{ width: "420px", maxWidth: "100%" }}>
+          <SearchBar
+            searchTerm={searchTerm}
+            setSearchTerm={(val) => {
+              setSearchTerm(val);
+              setCurrentPage(1);
+            }}
+            placeholder="Search report dataset..."
+          />
+        </div>
+      </div>
+
+      {/* Main Table View */}
       {loading ? (
         <Loader message="Generating report data..." />
+      ) : filteredDataset.length === 0 ? (
+        <div style={styles.emptyCard} className="card">
+          <div style={styles.emptyIconCircle}>
+            <BarChart3 size={32} color="#94a3b8" />
+          </div>
+          <h3 style={styles.emptyTitle}>No report data available</h3>
+          <p style={styles.emptySub}>
+            Create products and inventory records to generate reports.
+          </p>
+        </div>
       ) : (
-        renderTable()
+        <>
+          {renderTable()}
+
+          {/* Pagination Footer */}
+          {filteredDataset.length > 0 && (
+            <div style={styles.paginationFooter}>
+              <span style={styles.paginationText}>
+                Showing <strong>{indexOfFirstItem + 1}</strong>–
+                <strong>{Math.min(indexOfLastItem, filteredDataset.length)}</strong> of{" "}
+                <strong>{filteredDataset.length}</strong> records
+              </span>
+
+              <div style={styles.paginationBtnGroup}>
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  style={styles.pageArrowBtn}
+                >
+                  <ChevronLeft size={16} />
+                  <span>Previous</span>
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    style={{
+                      ...styles.pageNumBtn,
+                      ...(currentPage === pageNum ? styles.pageNumActive : {}),
+                    }}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  style={styles.pageArrowBtn}
+                >
+                  <span>Next</span>
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
 };
 
 const styles = {
+  btnGroup: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+  },
+  actionBtn: {
+    height: "48px",
+    borderRadius: "14px",
+    padding: "0 20px",
+    fontSize: "14px",
+  },
   tabsContainer: {
     display: "flex",
-    gap: "0.5rem",
-    marginBottom: "1.5rem",
+    gap: "8px",
+    marginBottom: "24px",
     overflowX: "auto",
-    paddingBottom: "0.25rem",
+    paddingBottom: "4px",
   },
   tabBtn: {
     display: "flex",
     alignItems: "center",
-    gap: "0.6rem",
-    padding: "0.65rem 1.15rem",
+    gap: "10px",
+    padding: "12px 20px",
     borderRadius: "12px",
     backgroundColor: "#ffffff",
-    border: "1px solid #e2e8f0",
+    border: "1px solid #e5e7eb",
     color: "#64748b",
     fontWeight: "600",
-    fontSize: "0.875rem",
+    fontSize: "14px",
     cursor: "pointer",
     whiteSpace: "nowrap",
     transition: "all 0.15s ease",
@@ -356,28 +620,150 @@ const styles = {
     backgroundColor: "#2563eb",
     color: "#ffffff",
     borderColor: "#2563eb",
-    boxShadow: "0 4px 12px rgba(37, 99, 235, 0.25)",
+    boxShadow: "0 6px 18px rgba(37, 99, 235, 0.22)",
   },
   metricsGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "1.25rem",
-    marginBottom: "1.5rem",
+    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+    gap: "24px",
+    marginBottom: "28px",
   },
   metricCard: {
-    padding: "1.25rem 1.5rem",
+    height: "100px",
+    padding: "20px 24px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#ffffff",
+    border: "1px solid #e5e7eb",
+    borderRadius: "16px",
+    boxShadow: "0 4px 16px rgba(15, 23, 42, 0.04)",
+  },
+  metricCardLeft: {
+    display: "flex",
+    flexDirection: "column",
   },
   metricLabel: {
-    fontSize: "0.825rem",
+    fontSize: "11px",
+    fontWeight: "700",
     color: "#64748b",
-    fontWeight: "600",
+    letterSpacing: "0.05em",
   },
   metricValue: {
-    fontSize: "1.65rem",
+    fontSize: "26px",
     fontWeight: "800",
     color: "#0f172a",
-    display: "block",
-    marginTop: "0.25rem",
+    lineHeight: 1.1,
+    marginTop: "4px",
+  },
+  iconCircle: {
+    width: "44px",
+    height: "44px",
+    borderRadius: "12px",
+    backgroundColor: "#eff6ff",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  chartTitle: {
+    fontSize: "18px",
+    fontWeight: "700",
+    color: "#0f172a",
+    margin: 0,
+  },
+  chartSub: {
+    fontSize: "13px",
+    color: "#64748b",
+    marginTop: "2px",
+    marginBottom: "16px",
+  },
+  toolbar: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "24px",
+  },
+  paginationFooter: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "16px 24px",
+    backgroundColor: "#ffffff",
+    border: "1px solid #e5e7eb",
+    borderTop: "none",
+    borderBottomLeftRadius: "16px",
+    borderBottomRightRadius: "16px",
+    flexWrap: "wrap",
+    gap: "12px",
+  },
+  paginationText: {
+    fontSize: "13px",
+    color: "#64748b",
+  },
+  paginationBtnGroup: {
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+  },
+  pageArrowBtn: {
+    display: "flex",
+    alignItems: "center",
+    gap: "4px",
+    padding: "6px 12px",
+    borderRadius: "8px",
+    backgroundColor: "#ffffff",
+    border: "1px solid #e5e7eb",
+    color: "#475569",
+    fontSize: "13px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+  pageNumBtn: {
+    width: "32px",
+    height: "32px",
+    borderRadius: "8px",
+    backgroundColor: "#ffffff",
+    border: "1px solid #e5e7eb",
+    color: "#475569",
+    fontSize: "13px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+  pageNumActive: {
+    backgroundColor: "#2563eb",
+    color: "#ffffff",
+    borderColor: "#2563eb",
+  },
+  emptyCard: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "64px 24px",
+    textAlign: "center",
+  },
+  emptyIconCircle: {
+    width: "60px",
+    height: "60px",
+    borderRadius: "50%",
+    backgroundColor: "#f8fafc",
+    border: "1px solid #e5e7eb",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: "16px",
+  },
+  emptyTitle: {
+    fontSize: "18px",
+    fontWeight: "700",
+    color: "#0f172a",
+    margin: 0,
+  },
+  emptySub: {
+    fontSize: "14px",
+    color: "#64748b",
+    marginTop: "4px",
+    maxWidth: "400px",
   },
 };
 
