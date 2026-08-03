@@ -5,6 +5,8 @@ import Table from "../components/Table";
 import Modal from "../components/Modal";
 import SearchBar from "../components/SearchBar";
 import Loader from "../components/Loader";
+import ConfirmModal from "../components/ConfirmModal";
+import Toast from "../components/Toast";
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);
@@ -16,6 +18,20 @@ const Categories = () => {
   const [formData, setFormData] = useState({ name: "", description: "" });
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+
+  // Delete Confirm Modal State
+  const [deleteId, setDeleteId] = useState(null);
+  const [deleteName, setDeleteName] = useState("");
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  // Toast Notification State
+  const [toast, setToast] = useState({ message: "", type: "success" });
+
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast({ message: "", type: "success" }), 3500);
+  };
 
   const fetchCategories = async () => {
     try {
@@ -60,8 +76,10 @@ const Categories = () => {
       setSubmitting(true);
       if (editingCategory) {
         await API.put(`/categories/${editingCategory._id}`, formData);
+        showToast(`Category "${formData.name}" updated successfully!`);
       } else {
         await API.post("/categories", formData);
+        showToast(`Category "${formData.name}" created successfully!`);
       }
       setIsModalOpen(false);
       fetchCategories();
@@ -74,14 +92,23 @@ const Categories = () => {
     }
   };
 
-  const handleDelete = async (id, name) => {
-    if (window.confirm(`Are you sure you want to delete category "${name}"?`)) {
-      try {
-        await API.delete(`/categories/${id}`);
-        fetchCategories();
-      } catch (err) {
-        alert(err.response?.data?.message || "Failed to delete category");
-      }
+  const promptDelete = (id, name) => {
+    setDeleteId(id);
+    setDeleteName(name);
+    setIsDeleteOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      setDeleting(true);
+      await API.delete(`/categories/${deleteId}`);
+      setIsDeleteOpen(false);
+      showToast(`Category "${deleteName}" deleted successfully.`);
+      fetchCategories();
+    } catch (err) {
+      showToast(err.response?.data?.message || "Failed to delete category", "error");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -96,7 +123,7 @@ const Categories = () => {
     {
       header: "Category Name",
       render: (row) => (
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <div style={styles.iconBadge}>
             <Tags size={16} color="#2563eb" />
           </div>
@@ -108,14 +135,14 @@ const Categories = () => {
       header: "Description",
       render: (row) => (
         <span style={{ color: "#64748b" }}>
-          {row.description || "No description"}
+          {row.description || "No description provided"}
         </span>
       ),
     },
     {
       header: "Created Date",
       render: (row) => (
-        <span style={{ color: "#94a3b8", fontSize: "0.85rem" }}>
+        <span style={{ color: "#94a3b8", fontSize: "13px" }}>
           {new Date(row.createdAt).toLocaleDateString()}
         </span>
       ),
@@ -124,7 +151,7 @@ const Categories = () => {
       header: "Actions",
       style: { width: "120px", textAlign: "right" },
       render: (row) => (
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
           <button
             onClick={() => handleOpenEditModal(row)}
             style={styles.actionBtn}
@@ -133,7 +160,7 @@ const Categories = () => {
             <Edit3 size={16} color="#2563eb" />
           </button>
           <button
-            onClick={() => handleDelete(row._id, row.name)}
+            onClick={() => promptDelete(row._id, row.name)}
             style={{ ...styles.actionBtn, backgroundColor: "#fef2f2" }}
             title="Delete Category"
           >
@@ -146,6 +173,9 @@ const Categories = () => {
 
   return (
     <div className="fade-in">
+      {/* Toast Notification */}
+      <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: "", type: "success" })} />
+
       {/* Header */}
       <div className="page-header">
         <div>
@@ -183,7 +213,7 @@ const Categories = () => {
         />
       )}
 
-      {/* Modal Form */}
+      {/* Add / Edit Modal Form */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -214,7 +244,7 @@ const Categories = () => {
             <textarea
               className="form-textarea"
               rows="3"
-              placeholder="Enter category description..."
+              placeholder="Enter detailed category description..."
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             ></textarea>
@@ -242,6 +272,16 @@ const Categories = () => {
           </div>
         </form>
       </Modal>
+
+      {/* Confirm Delete Modal */}
+      <ConfirmModal
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        onConfirm={confirmDelete}
+        title="Delete Category"
+        message={`Are you sure you want to delete category "${deleteName}"? Products in this category may be affected.`}
+        loading={deleting}
+      />
     </div>
   );
 };
@@ -251,17 +291,17 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "1.5rem",
-    gap: "1rem",
+    marginBottom: "24px",
+    gap: "16px",
     flexWrap: "wrap",
   },
   countBadge: {
-    fontSize: "0.875rem",
+    fontSize: "14px",
     color: "#64748b",
     backgroundColor: "#ffffff",
-    padding: "0.5rem 1rem",
+    padding: "8px 16px",
     borderRadius: "10px",
-    border: "1px solid #e2e8f0",
+    border: "1px solid #e5e7eb",
   },
   iconBadge: {
     width: "36px",
@@ -277,7 +317,7 @@ const styles = {
     height: "34px",
     borderRadius: "8px",
     backgroundColor: "#f8fafc",
-    border: "1px solid #e2e8f0",
+    border: "1px solid #e5e7eb",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -287,20 +327,20 @@ const styles = {
   errorBox: {
     display: "flex",
     alignItems: "center",
-    gap: "0.5rem",
+    gap: "8px",
     backgroundColor: "#fef2f2",
     border: "1px solid #fecaca",
     color: "#ef4444",
-    padding: "0.75rem 1rem",
+    padding: "12px 16px",
     borderRadius: "10px",
-    fontSize: "0.875rem",
-    marginBottom: "1.25rem",
+    fontSize: "14px",
+    marginBottom: "20px",
   },
   modalFooter: {
     display: "flex",
     justifyContent: "flex-end",
-    gap: "0.75rem",
-    marginTop: "1.5rem",
+    gap: "12px",
+    marginTop: "24px",
   },
 };
 

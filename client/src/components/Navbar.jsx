@@ -1,13 +1,71 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
-import { Search, Bell, ChevronRight } from "lucide-react";
+import { Search, Bell, ChevronRight, AlertTriangle, ArrowDownLeft, ShoppingCart, Check, X } from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
+import API from "../api/axios";
 
 const Navbar = () => {
   const { user } = useContext(AuthContext);
   const location = useLocation();
 
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
   const displayName = user?.name || "System Admin";
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const res = await API.get("/dashboard/summary");
+        const lowStock = res.data.lowStockProducts || [];
+        const stockIn = res.data.recentActivities?.recentStockIn || [];
+        const purchases = res.data.recentActivities?.recentPurchases || [];
+
+        const notifs = [
+          ...lowStock.map((prod) => ({
+            id: `low-${prod._id}`,
+            title: `Low Stock Alert: ${prod.name}`,
+            message: `Current stock (${prod.quantity}) is below reorder level (${prod.reorderLevel})`,
+            time: "Action required",
+            type: "danger",
+            icon: AlertTriangle,
+            unread: true,
+          })),
+          ...stockIn.slice(0, 2).map((item) => ({
+            id: `in-${item._id}`,
+            title: `Stock Received: ${item.product?.name || "Product"}`,
+            message: `Added ${item.quantity} units to warehouse inventory`,
+            time: new Date(item.receivedDate || item.createdAt).toLocaleDateString(),
+            type: "success",
+            icon: ArrowDownLeft,
+            unread: false,
+          })),
+          ...purchases.slice(0, 2).map((item) => ({
+            id: `pur-${item._id}`,
+            title: `Purchase Order Placed`,
+            message: `Procured ${item.quantity} units for $${item.totalAmount}`,
+            time: new Date(item.purchaseDate || item.createdAt).toLocaleDateString(),
+            type: "info",
+            icon: ShoppingCart,
+            unread: false,
+          })),
+        ];
+
+        setNotifications(notifs);
+        setUnreadCount(notifs.filter((n) => n.unread).length);
+      } catch (err) {
+        console.error("Failed to load notifications", err);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
+
+  const markAllAsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
+    setUnreadCount(0);
+  };
 
   const getInitials = (name) => {
     if (!name) return "SA";
@@ -108,14 +166,81 @@ const Navbar = () => {
 
       {/* Right Section */}
       <div style={styles.rightSection}>
-        <button style={styles.iconBtn} title="Notifications">
-          <Bell size={20} color="#64748b" />
-          <span style={styles.notificationDot}></span>
-        </button>
+        <div style={{ position: "relative" }}>
+          <button
+            onClick={() => setShowNotifications(!showNotifications)}
+            style={styles.iconBtn}
+            title="Notifications"
+          >
+            <Bell size={20} color="#64748b" />
+            {unreadCount > 0 && <span style={styles.notificationDot}></span>}
+          </button>
+
+          {/* Interactive Notifications Popup */}
+          {showNotifications && (
+            <div style={styles.notifDropdown} className="fade-in">
+              <div style={styles.notifHeader}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <h4 style={styles.notifTitle}>Notifications</h4>
+                  {unreadCount > 0 && (
+                    <span className="badge badge-danger">{unreadCount} new</span>
+                  )}
+                </div>
+                {unreadCount > 0 && (
+                  <button onClick={markAllAsRead} style={styles.markReadBtn}>
+                    <Check size={12} />
+                    <span>Mark read</span>
+                  </button>
+                )}
+              </div>
+
+              <div style={styles.notifList}>
+                {notifications.length === 0 ? (
+                  <p style={styles.emptyNotif}>No notifications at this time.</p>
+                ) : (
+                  notifications.map((item) => {
+                    const IconComp = item.icon;
+                    const iconColor =
+                      item.type === "danger"
+                        ? "#ef4444"
+                        : item.type === "success"
+                        ? "#10b981"
+                        : "#2563eb";
+                    const bgColor =
+                      item.type === "danger"
+                        ? "#fef2f2"
+                        : item.type === "success"
+                        ? "#ecfdf5"
+                        : "#eff6ff";
+
+                    return (
+                      <div
+                        key={item.id}
+                        style={{
+                          ...styles.notifItem,
+                          backgroundColor: item.unread ? "#f8fafc" : "#ffffff",
+                        }}
+                      >
+                        <div style={{ ...styles.notifIcon, backgroundColor: bgColor }}>
+                          <IconComp size={16} color={iconColor} />
+                        </div>
+                        <div style={styles.notifContent}>
+                          <span style={styles.itemTitle}>{item.title}</span>
+                          <span style={styles.itemMsg}>{item.message}</span>
+                          <span style={styles.itemTime}>{item.time}</span>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          )}
+        </div>
 
         <div style={styles.divider}></div>
 
-        <div style={styles.userProfile}>
+        <Link to="/profile" style={styles.userProfile}>
           <div style={styles.avatarInitials}>
             <span>{getInitials(displayName)}</span>
           </div>
@@ -123,7 +248,7 @@ const Navbar = () => {
             <span style={styles.userName}>{displayName}</span>
             <span style={styles.userRole}>Administrator</span>
           </div>
-        </div>
+        </Link>
       </div>
     </header>
   );
@@ -206,6 +331,89 @@ const styles = {
     borderRadius: "50%",
     border: "2px solid #ffffff",
   },
+  notifDropdown: {
+    position: "absolute",
+    top: "52px",
+    right: 0,
+    width: "360px",
+    backgroundColor: "#ffffff",
+    border: "1px solid #e5e7eb",
+    borderRadius: "16px",
+    boxShadow: "0 12px 32px rgba(15, 23, 42, 0.12)",
+    zIndex: 1000,
+    overflow: "hidden",
+  },
+  notifHeader: {
+    padding: "14px 18px",
+    borderBottom: "1px solid #e5e7eb",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#f8fafc",
+  },
+  notifTitle: {
+    fontSize: "14px",
+    fontWeight: "700",
+    color: "#0f172a",
+    margin: 0,
+  },
+  markReadBtn: {
+    display: "flex",
+    alignItems: "center",
+    gap: "4px",
+    background: "none",
+    border: "none",
+    color: "#2563eb",
+    fontSize: "12px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+  notifList: {
+    maxHeight: "360px",
+    overflowY: "auto",
+  },
+  emptyNotif: {
+    padding: "24px",
+    textAlign: "center",
+    color: "#94a3b8",
+    fontSize: "13px",
+    margin: 0,
+  },
+  notifItem: {
+    padding: "12px 16px",
+    borderBottom: "1px solid #f1f5f9",
+    display: "flex",
+    gap: "12px",
+    alignItems: "flex-start",
+  },
+  notifIcon: {
+    width: "32px",
+    height: "32px",
+    borderRadius: "8px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  notifContent: {
+    display: "flex",
+    flexDirection: "column",
+  },
+  itemTitle: {
+    fontSize: "13px",
+    fontWeight: "700",
+    color: "#0f172a",
+  },
+  itemMsg: {
+    fontSize: "12px",
+    color: "#64748b",
+    marginTop: "2px",
+  },
+  itemTime: {
+    fontSize: "11px",
+    color: "#94a3b8",
+    marginTop: "4px",
+  },
   divider: {
     width: "1px",
     height: "28px",
@@ -216,6 +424,7 @@ const styles = {
     alignItems: "center",
     gap: "12px",
     cursor: "pointer",
+    textDecoration: "none",
   },
   avatarInitials: {
     width: "40px",
