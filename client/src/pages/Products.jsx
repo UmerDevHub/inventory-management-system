@@ -14,7 +14,9 @@ import {
   Boxes,
   CheckCircle2,
   XCircle,
+  QrCode,
 } from "lucide-react";
+import ProductQRModal from "../components/ProductQRModal";
 import API from "../api/axios";
 import Table from "../components/Table";
 import Modal from "../components/Modal";
@@ -65,6 +67,9 @@ const Products = () => {
   const [deleteName, setDeleteName] = useState("");
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  // QR Code Modal State
+  const [qrProduct, setQrProduct] = useState(null);
 
   // Toast Notification State
   const [toast, setToast] = useState({ message: "", type: "success" });
@@ -410,9 +415,16 @@ const Products = () => {
     },
     {
       header: "Actions",
-      style: { width: "120px", textAlign: "right" },
+      style: { width: "160px", textAlign: "right" },
       render: (row) => (
         <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}>
+          <button
+            onClick={() => setQrProduct(row)}
+            style={{ ...styles.actionBtn, backgroundColor: "#f0fdf4" }}
+            title="Generate QR Code"
+          >
+            <QrCode size={16} color="#16a34a" />
+          </button>
           <button
             onClick={() => handleOpenEditModal(row)}
             style={styles.actionBtn}
@@ -436,6 +448,14 @@ const Products = () => {
     <div className="fade-in">
       {/* Toast Notification */}
       <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: "", type: "success" })} />
+
+      {/* QR Code Modal */}
+      {qrProduct && (
+        <ProductQRModal
+          product={qrProduct}
+          onClose={() => setQrProduct(null)}
+        />
+      )}
 
       {/* Header & Quick Actions */}
       <div className="page-header" style={{ marginBottom: "24px" }}>
