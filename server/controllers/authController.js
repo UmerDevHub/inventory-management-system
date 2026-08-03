@@ -17,28 +17,29 @@ const loginUser = async (req, res) => {
 
     if (!user) {
       return res.status(400).json({
-        message: "Invalid credentials",
+        message: "User not found",
       });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
-    if (isMatch) {
-      return res.status(200).json({
-        message: "User logged in successfully",
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        token: generateToken(user._id),
-      });
-    } else {
-      return res.status(400).json({
-        message: "Invalid credentials",
+    if (!isMatch) {
+      return res.status(401).json({
+        message: "Invalid email or password",
       });
     }
+
+    res.status(200).json({
+      message: "User logged in successfully",
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      token: generateToken(user._id),
+    });
+
   } catch (error) {
     res.status(500).json({
-      message: "Internal server error",
+      message: "Internal Server Error",
       error: error.message,
     });
   }
@@ -92,6 +93,79 @@ const registerUser = async (req, res) => {
     });
   }
 };
+
+
+const getUserProfile = async (req,res)=>{
+
+  try{
+
+    res.status(200).json(req.user);
+
+  }catch(error){
+    res.status(500).json({
+      message: "Server Error",
+      
+    })
+  }
+  
+
+}
+
+const updateUserProfileForm= async (req, res)=>{
+
+  res.send("form");
+}
+
+const updateUserProfile = async (req, res)=>{
+
+ try{
+
+  const {name , email} = req.body;
+
+  const user = await User.findById(req.user._id);
+
+  if(!user){
+    return res.status(404).json({
+      message: "User not found",
+    })
+  }
+
+
+  user.name=  name || user.name;
+  user.email= email || user.email;
+
+  const updatedUser= await user.save();
+
+
+  return res.status(200).json({
+      message: "Profile updated successfully",
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+    });
+
+
+  
+
+
+
+  
+
+
+
+
+
+ }catch(error){
+
+  res.status(500).json({
+    message:"Server Error",
+    error: error.message,
+  });
+
+ }
+
+
+}
 
 module.exports = {
   registerUser,
