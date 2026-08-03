@@ -377,7 +377,7 @@ const Dashboard = () => {
         </div>
 
         {/* Low Stock Table */}
-        <div className="card" style={{ padding: "24px", display: "flex", flexDirection: "column" }}>
+        <div className="card" style={{ padding: "24px" }}>
           <div style={styles.chartHeader}>
             <div>
               <h3 style={styles.chartTitle}>Low Stock</h3>
@@ -397,27 +397,29 @@ const Dashboard = () => {
               </p>
             </div>
           ) : (
-            <div className="table-container" style={{ border: "none", boxShadow: "none" }}>
-              <table className="custom-table">
+            <div style={{ width: "100%", overflow: "hidden" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px" }}>
                 <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th style={{ textAlign: "right" }}>Current</th>
-                    <th style={{ textAlign: "right" }}>Reorder</th>
-                    <th>Status</th>
+                  <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
+                    <th style={styles.thLeft}>PRODUCT</th>
+                    <th style={styles.thRight}>CURRENT</th>
+                    <th style={styles.thRight}>REORDER</th>
+                    <th style={styles.thRight}>STATUS</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {data.lowStockProducts.map((prod) => (
-                    <tr key={prod._id}>
-                      <td style={{ fontWeight: "700", color: "#0f172a" }}>{prod.name}</td>
-                      <td style={{ textAlign: "right", fontWeight: "800", color: "#ef4444" }}>
+                  {data.lowStockProducts.slice(0, 5).map((prod) => (
+                    <tr key={prod._id} style={{ borderBottom: "1px solid #f8fafc" }}>
+                      <td style={{ padding: "14px 0", fontWeight: "700", color: "#0f172a" }}>
+                        {prod.name}
+                      </td>
+                      <td style={{ padding: "14px 0", textAlign: "right", fontWeight: "800", color: "#ef4444" }}>
                         {prod.quantity}
                       </td>
-                      <td style={{ textAlign: "right", color: "#64748b" }}>
+                      <td style={{ padding: "14px 0", textAlign: "right", color: "#64748b" }}>
                         {prod.reorderLevel}
                       </td>
-                      <td>
+                      <td style={{ padding: "14px 0", textAlign: "right" }}>
                         <span className="badge badge-danger">Low</span>
                       </td>
                     </tr>
@@ -548,9 +550,22 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: "12px",
-    maxHeight: "380px",
-    overflowY: "auto",
-    paddingRight: "6px",
+  },
+  thLeft: {
+    padding: "10px 0",
+    textAlign: "left",
+    fontSize: "11px",
+    fontWeight: "700",
+    color: "#64748b",
+    letterSpacing: "0.04em",
+  },
+  thRight: {
+    padding: "10px 0",
+    textAlign: "right",
+    fontSize: "11px",
+    fontWeight: "700",
+    color: "#64748b",
+    letterSpacing: "0.04em",
   },
   activityItem: {
     display: "flex",
