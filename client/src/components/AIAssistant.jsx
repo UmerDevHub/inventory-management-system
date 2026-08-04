@@ -221,6 +221,7 @@ const AIAssistant = () => {
     <>
       {/* ── Floating Action Button ──────────────────────────────── */}
       <button
+        className="ai-assistant-fab"
         style={{ ...s.fab, ...(open ? s.fabActive : {}) }}
         onClick={() => setOpen((v) => !v)}
         title="WarehouseOS AI Assistant"
@@ -237,7 +238,8 @@ const AIAssistant = () => {
       </button>
 
       {/* ── Floating Chat Panel ─────────────────────────────────── */}
-      <div style={{ ...s.panel, ...(open ? s.panelOpen : s.panelHide) }}>
+      <div className={`ai-assistant-panel${open ? " panel-open" : ""}`} style={{ ...s.panel, ...(open ? s.panelOpen : s.panelHide) }}>
+
         
         {/* ── Panel Header ────────────────────────────────────── */}
         <div style={s.header}>
