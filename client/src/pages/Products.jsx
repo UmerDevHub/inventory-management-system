@@ -113,9 +113,10 @@ const Products = () => {
 
   const handleOpenAddModal = () => {
     setEditingProduct(null);
+    const randomSku = `SKU-${Math.floor(1000 + Math.random() * 9000)}`;
     setFormData({
       name: "",
-      sku: "",
+      sku: randomSku,
       price: "",
       quantity: "0",
       reorderLevel: "10",
