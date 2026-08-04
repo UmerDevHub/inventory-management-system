@@ -210,9 +210,10 @@ const Products = () => {
       setIsModalOpen(false);
       fetchProducts();
     } catch (err) {
-      setFormError(
-        err.response?.data?.message || "Failed to save product. Please check inputs."
-      );
+      const apiMsg = typeof err.response?.data === "string"
+        ? err.response.data
+        : err.response?.data?.message || err.message;
+      setFormError(apiMsg || "Failed to save product. Please check inputs.");
     } finally {
       setSubmitting(false);
     }
