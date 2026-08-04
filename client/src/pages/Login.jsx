@@ -11,6 +11,9 @@ import {
   Zap,
   ArrowRight,
   Sparkles,
+  TrendingUp,
+  Package,
+  Bot,
 } from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
 import API from "../api/axios";
@@ -41,7 +44,7 @@ const Login = () => {
     setError("");
 
     if (!email || !password) {
-      setError("Please fill in both email and password.");
+      setError("Please enter your email and password.");
       return;
     }
 
@@ -59,7 +62,7 @@ const Login = () => {
       navigate("/");
     } catch (err) {
       setError(
-        err.response?.data?.message || "Invalid credentials. Please try again."
+        err.response?.data?.message || "Invalid email or password. Please try again."
       );
     } finally {
       setLoading(false);
@@ -68,187 +71,202 @@ const Login = () => {
 
   return (
     <div className="login-container" style={styles.container}>
-      {/* Background Ambient Glows */}
-      <div style={styles.bgGlowTopLeft} />
-      <div style={styles.bgGlowBottomRight} />
-
-      {/* Left Hero Banner (Desktop) */}
+      {/* ── Left Hero Banner (Warm Modern Dark Canvas with Live Floating Preview Cards) ── */}
       <div className="login-left-banner" style={styles.leftBanner}>
+        {/* Subtle mesh background glows */}
+        <div style={styles.heroGlow1} />
+        <div style={styles.heroGlow2} />
+
         <div style={styles.heroContent}>
-          <div style={styles.heroLogo}>
+          {/* Logo Badge */}
+          <div style={styles.brandRow}>
             <div style={styles.logoBadge}>
-              <Boxes size={28} color="#ffffff" />
+              <Boxes size={24} color="#ffffff" />
             </div>
             <div>
-              <span style={styles.heroLogoText}>WarehouseOS</span>
-              <span style={styles.heroLogoSub}>Enterprise Platform</span>
+              <span style={styles.brandName}>WarehouseOS</span>
+              <span style={styles.brandTag}>Smart Inventory System</span>
             </div>
           </div>
 
+          {/* Warm Human Heading */}
           <h1 style={styles.heroHeading}>
-            Smart Inventory & Warehouse Management
+            Intelligent inventory built for modern teams.
           </h1>
           <p style={styles.heroSub}>
-            Streamline product stock, automated order processing, multi-warehouse tracking, and live AI inventory intelligence.
+            Everything you need to track stock, streamline multi-warehouse operations, and make data-driven decisions with AI intelligence.
           </p>
 
-          <div style={styles.featureList}>
-            <div style={styles.featureItem}>
-              <div style={styles.checkWrap}>
-                <CheckCircle2 size={16} color="#38bdf8" />
+          {/* Floating Live Stock Preview Card */}
+          <div style={styles.floatingPreviewCard}>
+            <div style={styles.previewHeader}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <TrendingUp size={16} color="#10b981" />
+                <span style={styles.previewTitle}>Live Warehouse Activity</span>
               </div>
-              <span>Real-time stock monitoring & automated threshold alerts</span>
+              <span style={styles.liveBadge}>LIVE</span>
             </div>
-            <div style={styles.featureItem}>
-              <div style={styles.checkWrap}>
-                <CheckCircle2 size={16} color="#38bdf8" />
+
+            <div style={styles.previewItem}>
+              <div style={styles.previewIconBox}>
+                <Package size={16} color="#3b82f6" />
               </div>
-              <span>Stock-In, Stock-Out & Purchase Order workflows</span>
+              <div style={{ flex: 1 }}>
+                <span style={styles.previewItemName}>Wireless Ergonomic Mouse</span>
+                <span style={styles.previewItemSub}>Warehouse A • Shelf 4B</span>
+              </div>
+              <span style={styles.stockPillSuccess}>142 In Stock</span>
             </div>
-            <div style={styles.featureItem}>
-              <div style={styles.checkWrap}>
-                <CheckCircle2 size={16} color="#38bdf8" />
+
+            <div style={{ ...styles.previewItem, borderBottom: "none" }}>
+              <div style={{ ...styles.previewIconBox, backgroundColor: "rgba(168, 85, 247, 0.15)" }}>
+                <Bot size={16} color="#a855f7" />
               </div>
-              <span>Embedded AI Assistant with database contextual intelligence</span>
+              <div style={{ flex: 1 }}>
+                <span style={styles.previewItemName}>AI Assistant Insight</span>
+                <span style={styles.previewItemSub}>Reorder 12 items below threshold</span>
+              </div>
+              <span style={styles.stockPillInfo}>Automated</span>
             </div>
           </div>
 
-          <div style={styles.trustBadge}>
+          {/* Human Trust Footer */}
+          <div style={styles.trustRow}>
             <ShieldCheck size={16} color="#38bdf8" />
-            <span>256-bit Encrypted Session · Multi-tenant Cloud Infrastructure</span>
+            <span>Encrypted 256-bit Session • Multi-Warehouse Ready</span>
           </div>
         </div>
       </div>
 
-      {/* Right Form Area (Desktop & Mobile) */}
-      <div className="login-right-area" style={styles.rightFormArea}>
-        <div className="login-form-card" style={styles.formCard}>
-          {/* Card Header Branding */}
-          <div style={styles.cardBrandHeader}>
-            <div style={styles.cardLogoBox}>
-              <Boxes size={24} color="#ffffff" />
-            </div>
-            <div>
-              <div style={styles.cardBrandTitleGroup}>
-                <span style={styles.cardBrandTitle}>WarehouseOS</span>
-                <span style={styles.proTag}>ADMIN</span>
-              </div>
-              <span style={styles.cardBrandSub}>Enterprise Management System</span>
-            </div>
-          </div>
+      {/* ── Right Form Area (Warm Light Mesh Background & Human Touch Card) ── */}
+      <div className="login-right-area" style={styles.rightArea}>
+        {/* Soft background ambient mesh glows */}
+        <div style={styles.rightGlow1} />
+        <div style={styles.rightGlow2} />
 
-          <div style={styles.formHeader}>
-            <h2 style={styles.formTitle}>Sign In to Dashboard</h2>
-            <p style={styles.formSub}>
-              Enter your credentials or tap below for 1-click admin access
+        <div className="login-form-card" style={styles.formCard}>
+          {/* Header */}
+          <div style={styles.cardHeader}>
+            <div style={styles.welcomeRow}>
+              <span style={styles.welcomeText}>Welcome back</span>
+              <span style={styles.handWave}>👋</span>
+            </div>
+            <h2 style={styles.cardTitle}>Sign In to Dashboard</h2>
+            <p style={styles.cardSub}>
+              Enter your credentials to manage your inventory
             </p>
           </div>
 
-          {/* 1-Tap Demo Credentials Bar (Redesigned & Premium) */}
-          <button
-            type="button"
+          {/* ⚡ Human-Centric Demo Auto-Fill Card */}
+          <div
             onClick={handleDemoFill}
             style={{
-              ...styles.demoPillBtn,
-              borderColor: demoApplied ? "#10b981" : "#cbd5e1",
-              background: demoApplied
-                ? "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)"
-                : "linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)",
+              ...styles.demoCard,
+              borderColor: demoApplied ? "#10b981" : "#e2e8f0",
+              backgroundColor: demoApplied ? "#f0fdf4" : "#ffffff",
+              boxShadow: demoApplied
+                ? "0 8px 20px rgba(16, 185, 129, 0.15)"
+                : "0 4px 14px rgba(15, 23, 42, 0.04)",
             }}
           >
-            <div style={styles.demoPillLeft}>
+            <div style={styles.demoCardLeft}>
               <div
                 style={{
-                  ...styles.zapBox,
+                  ...styles.demoZapIcon,
                   background: demoApplied
                     ? "linear-gradient(135deg, #10b981, #059669)"
                     : "linear-gradient(135deg, #3b82f6, #1d4ed8)",
                 }}
               >
                 {demoApplied ? (
-                  <CheckCircle2 size={15} color="#ffffff" />
+                  <CheckCircle2 size={16} color="#ffffff" />
                 ) : (
-                  <Zap size={15} color="#ffffff" />
+                  <Zap size={16} color="#ffffff" />
                 )}
               </div>
-              <div style={styles.demoTextGroup}>
-                <span
-                  style={{
-                    ...styles.demoTitleText,
-                    color: demoApplied ? "#065f46" : "#1e293b",
-                  }}
-                >
-                  {demoApplied ? "Demo Credentials Filled!" : "⚡ Quick Auto-Fill Demo"}
-                </span>
-                <div style={styles.demoBadgesRow}>
-                  <span style={styles.codeBadge}>admin@gmail.com</span>
-                  <span style={styles.dotSep}>•</span>
-                  <span style={styles.codeBadge}>123456</span>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span style={styles.demoHeading}>
+                    {demoApplied ? "Demo Credentials Loaded!" : "Instant Demo Access"}
+                  </span>
+                  <Sparkles size={14} color={demoApplied ? "#10b981" : "#2563eb"} />
+                </div>
+                <div style={styles.demoPillsGroup}>
+                  <span style={styles.demoCodePill}>admin@gmail.com</span>
+                  <span style={styles.demoDot}>•</span>
+                  <span style={styles.demoCodePill}>123456</span>
                 </div>
               </div>
             </div>
-            <Sparkles size={16} color={demoApplied ? "#10b981" : "#2563eb"} />
-          </button>
+            <span
+              style={{
+                ...styles.tapActionPill,
+                backgroundColor: demoApplied ? "#dcfce7" : "#eff6ff",
+                color: demoApplied ? "#15803d" : "#2563eb",
+              }}
+            >
+              {demoApplied ? "Filled ✓" : "Tap to fill"}
+            </span>
+          </div>
 
+          {/* Error Message */}
           {error && <div style={styles.errorAlert}>{error}</div>}
 
+          {/* Form */}
           <form onSubmit={handleSubmit}>
-            <div className="form-group" style={{ marginBottom: "18px" }}>
-              <label className="form-label" style={styles.label}>
-                Email Address
-              </label>
-              <div style={styles.inputWrapper}>
-                <Mail size={18} color="#64748b" style={styles.inputIcon} />
+            <div style={styles.fieldGroup}>
+              <label style={styles.fieldLabel}>Email Address</label>
+              <div style={styles.inputWrap}>
+                <Mail size={18} color="#94a3b8" style={styles.fieldIcon} />
                 <input
                   type="email"
                   className="form-input"
                   placeholder="admin@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  style={styles.paddedInput}
+                  style={styles.fieldInput}
                   required
                 />
               </div>
             </div>
 
-            <div className="form-group" style={{ marginBottom: "18px" }}>
-              <label className="form-label" style={styles.label}>
-                Password
-              </label>
-              <div style={styles.inputWrapper}>
-                <Lock size={18} color="#64748b" style={styles.inputIcon} />
+            <div style={styles.fieldGroup}>
+              <label style={styles.fieldLabel}>Password</label>
+              <div style={styles.inputWrap}>
+                <Lock size={18} color="#94a3b8" style={styles.fieldIcon} />
                 <input
                   type={showPassword ? "text" : "password"}
                   className="form-input"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  style={styles.paddedInput}
+                  style={styles.fieldInput}
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  style={styles.eyeBtn}
+                  style={styles.eyeButton}
+                  title={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
-                    <EyeOff size={18} color="#64748b" />
+                    <EyeOff size={18} color="#94a3b8" />
                   ) : (
-                    <Eye size={18} color="#64748b" />
+                    <Eye size={18} color="#94a3b8" />
                   )}
                 </button>
               </div>
             </div>
 
-            <div style={styles.formOptions}>
-              <label style={styles.rememberLabel}>
+            <div style={styles.rememberRow}>
+              <label style={styles.rememberCheckboxLabel}>
                 <input
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  style={styles.checkbox}
+                  style={styles.checkboxInput}
                 />
-                <span>Keep me signed in for 7 days</span>
+                <span>Remember this device for 7 days</span>
               </label>
             </div>
 
@@ -259,7 +277,7 @@ const Login = () => {
               style={styles.submitBtn}
             >
               {loading ? (
-                "Authenticating..."
+                "Signing in..."
               ) : (
                 <>
                   <span>Sign In to Dashboard</span>
@@ -269,9 +287,10 @@ const Login = () => {
             </button>
           </form>
 
-          <div style={styles.cardFooter}>
+          {/* Footer Security Note */}
+          <div style={styles.securityFooter}>
             <ShieldCheck size={14} color="#94a3b8" />
-            <span>Encrypted Session • Role Based Access Control</span>
+            <span>Protected by Role-Based Access Control & SSL Encryption</span>
           </div>
         </div>
       </div>
@@ -279,38 +298,20 @@ const Login = () => {
   );
 };
 
+/* ────────────────────────── Human Aesthetics Styles ────────────────────────── */
 const styles = {
   container: {
     display: "flex",
     minHeight: "100vh",
-    position: "relative",
-    overflow: "hidden",
-    fontFamily: "inherit",
+    backgroundColor: "#fafbfc",
+    fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif",
   },
-  bgGlowTopLeft: {
-    position: "absolute",
-    top: "-150px",
-    left: "-150px",
-    width: "450px",
-    height: "450px",
-    borderRadius: "50%",
-    background: "radial-gradient(circle, rgba(59, 130, 246, 0.18) 0%, rgba(37, 99, 235, 0) 70%)",
-    pointerEvents: "none",
-  },
-  bgGlowBottomRight: {
-    position: "absolute",
-    bottom: "-150px",
-    right: "-150px",
-    width: "450px",
-    height: "450px",
-    borderRadius: "50%",
-    background: "radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, rgba(99, 102, 241, 0) 70%)",
-    pointerEvents: "none",
-  },
+
+  /* ── Left Hero Banner ── */
   leftBanner: {
     flex: "1.1",
-    background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 45%, #1e40af 100%)",
-    padding: "4rem 3.5rem",
+    background: "linear-gradient(145deg, #090d16 0%, #0f172a 40%, #1e1b4b 100%)",
+    padding: "4rem 4rem",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
@@ -318,21 +319,41 @@ const styles = {
     position: "relative",
     overflow: "hidden",
   },
+  heroGlow1: {
+    position: "absolute",
+    top: "-100px",
+    left: "-100px",
+    width: "400px",
+    height: "400px",
+    borderRadius: "50%",
+    background: "radial-gradient(circle, rgba(59, 130, 246, 0.22) 0%, rgba(0, 0, 0, 0) 70%)",
+    pointerEvents: "none",
+  },
+  heroGlow2: {
+    position: "absolute",
+    bottom: "-100px",
+    right: "-100px",
+    width: "400px",
+    height: "400px",
+    borderRadius: "50%",
+    background: "radial-gradient(circle, rgba(168, 85, 247, 0.18) 0%, rgba(0, 0, 0, 0) 70%)",
+    pointerEvents: "none",
+  },
   heroContent: {
-    maxWidth: "520px",
+    maxWidth: "500px",
     margin: "0 auto",
     position: "relative",
-    zIndex: 1,
+    zIndex: 2,
   },
-  heroLogo: {
+  brandRow: {
     display: "flex",
     alignItems: "center",
     gap: "14px",
     marginBottom: "2.5rem",
   },
   logoBadge: {
-    width: "50px",
-    height: "50px",
+    width: "48px",
+    height: "48px",
     borderRadius: "14px",
     background: "linear-gradient(135deg, #2563eb, #3b82f6)",
     display: "flex",
@@ -340,14 +361,15 @@ const styles = {
     justifyContent: "center",
     boxShadow: "0 8px 24px rgba(37, 99, 235, 0.4)",
   },
-  heroLogoText: {
-    fontSize: "1.85rem",
+  brandName: {
+    fontSize: "1.75rem",
     fontWeight: "800",
+    color: "#ffffff",
     letterSpacing: "-0.03em",
     lineHeight: 1.1,
     display: "block",
   },
-  heroLogoSub: {
+  brandTag: {
     fontSize: "12px",
     color: "#93c5fd",
     fontWeight: "600",
@@ -355,286 +377,352 @@ const styles = {
     textTransform: "uppercase",
   },
   heroHeading: {
-    fontSize: "2.4rem",
+    fontSize: "2.5rem",
     fontWeight: "800",
     lineHeight: 1.2,
     marginBottom: "1.25rem",
     color: "#ffffff",
-    letterSpacing: "-0.02em",
+    letterSpacing: "-0.03em",
   },
   heroSub: {
     fontSize: "1.05rem",
     color: "#cbd5e1",
-    lineHeight: 1.6,
+    lineHeight: 1.65,
     marginBottom: "2.5rem",
   },
-  featureList: {
+
+  /* Floating Preview Card */
+  floatingPreviewCard: {
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backdropFilter: "blur(16px)",
+    border: "1px solid rgba(255, 255, 255, 0.12)",
+    borderRadius: "20px",
+    padding: "20px",
+    marginBottom: "2.5rem",
+    boxShadow: "0 20px 40px rgba(0,0,0,0.3)",
+  },
+  previewHeader: {
     display: "flex",
-    flexDirection: "column",
-    gap: "1.1rem",
-    marginBottom: "2.5rem",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingBottom: "14px",
+    borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+    marginBottom: "14px",
   },
-  featureItem: {
+  previewTitle: {
+    fontSize: "13px",
+    fontWeight: "700",
+    color: "#f8fafc",
+  },
+  liveBadge: {
+    fontSize: "10px",
+    fontWeight: "800",
+    backgroundColor: "rgba(16, 185, 129, 0.2)",
+    color: "#34d399",
+    padding: "2px 8px",
+    borderRadius: "999px",
+    letterSpacing: "0.08em",
+  },
+  previewItem: {
     display: "flex",
     alignItems: "center",
     gap: "12px",
-    fontSize: "0.95rem",
-    fontWeight: "500",
-    color: "#f1f5f9",
+    padding: "10px 0",
+    borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
   },
-  checkWrap: {
-    width: "26px",
-    height: "26px",
-    borderRadius: "8px",
-    backgroundColor: "rgba(56, 189, 248, 0.15)",
+  previewIconBox: {
+    width: "36px",
+    height: "36px",
+    borderRadius: "10px",
+    backgroundColor: "rgba(59, 130, 246, 0.15)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
   },
-  trustBadge: {
-    display: "inline-flex",
+  previewItemName: {
+    fontSize: "13px",
+    fontWeight: "700",
+    color: "#ffffff",
+    display: "block",
+    lineHeight: 1.2,
+  },
+  previewItemSub: {
+    fontSize: "11px",
+    color: "#94a3b8",
+    display: "block",
+    marginTop: "2px",
+  },
+  stockPillSuccess: {
+    fontSize: "11px",
+    fontWeight: "700",
+    backgroundColor: "rgba(16, 185, 129, 0.15)",
+    color: "#34d399",
+    padding: "4px 10px",
+    borderRadius: "8px",
+  },
+  stockPillInfo: {
+    fontSize: "11px",
+    fontWeight: "700",
+    backgroundColor: "rgba(168, 85, 247, 0.15)",
+    color: "#c084fc",
+    padding: "4px 10px",
+    borderRadius: "8px",
+  },
+  trustRow: {
+    display: "flex",
     alignItems: "center",
     gap: "8px",
-    padding: "8px 14px",
-    borderRadius: "999px",
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
-    border: "1px solid rgba(255, 255, 255, 0.12)",
-    fontSize: "12px",
-    color: "#93c5fd",
-    fontWeight: "600",
+    fontSize: "13px",
+    color: "#94a3b8",
+    fontWeight: "500",
   },
-  rightFormArea: {
+
+  /* ── Right Form Area ── */
+  rightArea: {
     flex: "1",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    padding: "2rem",
+    padding: "2.5rem",
     position: "relative",
-    zIndex: 2,
+    backgroundColor: "#f8fafc",
+  },
+  rightGlow1: {
+    position: "absolute",
+    top: "10%",
+    right: "10%",
+    width: "350px",
+    height: "350px",
+    borderRadius: "50%",
+    background: "radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, rgba(0,0,0,0) 70%)",
+    pointerEvents: "none",
+  },
+  rightGlow2: {
+    position: "absolute",
+    bottom: "10%",
+    left: "10%",
+    width: "350px",
+    height: "350px",
+    borderRadius: "50%",
+    background: "radial-gradient(circle, rgba(236, 72, 153, 0.06) 0%, rgba(0,0,0,0) 70%)",
+    pointerEvents: "none",
   },
   formCard: {
     width: "100%",
-    maxWidth: "450px",
+    maxWidth: "460px",
     backgroundColor: "#ffffff",
     border: "1px solid #e2e8f0",
-    borderRadius: "24px",
-    padding: "2.5rem",
-    boxShadow: "0 20px 50px rgba(15, 23, 42, 0.08)",
+    borderRadius: "28px",
+    padding: "2.75rem 2.5rem",
+    boxShadow: "0 25px 60px -15px rgba(15, 23, 42, 0.10), 0 0 0 1px rgba(226, 232, 240, 0.8)",
     position: "relative",
+    zIndex: 3,
   },
-  cardBrandHeader: {
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
+  cardHeader: {
     marginBottom: "1.75rem",
-    paddingBottom: "1.25rem",
-    borderBottom: "1px solid #f1f5f9",
   },
-  cardLogoBox: {
-    width: "44px",
-    height: "44px",
-    borderRadius: "12px",
-    background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
-    display: "flex",
+  welcomeRow: {
+    display: "inline-flex",
     alignItems: "center",
-    justifyContent: "center",
-    boxShadow: "0 6px 18px rgba(37, 99, 235, 0.3)",
+    gap: "6px",
+    backgroundColor: "#f1f5f9",
+    padding: "4px 12px",
+    borderRadius: "999px",
+    marginBottom: "12px",
   },
-  cardBrandTitleGroup: {
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-  },
-  cardBrandTitle: {
-    fontSize: "18px",
-    fontWeight: "800",
-    color: "#0f172a",
-    letterSpacing: "-0.02em",
-  },
-  proTag: {
-    fontSize: "10px",
-    fontWeight: "800",
-    color: "#2563eb",
-    backgroundColor: "#eff6ff",
-    border: "1px solid #dbeafe",
-    padding: "2px 6px",
-    borderRadius: "6px",
-    letterSpacing: "0.05em",
-  },
-  cardBrandSub: {
+  welcomeText: {
     fontSize: "12px",
-    color: "#64748b",
-    fontWeight: "500",
+    fontWeight: "700",
+    color: "#475569",
   },
-  formHeader: {
-    marginBottom: "1.5rem",
+  handWave: {
+    fontSize: "14px",
   },
-  formTitle: {
-    fontSize: "1.55rem",
+  cardTitle: {
+    fontSize: "1.75rem",
     fontWeight: "800",
     color: "#0f172a",
-    marginBottom: "0.35rem",
-    letterSpacing: "-0.02em",
+    margin: "0 0 6px",
+    letterSpacing: "-0.03em",
   },
-  formSub: {
-    fontSize: "0.875rem",
+  cardSub: {
+    fontSize: "0.9rem",
     color: "#64748b",
     lineHeight: 1.45,
+    margin: 0,
   },
-  demoPillBtn: {
-    width: "100%",
+
+  /* ⚡ Demo Card */
+  demoCard: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: "12px 16px",
-    borderRadius: "16px",
-    border: "1px solid #cbd5e1",
+    padding: "14px 16px",
+    borderRadius: "18px",
+    border: "1.5px solid #e2e8f0",
     cursor: "pointer",
-    marginBottom: "1.5rem",
-    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-    textAlign: "left",
-    boxShadow: "0 2px 8px rgba(15, 23, 42, 0.04)",
+    marginBottom: "1.75rem",
+    transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
   },
-  demoPillLeft: {
+  demoCardLeft: {
     display: "flex",
     alignItems: "center",
     gap: "12px",
     minWidth: 0,
   },
-  zapBox: {
-    width: "32px",
-    height: "32px",
-    borderRadius: "10px",
+  demoZapIcon: {
+    width: "36px",
+    height: "36px",
+    borderRadius: "12px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
-    boxShadow: "0 4px 10px rgba(37, 99, 235, 0.25)",
+    boxShadow: "0 4px 12px rgba(37, 99, 235, 0.25)",
   },
-  demoTextGroup: {
-    display: "flex",
-    flexDirection: "column",
-    minWidth: 0,
-  },
-  demoTitleText: {
-    fontSize: "13px",
+  demoHeading: {
+    fontSize: "13.5px",
     fontWeight: "800",
+    color: "#0f172a",
     lineHeight: 1.2,
   },
-  demoBadgesRow: {
+  demoPillsGroup: {
     display: "flex",
     alignItems: "center",
     gap: "6px",
     marginTop: "4px",
     flexWrap: "wrap",
   },
-  codeBadge: {
+  demoCodePill: {
     fontSize: "11px",
     fontWeight: "700",
     fontFamily: "monospace",
     color: "#334155",
-    backgroundColor: "#ffffff",
+    backgroundColor: "#f8fafc",
     border: "1px solid #e2e8f0",
-    padding: "1px 6px",
-    borderRadius: "5px",
-    letterSpacing: "0.02em",
+    padding: "2px 7px",
+    borderRadius: "6px",
   },
-  dotSep: {
+  demoDot: {
     fontSize: "10px",
     color: "#94a3b8",
   },
-  label: {
-    fontSize: "13px",
-    fontWeight: "700",
-    color: "#334155",
-    marginBottom: "6px",
+  tapActionPill: {
+    fontSize: "11px",
+    fontWeight: "800",
+    padding: "5px 12px",
+    borderRadius: "999px",
+    letterSpacing: "0.02em",
+    flexShrink: 0,
+    marginLeft: "8px",
   },
+
+  /* Form Controls */
   errorAlert: {
     backgroundColor: "#fef2f2",
     border: "1px solid #fecaca",
     color: "#ef4444",
-    padding: "0.75rem 1rem",
-    borderRadius: "12px",
+    padding: "0.85rem 1rem",
+    borderRadius: "14px",
     fontSize: "0.875rem",
-    fontWeight: "500",
+    fontWeight: "600",
+    marginBottom: "1.5rem",
+  },
+  fieldGroup: {
     marginBottom: "1.25rem",
   },
-  inputWrapper: {
+  fieldLabel: {
+    display: "block",
+    fontSize: "13px",
+    fontWeight: "700",
+    color: "#334155",
+    marginBottom: "8px",
+  },
+  inputWrap: {
     position: "relative",
     display: "flex",
     alignItems: "center",
   },
-  inputIcon: {
+  fieldIcon: {
     position: "absolute",
     left: "16px",
     zIndex: 1,
   },
-  paddedInput: {
+  fieldInput: {
     width: "100%",
-    height: "50px",
-    paddingLeft: "2.8rem",
-    paddingRight: "2.8rem",
+    height: "52px",
+    paddingLeft: "2.85rem",
+    paddingRight: "2.85rem",
     borderRadius: "14px",
     fontSize: "14px",
-    border: "1px solid #cbd5e1",
+    fontWeight: "500",
+    border: "1.5px solid #cbd5e1",
     backgroundColor: "#f8fafc",
+    color: "#0f172a",
+    outline: "none",
+    transition: "border-color 0.15s, box-shadow 0.15s",
   },
-  eyeBtn: {
+  eyeButton: {
     position: "absolute",
     right: "14px",
     background: "none",
     border: "none",
     cursor: "pointer",
-    padding: "0.25rem",
+    padding: "4px",
     display: "flex",
     alignItems: "center",
   },
-  formOptions: {
+  rememberRow: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    margin: "1.25rem 0 1.5rem",
+    margin: "1.25rem 0 1.75rem",
   },
-  rememberLabel: {
+  rememberCheckboxLabel: {
     display: "flex",
     alignItems: "center",
-    gap: "0.5rem",
-    fontSize: "0.85rem",
+    gap: "8px",
+    fontSize: "13px",
+    fontWeight: "600",
     color: "#475569",
     cursor: "pointer",
-    fontWeight: "500",
   },
-  checkbox: {
+  checkboxInput: {
+    width: "16px",
+    height: "16px",
     borderRadius: "4px",
     accentColor: "#2563eb",
     cursor: "pointer",
   },
   submitBtn: {
     width: "100%",
-    height: "50px",
-    fontSize: "0.95rem",
-    fontWeight: "700",
+    height: "52px",
+    fontSize: "1rem",
+    fontWeight: "800",
     borderRadius: "14px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    gap: "8px",
+    gap: "10px",
     background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
-    boxShadow: "0 6px 20px rgba(37, 99, 235, 0.3)",
+    boxShadow: "0 8px 25px rgba(37, 99, 235, 0.35)",
     cursor: "pointer",
+    border: "none",
+    color: "#ffffff",
   },
-  cardFooter: {
+  securityFooter: {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     gap: "6px",
-    marginTop: "1.75rem",
-    paddingTop: "1rem",
+    marginTop: "2rem",
+    paddingTop: "1.25rem",
     borderTop: "1px solid #f1f5f9",
     fontSize: "11px",
     color: "#94a3b8",
-    fontWeight: "500",
+    fontWeight: "600",
+    textAlign: "center",
   },
 };
 
