@@ -192,14 +192,10 @@ const Products = () => {
       }
 
       if (editingProduct) {
-        await API.put(`/products/${editingProduct._id}`, data, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        await API.put(`/products/${editingProduct._id}`, data);
         showToast(`Product "${formData.name}" updated successfully!`);
       } else {
-        await API.post("/products", data, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        await API.post("/products", data);
         showToast(`Product "${formData.name}" added to inventory!`);
       }
 

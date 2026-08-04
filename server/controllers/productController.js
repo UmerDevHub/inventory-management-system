@@ -23,7 +23,9 @@ const createProduct = async (req, res) => {
       return res.status(400).json({ message: `A product with SKU "${sku}" already exists. Please enter a unique SKU code.` });
     }
 
-    const imagePath = req.file ? req.file.path.replace(/\\/g, "/") : req.body.image || "";
+    const imagePath = req.file
+      ? `uploads/${req.file.filename}`
+      : req.body.image || "";
 
     const product = await Product.create({
       name: name.trim(),
@@ -109,7 +111,7 @@ const updateProduct = async (req, res) => {
     }
 
     if (req.file) {
-      product.image = req.file.path.replace(/\\/g, "/");
+      product.image = `uploads/${req.file.filename}`;
     } else if (req.body.image !== undefined) {
       product.image = req.body.image;
     }
