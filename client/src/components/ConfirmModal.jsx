@@ -5,8 +5,8 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, loading }) =
   if (!isOpen) return null;
 
   return (
-    <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay" style={styles.overlay} onClick={onClose}>
+      <div className="modal-container" style={styles.modal} onClick={(e) => e.stopPropagation()}>
         <button style={styles.closeBtn} onClick={onClose} title="Close modal">
           <X size={20} color="#64748b" />
         </button>

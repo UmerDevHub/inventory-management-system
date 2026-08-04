@@ -5,9 +5,9 @@ const Modal = ({ isOpen, onClose, title, subtitle, children }) => {
   if (!isOpen) return null;
 
   return (
-    <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <div style={styles.header}>
+    <div className="modal-overlay" style={styles.overlay} onClick={onClose}>
+      <div className="modal-container" style={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header" style={styles.header}>
           <div>
             <h2 style={styles.title}>{title}</h2>
             {subtitle && <p style={styles.subtitle}>{subtitle}</p>}
@@ -16,7 +16,7 @@ const Modal = ({ isOpen, onClose, title, subtitle, children }) => {
             <X size={20} color="#64748b" />
           </button>
         </div>
-        <div style={styles.body}>{children}</div>
+        <div className="modal-body" style={styles.body}>{children}</div>
       </div>
     </div>
   );

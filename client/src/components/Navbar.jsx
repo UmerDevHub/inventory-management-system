@@ -312,7 +312,7 @@ const Navbar = ({ onMenuClick }) => {
 
           {/* Interactive User Dropdown Menu */}
           {showUserMenu && (
-            <div style={styles.userDropdownMenu} className="fade-in">
+            <div style={styles.userDropdownMenu} className="navbar-user-menu fade-in">
               <div style={styles.userDropdownHeader}>
                 <div style={styles.headerAvatarCircle}>
                   <span>{getInitials(displayName)}</span>
