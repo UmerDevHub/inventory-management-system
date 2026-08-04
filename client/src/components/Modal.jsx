@@ -1,12 +1,33 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 
 const Modal = ({ isOpen, onClose, title, subtitle, children }) => {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      if (containerRef.current) {
+        containerRef.current.scrollTop = 0;
+      }
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
     <div className="modal-overlay" style={styles.overlay} onClick={onClose}>
-      <div className="modal-container" style={styles.modal} onClick={(e) => e.stopPropagation()}>
+      <div
+        ref={containerRef}
+        className="modal-container"
+        style={styles.modal}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-header" style={styles.header}>
           <div>
             <h2 style={styles.title}>{title}</h2>

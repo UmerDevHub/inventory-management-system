@@ -1,7 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Trash2, X } from "lucide-react";
 
 const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, loading }) => {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
