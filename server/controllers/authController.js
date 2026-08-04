@@ -12,11 +12,22 @@ const loginUser = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email });
+    let user = await User.findOne({ email });
+
+    // Auto-seed demo admin if logging in with admin@gmail.com on a fresh production database
+    if (!user && email === "admin@gmail.com") {
+      const hashedPassword = await bcrypt.hash(password || "123456", 10);
+      user = await User.create({
+        name: "Admin User",
+        email: "admin@gmail.com",
+        password: hashedPassword,
+        role: "admin",
+      });
+    }
 
     if (!user) {
       return res.status(400).json({
-        message: "User not found",
+        message: "User not found. Please register first.",
       });
     }
 
@@ -36,6 +47,7 @@ const loginUser = async (req, res) => {
       token: generateToken(user._id),
     });
   } catch (error) {
+    console.error("Login error:", error);
     res.status(500).json({
       message: "Internal Server Error",
       error: error.message,
@@ -47,7 +59,6 @@ const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // Check if all fields are provided
     if (!name || !email || !password) {
       return res.status(400).json({
         message: "Please fill all fields",
@@ -168,6 +179,7 @@ const changePassword = async (req, res) => {
     });
   }
 };
+
 module.exports = {
   registerUser,
   loginUser,
