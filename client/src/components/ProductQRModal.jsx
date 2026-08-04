@@ -1,4 +1,5 @@
 import React, { useRef } from "react";
+import { createPortal } from "react-dom";
 import { QRCodeCanvas } from "qrcode.react";
 import { X, Download, Printer, Package, Tag, Barcode } from "lucide-react";
 
@@ -171,7 +172,7 @@ const ProductQRModal = ({ product, onClose }) => {
 
   };
 
-  return (
+  return createPortal(
     <div className="modal-overlay" style={styles.overlay} onClick={onClose}>
       <div className="modal-container" style={styles.modal} onClick={(e) => e.stopPropagation()}>
 
@@ -267,7 +268,8 @@ const ProductQRModal = ({ product, onClose }) => {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

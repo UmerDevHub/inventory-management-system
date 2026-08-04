@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Trash2, X } from "lucide-react";
 
 const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, loading }) => {
@@ -15,7 +16,7 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, loading }) =
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className="modal-overlay" style={styles.overlay} onClick={onClose}>
       <div className="modal-container" style={styles.modal} onClick={(e) => e.stopPropagation()}>
         <button style={styles.closeBtn} onClick={onClose} title="Close modal">
@@ -53,7 +54,8 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, loading }) =
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

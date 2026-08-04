@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 const Modal = ({ isOpen, onClose, title, subtitle, children }) => {
@@ -7,9 +8,12 @@ const Modal = ({ isOpen, onClose, title, subtitle, children }) => {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
-      if (containerRef.current) {
-        containerRef.current.scrollTop = 0;
-      }
+      const timer = setTimeout(() => {
+        if (containerRef.current) {
+          containerRef.current.scrollTop = 0;
+        }
+      }, 10);
+      return () => clearTimeout(timer);
     } else {
       document.body.style.overflow = "";
     }
@@ -20,7 +24,7 @@ const Modal = ({ isOpen, onClose, title, subtitle, children }) => {
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className="modal-overlay" style={styles.overlay} onClick={onClose}>
       <div
         ref={containerRef}
@@ -39,7 +43,8 @@ const Modal = ({ isOpen, onClose, title, subtitle, children }) => {
         </div>
         <div className="modal-body" style={styles.body}>{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
