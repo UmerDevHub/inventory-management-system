@@ -47,13 +47,13 @@ const Login = () => {
   };
 
   return (
-    <div style={styles.container}>
+    <div className="login-container" style={styles.container}>
       {/* Left Hero Banner */}
-      <div style={styles.leftBanner}>
+      <div className="login-left-banner" style={styles.leftBanner}>
         <div style={styles.heroContent}>
           <div style={styles.heroLogo}>
             <Boxes size={32} color="#ffffff" />
-            <span style={styles.heroLogoText}>StockFlow</span>
+            <span style={styles.heroLogoText}>WarehouseOS</span>
           </div>
 
           <h1 style={styles.heroHeading}>
@@ -81,8 +81,9 @@ const Login = () => {
       </div>
 
       {/* Right Form Card */}
-      <div style={styles.rightFormArea}>
-        <div style={styles.formCard}>
+      <div className="login-right-area" style={styles.rightFormArea}>
+        <div className="login-form-card" style={styles.formCard}>
+
           <div style={styles.formHeader}>
             <h2 style={styles.formTitle}>Admin Sign In 👋</h2>
             <p style={styles.formSub}>

@@ -541,11 +541,33 @@ button, input, select, textarea {
 /* ─── Mobile Responsive ≤ 768px (Zero change to Laptop/Desktop ≥769px) ──── */
 @media (max-width: 768px) {
 
-  /* Sidebar: slide-in drawer on mobile */
-  .sidebar {
-    transform: translateX(-100%);
-    box-shadow: none;
-    z-index: 200;
+  /* ─── Login Screen Mobile Optimization ─────────────────────── */
+  .login-container {
+    flex-direction: column !important;
+    min-height: 100vh !important;
+    background-color: #f8fafc !important;
+  }
+
+  .login-left-banner {
+    display: none !important;
+  }
+
+  .login-right-area {
+    padding: 24px 16px !important;
+    width: 100% !important;
+    flex: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .login-form-card {
+    padding: 24px 18px !important;
+    border-radius: 20px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06) !important;
+    border: 1px solid #e2e8f0 !important;
   }
 
   .sidebar--open {
