@@ -144,34 +144,47 @@ const Login = () => {
             </p>
           </div>
 
-          {/* 1-Tap Demo Credentials Bar */}
+          {/* 1-Tap Demo Credentials Bar (Redesigned & Premium) */}
           <button
             type="button"
             onClick={handleDemoFill}
             style={{
               ...styles.demoPillBtn,
-              borderColor: demoApplied ? "#10b981" : "#bfdbfe",
-              backgroundColor: demoApplied ? "#ecfdf5" : "#eff6ff",
+              borderColor: demoApplied ? "#10b981" : "#cbd5e1",
+              background: demoApplied
+                ? "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)"
+                : "linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%)",
             }}
           >
             <div style={styles.demoPillLeft}>
-              <div style={{
-                ...styles.zapBox,
-                backgroundColor: demoApplied ? "#10b981" : "#2563eb",
-              }}>
+              <div
+                style={{
+                  ...styles.zapBox,
+                  background: demoApplied
+                    ? "linear-gradient(135deg, #10b981, #059669)"
+                    : "linear-gradient(135deg, #3b82f6, #1d4ed8)",
+                }}
+              >
                 {demoApplied ? (
-                  <CheckCircle2 size={14} color="#ffffff" />
+                  <CheckCircle2 size={15} color="#ffffff" />
                 ) : (
-                  <Zap size={14} color="#ffffff" />
+                  <Zap size={15} color="#ffffff" />
                 )}
               </div>
               <div style={styles.demoTextGroup}>
-                <span style={styles.demoTitleText}>
-                  {demoApplied ? "Demo Credentials Filled!" : "Auto-fill Demo Credentials"}
+                <span
+                  style={{
+                    ...styles.demoTitleText,
+                    color: demoApplied ? "#065f46" : "#1e293b",
+                  }}
+                >
+                  {demoApplied ? "Demo Credentials Filled!" : "⚡ Quick Auto-Fill Demo"}
                 </span>
-                <span style={styles.demoCredsText}>
-                  Email: <strong>admin@gmail.com</strong> | Pass: <strong>123456</strong>
-                </span>
+                <div style={styles.demoBadgesRow}>
+                  <span style={styles.codeBadge}>admin@gmail.com</span>
+                  <span style={styles.dotSep}>•</span>
+                  <span style={styles.codeBadge}>123456</span>
+                </div>
               </div>
             </div>
             <Sparkles size={16} color={demoApplied ? "#10b981" : "#2563eb"} />
@@ -474,42 +487,62 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: "12px 14px",
-    borderRadius: "14px",
-    border: "1px solid #bfdbfe",
+    padding: "12px 16px",
+    borderRadius: "16px",
+    border: "1px solid #cbd5e1",
     cursor: "pointer",
     marginBottom: "1.5rem",
-    transition: "all 0.2s ease",
+    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
     textAlign: "left",
+    boxShadow: "0 2px 8px rgba(15, 23, 42, 0.04)",
   },
   demoPillLeft: {
     display: "flex",
     alignItems: "center",
-    gap: "10px",
+    gap: "12px",
+    minWidth: 0,
   },
   zapBox: {
-    width: "28px",
-    height: "28px",
-    borderRadius: "8px",
+    width: "32px",
+    height: "32px",
+    borderRadius: "10px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
+    boxShadow: "0 4px 10px rgba(37, 99, 235, 0.25)",
   },
   demoTextGroup: {
     display: "flex",
     flexDirection: "column",
+    minWidth: 0,
   },
   demoTitleText: {
     fontSize: "13px",
-    fontWeight: "700",
-    color: "#1e293b",
+    fontWeight: "800",
     lineHeight: 1.2,
   },
-  demoCredsText: {
+  demoBadgesRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    marginTop: "4px",
+    flexWrap: "wrap",
+  },
+  codeBadge: {
     fontSize: "11px",
-    color: "#64748b",
-    marginTop: "2px",
+    fontWeight: "700",
+    fontFamily: "monospace",
+    color: "#334155",
+    backgroundColor: "#ffffff",
+    border: "1px solid #e2e8f0",
+    padding: "1px 6px",
+    borderRadius: "5px",
+    letterSpacing: "0.02em",
+  },
+  dotSep: {
+    fontSize: "10px",
+    color: "#94a3b8",
   },
   label: {
     fontSize: "13px",
