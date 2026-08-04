@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Package,
   Tags,
@@ -26,12 +27,26 @@ import {
 } from "recharts";
 import API from "../api/axios";
 import Loader from "../components/Loader";
+import ImageWithFallback from "../components/ImageWithFallback";
 import { compactNumber } from "../utils/formatNumber";
 
 const Dashboard = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 768 : false
+  );
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const fetchDashboardData = async (isRetry = false) => {
     try {
@@ -40,7 +55,6 @@ const Dashboard = () => {
       const res = await API.get("/dashboard/summary");
       setData(res.data);
     } catch (err) {
-      // On first 401/network error, wait 800ms and auto-retry once
       if (!isRetry && (err.response?.status === 401 || !err.response)) {
         setTimeout(() => fetchDashboardData(true), 800);
         return;
@@ -48,7 +62,8 @@ const Dashboard = () => {
       const msg =
         err.response?.status === 401
           ? "Session expired. Please refresh the page or log in again."
-          : err.response?.data?.message || "Failed to load dashboard. Check your server connection.";
+          : err.response?.data?.message ||
+            "Failed to load dashboard. Check your server connection.";
       setError(msg);
     } finally {
       setLoading(false);
@@ -65,26 +80,60 @@ const Dashboard = () => {
 
   if (error) {
     return (
-      <div style={{
-        display: "flex", flexDirection: "column", alignItems: "center",
-        justifyContent: "center", minHeight: "60vh", gap: "16px", padding: "24px",
-      }}>
-        <div style={{
-          backgroundColor: "#fef2f2", border: "1px solid #fecaca",
-          borderRadius: "20px", padding: "32px 40px", textAlign: "center",
-          maxWidth: "420px", width: "100%",
-        }}>
-          <div style={{
-            width: "56px", height: "56px", borderRadius: "16px",
-            backgroundColor: "#fee2e2", display: "flex", alignItems: "center",
-            justifyContent: "center", margin: "0 auto 16px",
-          }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "60vh",
+          gap: "16px",
+          padding: "24px",
+        }}
+      >
+        <div
+          style={{
+            backgroundColor: "#fef2f2",
+            border: "1px solid #fecaca",
+            borderRadius: "20px",
+            padding: "32px 40px",
+            textAlign: "center",
+            maxWidth: "420px",
+            width: "100%",
+          }}
+        >
+          <div
+            style={{
+              width: "56px",
+              height: "56px",
+              borderRadius: "16px",
+              backgroundColor: "#fee2e2",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 16px",
+            }}
+          >
             <AlertTriangle size={28} color="#ef4444" />
           </div>
-          <h3 style={{ fontSize: "18px", fontWeight: "800", color: "#0f172a", margin: "0 0 8px" }}>
+          <h3
+            style={{
+              fontSize: "18px",
+              fontWeight: "800",
+              color: "#0f172a",
+              margin: "0 0 8px",
+            }}
+          >
             Dashboard Failed to Load
           </h3>
-          <p style={{ fontSize: "14px", color: "#64748b", margin: "0 0 20px", lineHeight: 1.5 }}>
+          <p
+            style={{
+              fontSize: "14px",
+              color: "#64748b",
+              margin: "0 0 20px",
+              lineHeight: 1.5,
+            }}
+          >
             {error}
           </p>
           <button
@@ -120,7 +169,9 @@ const Dashboard = () => {
       productName: item.product?.name || "Inventory Product",
       actionText: `${item.quantity} units received`,
       type: "Stock In",
-      date: new Date(item.receivedDate || item.createdAt).toLocaleDateString("en-GB", {
+      date: new Date(
+        item.receivedDate || item.createdAt
+      ).toLocaleDateString("en-GB", {
         day: "numeric",
         month: "short",
         year: "numeric",
@@ -132,11 +183,14 @@ const Dashboard = () => {
       productName: item.product?.name || "Inventory Product",
       actionText: `${item.quantity} units dispatched`,
       type: "Stock Out",
-      date: new Date(item.issuedDate || item.createdAt).toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      }),
+      date: new Date(item.issuedDate || item.createdAt).toLocaleDateString(
+        "en-GB",
+        {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        }
+      ),
       badgeClass: "badge-danger",
     })) || []),
     ...(data.recentActivities?.recentPurchases?.map((item) => ({
@@ -144,7 +198,9 @@ const Dashboard = () => {
       productName: item.product?.name || "Procured Item",
       actionText: `${item.quantity} units purchased ($${item.totalAmount})`,
       type: "Purchase",
-      date: new Date(item.purchaseDate || item.createdAt).toLocaleDateString("en-GB", {
+      date: new Date(
+        item.purchaseDate || item.createdAt
+      ).toLocaleDateString("en-GB", {
         day: "numeric",
         month: "short",
         year: "numeric",
@@ -156,7 +212,7 @@ const Dashboard = () => {
   return (
     <div className="fade-in" style={{ paddingTop: "8px" }}>
       {/* 1. Header */}
-      <div className="page-header" style={{ marginBottom: "32px" }}>
+      <div className="page-header" style={{ marginBottom: "28px" }}>
         <div>
           <h1 className="page-title">Inventory Dashboard</h1>
           <p className="page-subtitle">
@@ -166,161 +222,209 @@ const Dashboard = () => {
       </div>
 
       {/* Group 1: Inventory Overview Section */}
-      <div style={{ marginBottom: "32px" }}>
+      <div style={{ marginBottom: "28px" }}>
         <div style={styles.sectionDividerRow}>
           <span style={styles.groupHeading}>INVENTORY OVERVIEW</span>
           <div style={styles.sectionDividerLine}></div>
         </div>
 
-        <div style={styles.cardsGrid}>
-          <div className="card" style={styles.summaryCard}>
+        <div className="dashboard-kpi-grid" style={styles.cardsGrid}>
+          <div className="card dashboard-kpi-card" style={styles.summaryCard}>
             <div style={styles.cardMain}>
-              <span style={styles.cardLabel}>TOTAL PRODUCTS</span>
-              <div style={styles.cardValue}>
+              <span className="dashboard-kpi-label" style={styles.cardLabel}>
+                TOTAL PRODUCTS
+              </span>
+              <div className="dashboard-kpi-value" style={styles.cardValue}>
                 {compactNumber(data.totalProducts || 0)}
               </div>
-              <span style={styles.trendPill}>Updated today</span>
+              <span className="dashboard-kpi-trend" style={styles.trendPill}>
+                Updated today
+              </span>
             </div>
-            <div style={styles.iconCircle56}>
-              <Package size={24} color="#2563eb" />
+            <div className="dashboard-kpi-icon" style={styles.iconCircle56}>
+              <Package size={isMobile ? 20 : 24} color="#2563eb" />
             </div>
           </div>
 
-          <div className="card" style={styles.summaryCard}>
+          <div className="card dashboard-kpi-card" style={styles.summaryCard}>
             <div style={styles.cardMain}>
-              <span style={styles.cardLabel}>CATEGORIES</span>
-              <div style={styles.cardValue}>
+              <span className="dashboard-kpi-label" style={styles.cardLabel}>
+                CATEGORIES
+              </span>
+              <div className="dashboard-kpi-value" style={styles.cardValue}>
                 {compactNumber(data.totalCategories || 0)}
               </div>
-              <span style={styles.trendPill}>Active tags</span>
+              <span className="dashboard-kpi-trend" style={styles.trendPill}>
+                Active tags
+              </span>
             </div>
-            <div style={styles.iconCircle56}>
-              <Tags size={24} color="#2563eb" />
+            <div className="dashboard-kpi-icon" style={styles.iconCircle56}>
+              <Tags size={isMobile ? 20 : 24} color="#2563eb" />
             </div>
           </div>
 
-          <div className="card" style={styles.summaryCard}>
+          <div className="card dashboard-kpi-card" style={styles.summaryCard}>
             <div style={styles.cardMain}>
-              <span style={styles.cardLabel}>SUPPLIERS</span>
-              <div style={styles.cardValue}>
+              <span className="dashboard-kpi-label" style={styles.cardLabel}>
+                SUPPLIERS
+              </span>
+              <div className="dashboard-kpi-value" style={styles.cardValue}>
                 {compactNumber(data.totalSuppliers || 0)}
               </div>
-              <span style={styles.trendPill}>Verified vendors</span>
+              <span className="dashboard-kpi-trend" style={styles.trendPill}>
+                Verified vendors
+              </span>
             </div>
-            <div style={styles.iconCircle56}>
-              <Truck size={24} color="#2563eb" />
+            <div className="dashboard-kpi-icon" style={styles.iconCircle56}>
+              <Truck size={isMobile ? 20 : 24} color="#2563eb" />
             </div>
           </div>
 
-          <div className="card" style={styles.summaryCard}>
+          <div className="card dashboard-kpi-card" style={styles.summaryCard}>
             <div style={styles.cardMain}>
-              <span style={styles.cardLabel}>WAREHOUSES</span>
-              <div style={styles.cardValue}>
+              <span className="dashboard-kpi-label" style={styles.cardLabel}>
+                WAREHOUSES
+              </span>
+              <div className="dashboard-kpi-value" style={styles.cardValue}>
                 {compactNumber(data.totalWarehouses || 0)}
               </div>
-              <span style={styles.trendPill}>Active depots</span>
+              <span className="dashboard-kpi-trend" style={styles.trendPill}>
+                Active depots
+              </span>
             </div>
-            <div style={styles.iconCircle56}>
-              <Warehouse size={24} color="#2563eb" />
+            <div className="dashboard-kpi-icon" style={styles.iconCircle56}>
+              <Warehouse size={isMobile ? 20 : 24} color="#2563eb" />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Group 2: Operations & Alerts Section (Premium Stock In & Stock Out KPI Cards) */}
-      <div style={{ marginBottom: "36px" }}>
+      {/* Group 2: Operations & Alerts Section */}
+      <div style={{ marginBottom: "32px" }}>
         <div style={styles.sectionDividerRow}>
           <span style={styles.groupHeading}>OPERATIONS & ALERTS</span>
           <div style={styles.sectionDividerLine}></div>
         </div>
 
-        <div style={styles.cardsGrid}>
+        <div className="dashboard-kpi-grid" style={styles.cardsGrid}>
           {/* Stock In KPI Card */}
-          <div className="card" style={styles.summaryCard}>
+          <div className="card dashboard-kpi-card" style={styles.summaryCard}>
             <div style={styles.cardMain}>
-              <span style={styles.cardLabel}>STOCK IN LOGS</span>
-              <div style={styles.cardValue}>
+              <span className="dashboard-kpi-label" style={styles.cardLabel}>
+                STOCK IN LOGS
+              </span>
+              <div className="dashboard-kpi-value" style={styles.cardValue}>
                 {compactNumber(data.totalStockIn || 0)}
               </div>
-              <span style={{ ...styles.trendPill, color: "#10b981", fontWeight: "600" }}>
+              <span
+                className="dashboard-kpi-trend"
+                style={{ ...styles.trendPill, color: "#10b981", fontWeight: "600" }}
+              >
                 145 units received
               </span>
             </div>
-            <div style={{ ...styles.iconCircle56, backgroundColor: "#eafbf3" }}>
-              <ArrowDownLeft size={24} color="#10b981" />
+            <div
+              className="dashboard-kpi-icon"
+              style={{ ...styles.iconCircle56, backgroundColor: "#eafbf3" }}
+            >
+              <ArrowDownLeft size={isMobile ? 20 : 24} color="#10b981" />
             </div>
           </div>
 
           {/* Stock Out KPI Card */}
-          <div className="card" style={styles.summaryCard}>
+          <div className="card dashboard-kpi-card" style={styles.summaryCard}>
             <div style={styles.cardMain}>
-              <span style={styles.cardLabel}>STOCK OUT LOGS</span>
-              <div style={styles.cardValue}>
+              <span className="dashboard-kpi-label" style={styles.cardLabel}>
+                STOCK OUT LOGS
+              </span>
+              <div className="dashboard-kpi-value" style={styles.cardValue}>
                 {compactNumber(data.totalStockOut || 0)}
               </div>
-              <span style={{ ...styles.trendPill, color: "#64748b" }}>
+              <span
+                className="dashboard-kpi-trend"
+                style={{ ...styles.trendPill, color: "#64748b" }}
+              >
                 121 units dispatched
               </span>
             </div>
-            <div style={{ ...styles.iconCircle56, backgroundColor: "#fdeeee" }}>
-              <ArrowUpRight size={24} color="#ef4444" />
+            <div
+              className="dashboard-kpi-icon"
+              style={{ ...styles.iconCircle56, backgroundColor: "#fdeeee" }}
+            >
+              <ArrowUpRight size={isMobile ? 20 : 24} color="#ef4444" />
             </div>
           </div>
 
           {/* Purchases KPI Card */}
-          <div className="card" style={styles.summaryCard}>
+          <div className="card dashboard-kpi-card" style={styles.summaryCard}>
             <div style={styles.cardMain}>
-              <span style={styles.cardLabel}>PURCHASES LOGGED</span>
-              <div style={styles.cardValue}>
+              <span className="dashboard-kpi-label" style={styles.cardLabel}>
+                PURCHASES LOGGED
+              </span>
+              <div className="dashboard-kpi-value" style={styles.cardValue}>
                 {compactNumber(data.totalPurchases || 0)}
               </div>
-              <span style={styles.trendPill}>Orders fulfilled</span>
+              <span className="dashboard-kpi-trend" style={styles.trendPill}>
+                Orders fulfilled
+              </span>
             </div>
-            <div style={styles.iconCircle56}>
-              <ShoppingCart size={24} color="#2563eb" />
+            <div className="dashboard-kpi-icon" style={styles.iconCircle56}>
+              <ShoppingCart size={isMobile ? 20 : 24} color="#2563eb" />
             </div>
           </div>
 
           {/* Low Stock KPI Card */}
-          <div className="card" style={styles.summaryCard}>
+          <div className="card dashboard-kpi-card" style={styles.summaryCard}>
             <div style={styles.cardMain}>
-              <span style={styles.cardLabel}>LOW STOCK ALERTS</span>
+              <span className="dashboard-kpi-label" style={styles.cardLabel}>
+                LOW STOCK ALERTS
+              </span>
               <div
+                className="dashboard-kpi-value"
                 style={{
                   ...styles.cardValue,
-                  color: data.lowStockProducts?.length > 0 ? "#ef4444" : "#0f172a",
+                  color:
+                    data.lowStockProducts?.length > 0 ? "#ef4444" : "#0f172a",
                 }}
               >
                 {data.lowStockProducts?.length || 0}
               </div>
               <span
+                className="dashboard-kpi-trend"
                 style={{
                   ...styles.trendPill,
-                  color: data.lowStockProducts?.length > 0 ? "#ef4444" : "#64748b",
+                  color:
+                    data.lowStockProducts?.length > 0 ? "#ef4444" : "#64748b",
                 }}
               >
-                {data.lowStockProducts?.length > 0 ? "Action required" : "Healthy levels"}
+                {data.lowStockProducts?.length > 0
+                  ? "Action required"
+                  : "Healthy levels"}
               </span>
             </div>
             <div
+              className="dashboard-kpi-icon"
               style={{
                 ...styles.iconCircle56,
-                backgroundColor: data.lowStockProducts?.length > 0 ? "#fdeeee" : "#eff6ff",
+                backgroundColor:
+                  data.lowStockProducts?.length > 0 ? "#fdeeee" : "#eff6ff",
               }}
             >
               <AlertTriangle
-                size={24}
-                color={data.lowStockProducts?.length > 0 ? "#ef4444" : "#2563eb"}
+                size={isMobile ? 20 : 24}
+                color={
+                  data.lowStockProducts?.length > 0 ? "#ef4444" : "#2563eb"
+                }
               />
             </div>
           </div>
         </div>
       </div>
 
-      {/* 3. Row 3: Taller Charts (320px Height) with Subtitles */}
-      <div style={styles.chartsGrid}>
+      {/* 3. Row 3: Responsive Charts (320px Desktop / ~220px Mobile) */}
+      <div className="dashboard-charts-grid" style={styles.chartsGrid}>
         {/* Left Bar Chart */}
-        <div className="card" style={{ padding: "24px" }}>
+        <div className="card dashboard-chart-card" style={{ padding: "24px" }}>
           <div style={styles.chartHeader}>
             <div>
               <h3 style={styles.chartTitle}>Inventory Overview</h3>
@@ -328,11 +432,25 @@ const Dashboard = () => {
             </div>
             <TrendingUp size={18} color="#64748b" />
           </div>
-          <div style={styles.chartWrapper}>
-            <ResponsiveContainer width="100%" height={320}>
-              <BarChart data={chartData} margin={{ top: 15, right: 10, left: -25, bottom: 0 }}>
-                <XAxis dataKey="name" stroke="#94a3b8" fontSize={13} axisLine={false} tickLine={false} />
-                <YAxis stroke="#94a3b8" fontSize={13} axisLine={false} tickLine={false} />
+          <div className="dashboard-chart-wrapper" style={styles.chartWrapper}>
+            <ResponsiveContainer width="100%" height={isMobile ? 220 : 320}>
+              <BarChart
+                data={chartData}
+                margin={{ top: 15, right: 10, left: -25, bottom: 0 }}
+              >
+                <XAxis
+                  dataKey="name"
+                  stroke="#94a3b8"
+                  fontSize={isMobile ? 11 : 13}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  stroke="#94a3b8"
+                  fontSize={isMobile ? 11 : 13}
+                  axisLine={false}
+                  tickLine={false}
+                />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "#ffffff",
@@ -341,14 +459,19 @@ const Dashboard = () => {
                     boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
                   }}
                 />
-                <Bar dataKey="count" fill="#2563eb" radius={[8, 8, 0, 0]} barSize={44} />
+                <Bar
+                  dataKey="count"
+                  fill="#2563eb"
+                  radius={[8, 8, 0, 0]}
+                  barSize={isMobile ? 32 : 44}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Right Pie Chart */}
-        <div className="card" style={{ padding: "24px" }}>
+        <div className="card dashboard-chart-card" style={{ padding: "24px" }}>
           <div style={styles.chartHeader}>
             <div>
               <h3 style={styles.chartTitle}>Inventory Distribution</h3>
@@ -356,20 +479,23 @@ const Dashboard = () => {
             </div>
             <Boxes size={18} color="#64748b" />
           </div>
-          <div style={styles.chartWrapper}>
-            <ResponsiveContainer width="100%" height={320}>
+          <div className="dashboard-chart-wrapper" style={styles.chartWrapper}>
+            <ResponsiveContainer width="100%" height={isMobile ? 220 : 320}>
               <PieChart>
                 <Pie
                   data={pieData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={75}
-                  outerRadius={105}
+                  innerRadius={isMobile ? 45 : 75}
+                  outerRadius={isMobile ? 72 : 105}
                   paddingAngle={6}
                   dataKey="value"
                 >
                   {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={PIE_COLORS[index % PIE_COLORS.length]}
+                    />
                   ))}
                 </Pie>
                 <Tooltip />
@@ -380,13 +506,15 @@ const Dashboard = () => {
       </div>
 
       {/* 4. Row 4: Recent Activity & Low Stock */}
-      <div style={styles.bottomGrid}>
+      <div className="dashboard-bottom-grid" style={styles.bottomGrid}>
         {/* Recent Activity Card */}
-        <div className="card" style={{ padding: "24px" }}>
+        <div className="card dashboard-chart-card" style={{ padding: "24px" }}>
           <div style={styles.chartHeader}>
             <div>
               <h3 style={styles.chartTitle}>Recent Activity</h3>
-              <p style={styles.chartSub}>Latest transaction events across stock & purchases</p>
+              <p style={styles.chartSub}>
+                Latest transaction events across stock & purchases
+              </p>
             </div>
             <Clock size={18} color="#64748b" />
           </div>
@@ -396,14 +524,35 @@ const Dashboard = () => {
           ) : (
             <div style={styles.activityList}>
               {recentList.map((item) => (
-                <div key={item.id} style={styles.activityItem}>
-                  <div>
-                    <span style={styles.productBold}>{item.productName}</span>
-                    <span style={styles.actionText}>{item.actionText}</span>
+                <div
+                  key={item.id}
+                  className="dashboard-activity-item"
+                  style={styles.activityItem}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <span
+                      className="dashboard-activity-title"
+                      style={styles.productBold}
+                    >
+                      {item.productName}
+                    </span>
+                    <span
+                      className="dashboard-activity-sub"
+                      style={styles.actionText}
+                    >
+                      {item.actionText}
+                    </span>
                   </div>
                   <div style={styles.activityRight}>
-                    <span className={`badge ${item.badgeClass}`}>{item.type}</span>
-                    <span style={styles.dateText}>{item.date}</span>
+                    <span className={`badge ${item.badgeClass}`}>
+                      {item.type}
+                    </span>
+                    <span
+                      className="dashboard-activity-date"
+                      style={styles.dateText}
+                    >
+                      {item.date}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -411,12 +560,14 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Low Stock Table */}
-        <div className="card" style={{ padding: "24px" }}>
+        {/* Low Stock Card */}
+        <div className="card dashboard-chart-card" style={{ padding: "24px" }}>
           <div style={styles.chartHeader}>
             <div>
               <h3 style={styles.chartTitle}>Low Stock</h3>
-              <p style={styles.chartSub}>Products requiring inventory replenishment</p>
+              <p style={styles.chartSub}>
+                Products requiring inventory replenishment
+              </p>
             </div>
             <AlertTriangle size={18} color="#ef4444" />
           </div>
@@ -432,36 +583,256 @@ const Dashboard = () => {
               </p>
             </div>
           ) : (
-            <div style={{ width: "100%", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px", minWidth: "320px" }}>
-                <thead>
-                  <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
-                    <th style={{ ...styles.thLeft, paddingRight: "12px" }}>PRODUCT</th>
-                    <th style={{ ...styles.thRight, paddingLeft: "8px", paddingRight: "8px" }}>QTY</th>
-                    <th style={{ ...styles.thRight, paddingLeft: "8px", paddingRight: "8px" }}>REORDER</th>
-                    <th style={{ ...styles.thRight, paddingLeft: "8px" }}>STATUS</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.lowStockProducts.slice(0, 5).map((prod) => (
-                    <tr key={prod._id} style={{ borderBottom: "1px solid #f8fafc" }}>
-                      <td style={{ padding: "12px 12px 12px 0", fontWeight: "700", color: "#0f172a" }}>
-                        {prod.name}
-                      </td>
-                      <td style={{ padding: "12px 8px", textAlign: "right", fontWeight: "800", color: "#ef4444" }}>
-                        {prod.quantity}
-                      </td>
-                      <td style={{ padding: "12px 8px", textAlign: "right", color: "#64748b" }}>
-                        {prod.reorderLevel}
-                      </td>
-                      <td style={{ padding: "12px 0 12px 8px", textAlign: "right" }}>
-                        <span className="badge badge-danger">Low</span>
-                      </td>
+            <>
+              {/* Desktop Table View (≥ 768px) */}
+              <div
+                className="dashboard-low-stock-desktop-table"
+                style={{
+                  width: "100%",
+                  overflowX: "auto",
+                  WebkitOverflowScrolling: "touch",
+                }}
+              >
+                <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    fontSize: "14px",
+                    minWidth: "340px",
+                  }}
+                >
+                  <thead>
+                    <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
+                      <th style={{ ...styles.thLeft, paddingRight: "12px" }}>
+                        PRODUCT
+                      </th>
+                      <th
+                        style={{
+                          ...styles.thRight,
+                          paddingLeft: "8px",
+                          paddingRight: "8px",
+                        }}
+                      >
+                        QTY
+                      </th>
+                      <th
+                        style={{
+                          ...styles.thRight,
+                          paddingLeft: "8px",
+                          paddingRight: "8px",
+                        }}
+                      >
+                        REORDER
+                      </th>
+                      <th
+                        style={{
+                          ...styles.thRight,
+                          paddingLeft: "8px",
+                          paddingRight: "8px",
+                        }}
+                      >
+                        STATUS
+                      </th>
+                      <th style={{ ...styles.thRight, paddingLeft: "8px" }}>
+                        ACTION
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {data.lowStockProducts.slice(0, 5).map((prod) => (
+                      <tr
+                        key={prod._id}
+                        style={{ borderBottom: "1px solid #f8fafc" }}
+                      >
+                        <td
+                          style={{
+                            padding: "12px 12px 12px 0",
+                            fontWeight: "700",
+                            color: "#0f172a",
+                          }}
+                        >
+                          <div style={{ display: "flex", flexDirection: "column" }}>
+                            <span>{prod.name}</span>
+                            {prod.sku && (
+                              <span
+                                style={{
+                                  fontSize: "11px",
+                                  color: "#94a3b8",
+                                  fontFamily: "monospace",
+                                  fontWeight: "normal",
+                                }}
+                              >
+                                SKU: {prod.sku}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td
+                          style={{
+                            padding: "12px 8px",
+                            textAlign: "right",
+                            fontWeight: "800",
+                            color: "#ef4444",
+                          }}
+                        >
+                          {prod.quantity}
+                        </td>
+                        <td
+                          style={{
+                            padding: "12px 8px",
+                            textAlign: "right",
+                            color: "#64748b",
+                          }}
+                        >
+                          {prod.reorderLevel}
+                        </td>
+                        <td
+                          style={{
+                            padding: "12px 8px",
+                            textAlign: "right",
+                          }}
+                        >
+                          <span className="badge badge-danger">Low</span>
+                        </td>
+                        <td style={{ padding: "12px 0 12px 8px", textAlign: "right" }}>
+                          <button
+                            onClick={() => navigate("/stock-in")}
+                            className="btn btn-primary btn-sm"
+                            style={{
+                              padding: "4px 10px",
+                              fontSize: "11px",
+                              borderRadius: "6px",
+                            }}
+                          >
+                            Restock
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Stacked Cards View (< 768px) */}
+              <div className="dashboard-low-stock-mobile-cards">
+                {data.lowStockProducts.slice(0, 5).map((prod) => (
+                  <div
+                    key={prod._id}
+                    style={{
+                      padding: "12px 14px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                      backgroundColor: "#f8fafc",
+                      border: "1px solid #f1f5f9",
+                      borderRadius: "14px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "46px",
+                        height: "46px",
+                        borderRadius: "10px",
+                        overflow: "hidden",
+                        backgroundColor: "#eff6ff",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <ImageWithFallback
+                        src={prod.image}
+                        alt={prod.name}
+                        size={20}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                    </div>
+
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontSize: "13.5px",
+                          fontWeight: "700",
+                          color: "#0f172a",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          marginBottom: "2px",
+                        }}
+                      >
+                        {prod.name}
+                      </div>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          flexWrap: "wrap",
+                          marginBottom: "4px",
+                        }}
+                      >
+                        {prod.sku && (
+                          <span
+                            style={{
+                              color: "#64748b",
+                              fontFamily: "monospace",
+                              fontSize: "11px",
+                            }}
+                          >
+                            SKU: {prod.sku}
+                          </span>
+                        )}
+                        {prod.category?.name && (
+                          <span
+                            className="badge"
+                            style={{
+                              fontSize: "10px",
+                              padding: "1px 6px",
+                              backgroundColor: "#e0e7ff",
+                              color: "#3730a3",
+                            }}
+                          >
+                            {prod.category.name}
+                          </span>
+                        )}
+                      </div>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                          fontSize: "12px",
+                        }}
+                      >
+                        <span style={{ fontWeight: "700", color: "#ef4444" }}>
+                          Stock: {prod.quantity}
+                        </span>
+                        <span style={{ color: "#64748b" }}>
+                          Min: {prod.reorderLevel}
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => navigate("/stock-in")}
+                      className="btn btn-primary btn-sm"
+                      style={{
+                        padding: "6px 12px",
+                        fontSize: "12px",
+                        borderRadius: "8px",
+                        flexShrink: 0,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      Restock
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       </div>
@@ -637,6 +1008,7 @@ const styles = {
     flexDirection: "column",
     alignItems: "flex-end",
     gap: "4px",
+    flexShrink: 0,
   },
   dateText: {
     fontSize: "12px",

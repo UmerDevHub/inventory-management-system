@@ -836,23 +836,87 @@ button, input, select, textarea {
   }
 
   /* Grids & Cards Layout */
+  .dashboard-kpi-grid,
   [style*="cardsGrid"],
   [style*="statsCardsGrid"] {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px !important;
+    gap: 10px !important;
+  }
+
+  .dashboard-kpi-card {
+    min-height: 88px !important;
+    padding: 12px 14px !important;
+  }
+
+  .dashboard-kpi-value {
+    font-size: 24px !important;
+    margin-top: 2px !important;
+    margin-bottom: 2px !important;
+  }
+
+  .dashboard-kpi-label {
+    font-size: 10px !important;
+  }
+
+  .dashboard-kpi-trend {
+    font-size: 10.5px !important;
+  }
+
+  .dashboard-kpi-icon {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 10px !important;
+  }
+
+  .dashboard-charts-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .dashboard-chart-card {
+    padding: 16px !important;
+  }
+
+  .dashboard-chart-wrapper {
+    height: 220px !important;
+  }
+
+  .dashboard-bottom-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .dashboard-activity-item {
+    padding: 10px 12px !important;
+  }
+
+  .dashboard-activity-title {
+    font-size: 13px !important;
+  }
+
+  .dashboard-activity-sub {
+    font-size: 11.5px !important;
+  }
+
+  .dashboard-activity-date {
+    font-size: 10.5px !important;
+  }
+
+  .dashboard-low-stock-desktop-table {
+    display: none !important;
+  }
+
+  .dashboard-low-stock-mobile-cards {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
   }
 
   @media (max-width: 400px) {
     [style*="cardsGrid"],
     [style*="statsCardsGrid"] {
-      grid-template-columns: 1fr !important;
+      grid-template-columns: repeat(2, 1fr) !important;
     }
-  }
-
-  [style*="chartsGrid"],
-  [style*="bottomGrid"] {
-    grid-template-columns: 1fr !important;
-    gap: 20px !important;
   }
 
   /* Cards padding */
@@ -1073,3 +1137,10 @@ button, input, select, textarea {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+@media (min-width: 768px) {
+  .dashboard-low-stock-mobile-cards {
+    display: none !important;
+  }
+}
+
