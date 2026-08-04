@@ -601,17 +601,44 @@ button, input, select, textarea {
     border: 1px solid #e2e8f0 !important;
   }
 
+  /* Sidebar base position on Mobile: hidden offscreen left (-100%) */
+  .sidebar {
+    transform: translateX(-100%) !important;
+    width: 280px !important;
+    box-shadow: none !important;
+    z-index: 300 !important;
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  /* Sidebar active open state on Mobile */
   .sidebar--open {
-    transform: translateX(0);
-    box-shadow: 4px 0 24px rgba(0,0,0,0.18);
+    transform: translateX(0) !important;
+    box-shadow: 8px 0 32px rgba(15, 23, 42, 0.25) !important;
   }
 
+  /* Mobile backdrop overlay */
   .sidebar-overlay {
-    display: block;
+    display: block !important;
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(15, 23, 42, 0.5) !important;
+    backdrop-filter: blur(4px) !important;
+    z-index: 299 !important;
   }
 
+  /* Mobile close X button in Sidebar Header */
   .sidebar__close-btn {
-    display: flex;
+    display: flex !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 10px !important;
+    background: #f1f5f9 !important;
+    border: 1px solid #cbd5e1 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    margin-left: auto !important;
+    color: #0f172a !important;
   }
 
   /* Main content fills full screen width (no left offset) */
@@ -619,9 +646,17 @@ button, input, select, textarea {
     margin-left: 0 !important;
   }
 
-  /* Hamburger button */
+  /* Hamburger button on Mobile */
   .navbar-hamburger {
     display: flex !important;
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 12px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
   }
 
   /* Breadcrumbs hidden on small mobile screens */
