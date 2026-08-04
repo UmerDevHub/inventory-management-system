@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "seed": "node seedDatabase.js",
+    "seed:admin": "node seedUser.js"
   },
   "engines": {
     "node": ">=20.19.0"

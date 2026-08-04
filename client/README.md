@@ -1,16 +1,29 @@
-# React + Vite
+# Smart Inventory Management - Frontend Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+This directory contains the React 19 + Vite frontend client for the **Smart Inventory Management System**.
 
-Currently, two official plugins are available:
+## 🚀 Development Quick Start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+To run the frontend client independently:
 
-## React Compiler
+```bash
+# 1. Install dependencies (from root or client folder)
+npm install
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+# 2. Start Vite development server
+npm run dev
+```
 
-## Expanding the Oxlint configuration
+The application will be accessible at `http://localhost:5173`.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## 📦 Features & Built-with
+
+- **Framework**: React 19 + Vite 8
+- **Routing**: React Router v7
+- **Data Visualization**: Recharts
+- **Icons**: Lucide React
+- **PDF Generation**: jsPDF & jsPDF-AutoTable
+- **Barcode / QR**: qrcode.react
+- **Linter**: Oxlint
+
+For complete project documentation, database setup, environment variables, and backend instructions, please refer to the [Root README.md](../README.md).
