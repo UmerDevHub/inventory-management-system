@@ -16,10 +16,10 @@ const chatWithAI = async (req, res) => {
   try {
     const { messages } = req.body;
 
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.GROQ_API_KEY) {
       return res.status(503).json({
         reply:
-          "⚠️ No API key configured. Add OPENAI_API_KEY to your server/.env file to enable the AI assistant.",
+          "⚠️ No API key configured. Add GROQ_API_KEY to your server/.env file to enable the AI assistant.",
       });
     }
 
@@ -132,21 +132,21 @@ ${warehouseList || "No warehouses."}
 
 Answer the user's questions based on this live data. Keep responses concise but complete. Use emojis sparingly for clarity.`;
 
-    // ── Call OpenAI API ──────────────────────────────────────────
+    // ── Call Groq API (OpenAI-compatible) ───────────────────────
     const aiRes = await axios.post(
-      "https://api.openai.com/v1/chat/completions",
+      "https://api.groq.com/openai/v1/chat/completions",
       {
-        model: process.env.OPENAI_MODEL || "gpt-3.5-turbo",
+        model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
         messages: [
           { role: "system", content: systemPrompt },
           ...messages,
         ],
         temperature: 0.4,
-        max_tokens: 600,
+        max_tokens: 700,
       },
       {
         headers: {
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
           "Content-Type": "application/json",
         },
         timeout: 30000,
