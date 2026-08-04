@@ -21,20 +21,18 @@ connectDB();
 
 const app = express();
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:4173",
-  process.env.FRONTEND_URL, // e.g. https://your-app.vercel.app
-].filter(Boolean);
+// Open CORS in dev, strict allowlist in production
+const isDev = process.env.NODE_ENV !== "production";
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, curl, Postman)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
-      callback(new Error(`CORS blocked: ${origin}`));
-    },
+    origin: isDev
+      ? true // allow all in development
+      : [
+          "http://localhost:5173",
+          "http://localhost:4173",
+          process.env.FRONTEND_URL,
+        ].filter(Boolean),
     credentials: true,
   })
 );

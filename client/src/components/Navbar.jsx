@@ -13,11 +13,12 @@ import {
   Key,
   LogOut,
   ShieldCheck,
+  Menu,
 } from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
 import API from "../api/axios";
 
-const Navbar = () => {
+const Navbar = ({ onMenuClick }) => {
   const { user, logout } = useContext(AuthContext);
   const location = useLocation();
   const navigate = useNavigate();
@@ -156,9 +157,20 @@ const Navbar = () => {
 
   return (
     <header style={styles.navbar}>
-      {/* Breadcrumb Navigation */}
+      {/* Left: Hamburger (mobile) + Breadcrumb */}
       <div style={styles.leftNavSection}>
-        <div style={styles.breadcrumbWrapper}>
+        {/* Hamburger — visible only on mobile via CSS */}
+        <button
+          className="navbar-hamburger"
+          onClick={onMenuClick}
+          title="Open menu"
+          aria-label="Open menu"
+        >
+          <Menu size={22} color="#0f172a" />
+        </button>
+
+        {/* Breadcrumb — hidden on small mobile */}
+        <div style={styles.breadcrumbWrapper} className="navbar-breadcrumb">
           {crumbs.map((crumb, idx) => (
             <React.Fragment key={crumb.path}>
               {idx > 0 && <ChevronRight size={14} color="#94a3b8" />}
@@ -273,7 +285,7 @@ const Navbar = () => {
               <span style={styles.activeDot}></span>
             </div>
 
-            <div style={styles.userInfo}>
+            <div style={styles.userInfo} className="navbar-user-info">
               <span style={styles.userName}>{displayName}</span>
               <span style={styles.userRole}>Administrator</span>
             </div>
