@@ -538,8 +538,39 @@ button, input, select, textarea {
   }
 }
 
+/* Desktop Navbar Mobile Brand: Hidden */
+.navbar-mobile-brand {
+  display: none;
+}
+
 /* ─── Mobile Responsive ≤ 768px (Zero change to Laptop/Desktop ≥769px) ──── */
 @media (max-width: 768px) {
+
+  /* Navbar Mobile Brand display */
+  .navbar-mobile-brand {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-left: 6px !important;
+  }
+
+  .navbar-mobile-logo {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 9px !important;
+    background-color: #2563eb !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3) !important;
+  }
+
+  .navbar-mobile-title {
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    letter-spacing: -0.02em !important;
+  }
 
   /* ─── Login Screen Mobile Optimization ─────────────────────── */
   .login-container {

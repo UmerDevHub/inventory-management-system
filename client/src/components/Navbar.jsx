@@ -14,6 +14,7 @@ import {
   LogOut,
   ShieldCheck,
   Menu,
+  Boxes,
 } from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
 import API from "../api/axios";
@@ -157,7 +158,7 @@ const Navbar = ({ onMenuClick }) => {
 
   return (
     <header style={styles.navbar}>
-      {/* Left: Hamburger (mobile) + Breadcrumb */}
+      {/* Left: Hamburger (mobile) + Mobile Logo + Breadcrumb */}
       <div style={styles.leftNavSection}>
         {/* Hamburger — visible only on mobile via CSS */}
         <button
@@ -168,6 +169,14 @@ const Navbar = ({ onMenuClick }) => {
         >
           <Menu size={22} color="#0f172a" />
         </button>
+
+        {/* Mobile Brand Logo — visible only on mobile via CSS */}
+        <div className="navbar-mobile-brand">
+          <div className="navbar-mobile-logo">
+            <Boxes size={18} color="#ffffff" />
+          </div>
+          <span className="navbar-mobile-title">WarehouseOS</span>
+        </div>
 
         {/* Breadcrumb — hidden on small mobile */}
         <div style={styles.breadcrumbWrapper} className="navbar-breadcrumb">
