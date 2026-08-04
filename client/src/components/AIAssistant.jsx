@@ -9,49 +9,44 @@ import {
   TrendingDown,
   BarChart3,
   ShoppingCart,
+  Zap,
 } from "lucide-react";
 import API from "../api/axios";
 
 /* ─── Quick suggestion chips ─────────────────────────────────── */
 const SUGGESTIONS = [
-  { icon: Package,      label: "Stock summary"        , msg: "Give me a full summary of current stock levels." },
-  { icon: TrendingDown, label: "Low stock alerts"     , msg: "Which products are running low or out of stock?" },
-  { icon: BarChart3,    label: "Inventory value"      , msg: "What is the total value of my inventory?" },
-  { icon: ShoppingCart, label: "Recent purchases"     , msg: "Show me the most recent purchases." },
+  { icon: Package,      label: "Stock summary",    msg: "Give me a full summary of current stock levels." },
+  { icon: TrendingDown, label: "Low stock alerts", msg: "Which products are running low or out of stock?" },
+  { icon: BarChart3,    label: "Inventory value",  msg: "What is the total value of my inventory?" },
+  { icon: ShoppingCart, label: "Recent purchases", msg: "Show me the most recent purchases." },
 ];
 
-/* ─── Helper: format AI message with basic markdown ─────────── */
+/* ─── Format AI message text ─────────────────────────────────── */
 const formatMessage = (text) => {
-  // Convert **bold**, • bullets, and newlines to HTML-safe JSX
-  const lines = text.split("\n");
-  return lines.map((line, i) => {
-    const trimmed = line.trim();
-    if (!trimmed) return <br key={i} />;
-    // Bold
-    const parts = trimmed.split(/\*\*(.*?)\*\*/g);
-    const rendered = parts.map((part, j) =>
-      j % 2 === 1 ? <strong key={j}>{part}</strong> : part
-    );
+  return text.split("\n").map((line, i) => {
+    if (!line.trim()) return <br key={i} />;
+    const parts = line.split(/\*\*(.*?)\*\*/g);
     return (
-      <p key={i} style={{ margin: "2px 0", lineHeight: 1.55 }}>
-        {rendered}
+      <p key={i} style={{ margin: "3px 0", lineHeight: 1.6 }}>
+        {parts.map((p, j) => j % 2 === 1 ? <strong key={j}>{p}</strong> : p)}
       </p>
     );
   });
 };
 
-/* ─── Typing indicator ───────────────────────────────────────── */
+/* ─── Typing dots ────────────────────────────────────────────── */
 const TypingDots = () => (
-  <div style={s.typingWrap}>
+  <div style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
+    <div style={s.aiAvatar}><Bot size={13} color="#6366f1" /></div>
     <div style={s.dotsBubble}>
-      <span style={{ ...s.dot, animationDelay: "0ms"   }} />
-      <span style={{ ...s.dot, animationDelay: "160ms" }} />
-      <span style={{ ...s.dot, animationDelay: "320ms" }} />
+      {[0, 160, 320].map((d) => (
+        <span key={d} style={{ ...s.dot, animationDelay: `${d}ms` }} />
+      ))}
     </div>
   </div>
 );
 
-/* ─── Main Component ─────────────────────────────────────────── */
+/* ─────────────────────── Main Component ───────────────────────── */
 const AIAssistant = () => {
   const [open,     setOpen]     = useState(false);
   const [input,    setInput]    = useState("");
@@ -59,548 +54,351 @@ const AIAssistant = () => {
   const [loading,  setLoading]  = useState(false);
   const [showSugg, setShowSugg] = useState(true);
 
-  const bottomRef  = useRef(null);
-  const inputRef   = useRef(null);
-  const panelRef   = useRef(null);
+  const bottomRef = useRef(null);
+  const inputRef  = useRef(null);
 
-  // Scroll to bottom whenever messages update
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, loading]);
+  useEffect(() => { if (open) setTimeout(() => inputRef.current?.focus(), 300); }, [open]);
 
-  // Focus input when panel opens
-  useEffect(() => {
-    if (open) setTimeout(() => inputRef.current?.focus(), 300);
-  }, [open]);
-
-  const sendMessage = async (text) => {
-    const userText = (text || input).trim();
-    if (!userText || loading) return;
-
+  const send = async (text) => {
+    const txt = (text || input).trim();
+    if (!txt || loading) return;
     setInput("");
     setShowSugg(false);
-    setMessages((prev) => [...prev, { role: "user", content: userText }]);
+    const next = [...messages, { role: "user", content: txt }];
+    setMessages(next);
     setLoading(true);
-
     try {
-      const history = [...messages, { role: "user", content: userText }];
       const { data } = await API.post("/ai/chat", {
-        messages: history.map(({ role, content }) => ({ role, content })),
+        messages: next.map(({ role, content }) => ({ role, content })),
       });
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: data.reply },
-      ]);
-    } catch (err) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "⚠️ Sorry, I couldn't connect to the AI service. Please check your API key.",
-        },
-      ]);
+      setMessages((p) => [...p, { role: "assistant", content: data.reply }]);
+    } catch {
+      setMessages((p) => [...p, { role: "assistant", content: "⚠️ Couldn't reach AI service. Please check your API key in server/.env." }]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
-
-  const resetChat = () => {
-    setMessages([]);
-    setShowSugg(true);
-    setInput("");
-  };
+  const reset = () => { setMessages([]); setShowSugg(true); setInput(""); };
 
   return (
     <>
-      {/* ── Floating Button ──────────────────────────────────── */}
+      {/* ── Floating Button ─────────────────────────────────────── */}
       <button
-        style={{
-          ...s.fab,
-          ...(open ? s.fabOpen : {}),
-        }}
-        onClick={() => setOpen((v) => !v)}
-        title="AI Inventory Assistant"
-        aria-label="Open AI assistant"
+        style={{ ...s.fab, ...(open ? s.fabActive : {}) }}
+        onClick={() => setOpen(v => !v)}
+        aria-label="AI assistant"
       >
-        {open ? (
-          <X size={22} color="#fff" />
-        ) : (
-          <>
-            <Bot size={24} color="#fff" />
-            <span style={s.fabBadge} />
-          </>
-        )}
-        {!open && <span style={s.fabGlow} />}
+        <div style={s.fabInner}>
+          {open
+            ? <X size={20} color="#fff" />
+            : <Bot size={22} color="#fff" />
+          }
+        </div>
+        {!open && <span style={s.fabPing} />}
+        {!open && <span style={s.fabRing} />}
       </button>
 
-      {/* ── Chat Panel ───────────────────────────────────────── */}
-      <div
-        ref={panelRef}
-        style={{
-          ...s.panel,
-          ...(open ? s.panelOpen : s.panelClosed),
-        }}
-        aria-hidden={!open}
-      >
+      {/* ── Chat Panel ──────────────────────────────────────────── */}
+      <div style={{ ...s.panel, ...(open ? s.panelOpen : s.panelHide) }}>
+
         {/* Header */}
         <div style={s.header}>
-          <div style={s.headerLeft}>
-            <div style={s.headerIcon}>
-              <Sparkles size={16} color="#ffffff" />
-            </div>
-            <div>
-              <div style={s.headerTitle}>WarehouseOS AI</div>
-              <div style={s.headerSub}>
-                <span style={s.activeDot} />
-                Live inventory context
+          <div style={s.headerGlow} />
+          <div style={s.headerContent}>
+            <div style={s.headerLeft}>
+              <div style={s.botAvatar}>
+                <Sparkles size={15} color="#fff" />
+              </div>
+              <div>
+                <div style={s.headerTitle}>WarehouseOS AI</div>
+                <div style={s.headerStatus}>
+                  <span style={s.greenDot} />
+                  <span>Live inventory context</span>
+                </div>
               </div>
             </div>
-          </div>
-          <div style={s.headerRight}>
-            {messages.length > 0 && (
-              <button style={s.iconBtn} onClick={resetChat} title="Clear chat">
-                <RotateCcw size={15} color="#94a3b8" />
+            <div style={{ display: "flex", gap: 4 }}>
+              {messages.length > 0 && (
+                <button style={s.hBtn} onClick={reset} title="Clear">
+                  <RotateCcw size={14} color="rgba(255,255,255,0.75)" />
+                </button>
+              )}
+              <button style={s.hBtn} onClick={() => setOpen(false)} title="Close">
+                <X size={14} color="rgba(255,255,255,0.75)" />
               </button>
-            )}
-            <button style={s.iconBtn} onClick={() => setOpen(false)} title="Close">
-              <X size={15} color="#94a3b8" />
-            </button>
+            </div>
           </div>
         </div>
 
-        {/* Messages */}
-        <div style={s.messages}>
-          {/* Welcome message */}
+        {/* Body */}
+        <div style={s.body}>
+
+          {/* Welcome */}
           {messages.length === 0 && (
             <div style={s.welcome}>
-              <div style={s.welcomeIcon}>
-                <Bot size={28} color="#2563eb" />
+              <div style={s.welcomeIconWrap}>
+                <Bot size={26} color="#6366f1" />
               </div>
-              <p style={s.welcomeTitle}>Hi! I'm your AI assistant.</p>
-              <p style={s.welcomeSub}>
-                I have live access to all your products, stock levels, purchases,
-                and more. Ask me anything!
+              <p style={s.welcomeH}>Hello! I'm your AI assistant 👋</p>
+              <p style={s.welcomeP}>
+                I have live access to all your products, stock levels, suppliers, purchases, and more.
               </p>
             </div>
           )}
 
           {/* Suggestion chips */}
           {showSugg && (
-            <div style={s.suggestions}>
+            <div style={s.chipGrid}>
               {SUGGESTIONS.map(({ icon: Icon, label, msg }) => (
-                <button
-                  key={label}
-                  style={s.chip}
-                  onClick={() => sendMessage(msg)}
-                >
-                  <Icon size={13} color="#2563eb" />
-                  {label}
+                <button key={label} style={s.chip} onClick={() => send(msg)}>
+                  <Icon size={12} color="#6366f1" style={{ flexShrink: 0 }} />
+                  <span>{label}</span>
                 </button>
               ))}
             </div>
           )}
 
-          {/* Chat messages */}
-          {messages.map((msg, idx) => (
-            <div
-              key={idx}
-              style={{
-                ...s.msgRow,
-                justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
-              }}
-            >
-              {msg.role === "assistant" && (
-                <div style={s.aiBubbleIcon}>
-                  <Bot size={14} color="#2563eb" />
+          {/* Messages */}
+          {messages.map((m, i) => (
+            <div key={i} style={{ display: "flex", flexDirection: "column",
+              alignItems: m.role === "user" ? "flex-end" : "flex-start", gap: 4 }}>
+              {m.role === "assistant" && (
+                <div style={s.aiLabel}>
+                  <div style={s.aiAvatar}><Bot size={11} color="#6366f1" /></div>
+                  <span style={s.aiLabelTxt}>AI</span>
                 </div>
               )}
-              <div
-                style={{
-                  ...(msg.role === "user" ? s.userBubble : s.aiBubble),
-                }}
-              >
-                {msg.role === "assistant"
-                  ? formatMessage(msg.content)
-                  : msg.content}
+              <div style={m.role === "user" ? s.userBubble : s.aiBubble}>
+                {m.role === "assistant" ? formatMessage(m.content) : m.content}
               </div>
             </div>
           ))}
 
-          {/* Typing indicator */}
           {loading && <TypingDots />}
-
           <div ref={bottomRef} />
         </div>
 
         {/* Input */}
-        <div style={s.inputArea}>
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Ask about stock, purchases, suppliers…"
-            style={s.textarea}
-            rows={1}
-            disabled={loading}
-          />
-          <button
-            style={{
-              ...s.sendBtn,
-              opacity: (!input.trim() || loading) ? 0.45 : 1,
-              cursor: (!input.trim() || loading) ? "not-allowed" : "pointer",
-            }}
-            onClick={() => sendMessage()}
-            disabled={!input.trim() || loading}
-            title="Send"
-          >
-            <Send size={16} color="#ffffff" />
-          </button>
+        <div style={s.inputRow}>
+          <div style={s.inputWrap}>
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
+              placeholder="Ask anything about your inventory…"
+              style={s.textarea}
+              rows={1}
+              disabled={loading}
+            />
+            <button
+              style={{ ...s.sendBtn, opacity: (!input.trim() || loading) ? 0.4 : 1 }}
+              onClick={() => send()}
+              disabled={!input.trim() || loading}
+            >
+              <Send size={15} color="#fff" />
+            </button>
+          </div>
+          <p style={s.hint}>
+            <Zap size={10} color="#a5b4fc" style={{ display: "inline", marginRight: 3 }} />
+            Powered by GPT · reads live data
+          </p>
         </div>
-
-        <p style={s.footer}>Powered by GPT · reads live inventory data</p>
       </div>
 
-      {/* Global keyframe styles */}
       <style>{`
-        @keyframes ai-bounce {
-          0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
-          40% { transform: translateY(-5px); opacity: 1; }
-        }
-        @keyframes ai-panel-in {
-          from { opacity: 0; transform: scale(0.95) translateY(16px); }
-          to   { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        @keyframes ai-fab-pulse {
-          0%   { transform: scale(1); }
-          50%  { transform: scale(1.08); }
-          100% { transform: scale(1); }
-        }
+        @keyframes ai-ping  { 0%,100%{transform:scale(1);opacity:.6} 50%{transform:scale(1.5);opacity:0} }
+        @keyframes ai-pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+        @keyframes ai-bounce{ 0%,80%,100%{transform:translateY(0);opacity:.4} 40%{transform:translateY(-5px);opacity:1} }
+        @keyframes ai-in    { from{opacity:0;transform:scale(.94) translateY(14px)} to{opacity:1;transform:scale(1) translateY(0)} }
       `}</style>
     </>
   );
 };
 
-/* ─────────────────────────── Styles ─────────────────────────── */
+/* ──────────────────────────── Styles ────────────────────────── */
 const s = {
-  /* Floating action button */
+  /* FAB */
   fab: {
-    position:        "fixed",
-    bottom:          "28px",
-    right:           "28px",
-    width:           "58px",
-    height:          "58px",
-    borderRadius:    "50%",
-    background:      "linear-gradient(135deg, #2563eb 0%, #1d4ed8 60%, #7c3aed 100%)",
-    boxShadow:       "0 8px 28px rgba(37,99,235,0.40), 0 2px 8px rgba(0,0,0,0.15)",
-    border:          "none",
-    cursor:          "pointer",
-    display:         "flex",
-    alignItems:      "center",
-    justifyContent:  "center",
-    zIndex:          9999,
-    transition:      "all 0.22s cubic-bezier(0.4,0,0.2,1)",
-    animation:       "ai-fab-pulse 3s ease-in-out infinite",
+    position: "fixed", bottom: 26, right: 26,
+    width: 56, height: 56, borderRadius: "50%",
+    background: "linear-gradient(135deg,#6366f1,#4f46e5)",
+    border: "none", cursor: "pointer",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    zIndex: 9999,
+    boxShadow: "0 6px 24px rgba(99,102,241,0.45), 0 2px 6px rgba(0,0,0,0.12)",
+    transition: "all .2s cubic-bezier(.4,0,.2,1)",
   },
-  fabOpen: {
-    background:   "linear-gradient(135deg, #475569, #334155)",
-    animation:    "none",
-    boxShadow:    "0 4px 16px rgba(0,0,0,0.2)",
+  fabActive: {
+    background: "linear-gradient(135deg,#475569,#334155)",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
   },
-  fabBadge: {
-    position:        "absolute",
-    top:             "10px",
-    right:           "10px",
-    width:           "10px",
-    height:          "10px",
-    borderRadius:    "50%",
-    backgroundColor: "#22c55e",
-    border:          "2px solid #ffffff",
+  fabInner: { position: "relative", zIndex: 1 },
+  fabPing: {
+    position: "absolute", inset: -3, borderRadius: "50%",
+    backgroundColor: "rgba(99,102,241,.35)",
+    animation: "ai-ping 2.4s cubic-bezier(0,0,.2,1) infinite",
   },
-  fabGlow: {
-    position:        "absolute",
-    inset:           "-4px",
-    borderRadius:    "50%",
-    background:      "rgba(37,99,235,0.15)",
-    animation:       "ai-fab-pulse 3s ease-in-out infinite",
-    pointerEvents:   "none",
+  fabRing: {
+    position: "absolute", inset: -1, borderRadius: "50%",
+    border: "2px solid rgba(99,102,241,.4)",
+    animation: "ai-pulse 2s ease-in-out infinite",
   },
 
-  /* Chat panel */
+  /* Panel */
   panel: {
-    position:        "fixed",
-    bottom:          "100px",
-    right:           "28px",
-    width:           "360px",
-    maxHeight:       "540px",
-    borderRadius:    "20px",
-    backgroundColor: "#ffffff",
-    boxShadow:       "0 24px 64px rgba(15,23,42,0.18), 0 0 0 1px rgba(0,0,0,0.06)",
-    display:         "flex",
-    flexDirection:   "column",
-    zIndex:          9998,
-    overflow:        "hidden",
-    transition:      "all 0.25s cubic-bezier(0.4,0,0.2,1)",
+    position: "fixed", bottom: 96, right: 26,
+    width: 355, borderRadius: 20,
+    backgroundColor: "#fff",
+    boxShadow: "0 20px 60px rgba(15,23,42,.16), 0 0 0 1px rgba(0,0,0,.05)",
+    display: "flex", flexDirection: "column",
+    zIndex: 9998, overflow: "hidden",
     transformOrigin: "bottom right",
+    transition: "all .22s cubic-bezier(.4,0,.2,1)",
+    maxHeight: 520,
   },
-  panelOpen: {
-    opacity:         1,
-    transform:       "scale(1) translateY(0)",
-    pointerEvents:   "all",
-    animation:       "ai-panel-in 0.25s ease",
-  },
-  panelClosed: {
-    opacity:         0,
-    transform:       "scale(0.92) translateY(20px)",
-    pointerEvents:   "none",
-  },
+  panelOpen:  { opacity: 1, transform: "scale(1) translateY(0)", pointerEvents: "all", animation: "ai-in .22s ease" },
+  panelHide:  { opacity: 0, transform: "scale(.93) translateY(18px)", pointerEvents: "none" },
 
   /* Header */
   header: {
-    display:         "flex",
-    alignItems:      "center",
-    justifyContent:  "space-between",
-    padding:         "14px 16px",
-    background:      "linear-gradient(135deg, #2563eb 0%, #1d4ed8 60%, #7c3aed 100%)",
-    flexShrink:      0,
+    position: "relative", overflow: "hidden",
+    background: "linear-gradient(135deg,#4f46e5 0%,#6366f1 50%,#818cf8 100%)",
+    flexShrink: 0,
   },
-  headerLeft: {
-    display:     "flex",
-    alignItems:  "center",
-    gap:         "10px",
+  headerGlow: {
+    position: "absolute", top: -30, right: -30,
+    width: 100, height: 100, borderRadius: "50%",
+    backgroundColor: "rgba(255,255,255,0.08)",
+    pointerEvents: "none",
   },
-  headerIcon: {
-    width:           "32px",
-    height:          "32px",
-    borderRadius:    "10px",
-    backgroundColor: "rgba(255,255,255,0.2)",
-    display:         "flex",
-    alignItems:      "center",
-    justifyContent:  "center",
+  headerContent: {
+    display: "flex", alignItems: "center", justifyContent: "space-between",
+    padding: "13px 14px", position: "relative", zIndex: 1,
   },
-  headerTitle: {
-    fontSize:    "14px",
-    fontWeight:  "800",
-    color:       "#ffffff",
-    lineHeight:  1.2,
+  headerLeft: { display: "flex", alignItems: "center", gap: 10 },
+  botAvatar: {
+    width: 34, height: 34, borderRadius: 10,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    border: "1px solid rgba(255,255,255,0.25)",
+    display: "flex", alignItems: "center", justifyContent: "center",
   },
-  headerSub: {
-    fontSize:    "11px",
-    color:       "rgba(255,255,255,0.75)",
-    display:     "flex",
-    alignItems:  "center",
-    gap:         "4px",
-    marginTop:   "1px",
+  headerTitle: { fontSize: 14, fontWeight: 800, color: "#fff", lineHeight: 1.2 },
+  headerStatus: {
+    display: "flex", alignItems: "center", gap: 5,
+    fontSize: 11, color: "rgba(255,255,255,0.75)", marginTop: 1,
   },
-  activeDot: {
-    display:         "inline-block",
-    width:           "6px",
-    height:          "6px",
-    borderRadius:    "50%",
+  greenDot: {
+    display: "inline-block", width: 6, height: 6, borderRadius: "50%",
     backgroundColor: "#4ade80",
+    boxShadow: "0 0 6px rgba(74,222,128,0.8)",
   },
-  headerRight: {
-    display:     "flex",
-    alignItems:  "center",
-    gap:         "6px",
-  },
-  iconBtn: {
-    width:           "28px",
-    height:          "28px",
-    borderRadius:    "8px",
-    backgroundColor: "rgba(255,255,255,0.15)",
-    border:          "none",
-    cursor:          "pointer",
-    display:         "flex",
-    alignItems:      "center",
-    justifyContent:  "center",
+  hBtn: {
+    width: 28, height: 28, borderRadius: 8,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    border: "1px solid rgba(255,255,255,0.15)",
+    cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+    transition: "background .15s",
   },
 
-  /* Messages area */
-  messages: {
-    flex:              1,
-    overflowY:         "auto",
-    padding:           "16px",
-    display:           "flex",
-    flexDirection:     "column",
-    gap:               "12px",
-    backgroundColor:   "#f8fafc",
+  /* Body */
+  body: {
+    flex: 1, overflowY: "auto", padding: "14px 14px 8px",
+    display: "flex", flexDirection: "column", gap: 10,
+    background: "#fafafa",
   },
 
   /* Welcome */
   welcome: {
-    display:     "flex",
-    flexDirection:"column",
-    alignItems:  "center",
-    textAlign:   "center",
-    padding:     "12px 8px",
-    gap:         "8px",
+    display: "flex", flexDirection: "column", alignItems: "center",
+    textAlign: "center", padding: "10px 4px 4px", gap: 8,
   },
-  welcomeIcon: {
-    width:           "52px",
-    height:          "52px",
-    borderRadius:    "16px",
-    backgroundColor: "#eff6ff",
-    border:          "1px solid #dbeafe",
-    display:         "flex",
-    alignItems:      "center",
-    justifyContent:  "center",
-    marginBottom:    "4px",
+  welcomeIconWrap: {
+    width: 50, height: 50, borderRadius: 14,
+    backgroundColor: "#eef2ff", border: "1px solid #c7d2fe",
+    display: "flex", alignItems: "center", justifyContent: "center",
   },
-  welcomeTitle: {
-    fontSize:    "15px",
-    fontWeight:  "800",
-    color:       "#0f172a",
-    margin:      0,
-  },
-  welcomeSub: {
-    fontSize:    "13px",
-    color:       "#64748b",
-    margin:      0,
-    lineHeight:  1.5,
-  },
+  welcomeH: { fontSize: 14, fontWeight: 800, color: "#1e1b4b", margin: 0 },
+  welcomeP: { fontSize: 12.5, color: "#64748b", margin: 0, lineHeight: 1.55 },
 
-  /* Suggestion chips */
-  suggestions: {
-    display:    "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap:        "6px",
-  },
+  /* Chips */
+  chipGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 },
   chip: {
-    display:         "flex",
-    alignItems:      "center",
-    gap:             "6px",
-    padding:         "8px 10px",
-    borderRadius:    "10px",
-    backgroundColor: "#ffffff",
-    border:          "1px solid #e2e8f0",
-    color:           "#334155",
-    fontSize:        "12px",
-    fontWeight:      "600",
-    cursor:          "pointer",
-    transition:      "all 0.15s ease",
-    textAlign:       "left",
-    fontFamily:      "inherit",
+    display: "flex", alignItems: "center", gap: 6,
+    padding: "7px 10px", borderRadius: 10,
+    backgroundColor: "#fff", border: "1px solid #e0e7ff",
+    color: "#3730a3", fontSize: 12, fontWeight: 600,
+    cursor: "pointer", fontFamily: "inherit",
+    transition: "all .15s", textAlign: "left",
+    boxShadow: "0 1px 3px rgba(99,102,241,.08)",
   },
 
-  /* Message rows */
-  msgRow: {
-    display:     "flex",
-    alignItems:  "flex-end",
-    gap:         "8px",
+  /* Messages */
+  aiLabel: { display: "flex", alignItems: "center", gap: 4, marginLeft: 2 },
+  aiAvatar: {
+    width: 20, height: 20, borderRadius: 6,
+    backgroundColor: "#eef2ff", border: "1px solid #c7d2fe",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    flexShrink: 0,
   },
-  aiBubbleIcon: {
-    width:           "24px",
-    height:          "24px",
-    borderRadius:    "8px",
-    backgroundColor: "#eff6ff",
-    display:         "flex",
-    alignItems:      "center",
-    justifyContent:  "center",
-    flexShrink:      0,
-    border:          "1px solid #dbeafe",
-  },
+  aiLabelTxt: { fontSize: 10, fontWeight: 700, color: "#6366f1", letterSpacing: "0.05em" },
   aiBubble: {
-    maxWidth:        "88%",
-    backgroundColor: "#ffffff",
-    border:          "1px solid #e2e8f0",
-    borderRadius:    "14px 14px 14px 4px",
-    padding:         "10px 13px",
-    fontSize:        "13px",
-    color:           "#334155",
-    lineHeight:      1.55,
-    boxShadow:       "0 1px 4px rgba(0,0,0,0.05)",
+    maxWidth: "90%", backgroundColor: "#fff",
+    border: "1px solid #e0e7ff", borderRadius: "14px 14px 14px 4px",
+    padding: "9px 12px", fontSize: 13, color: "#1e293b", lineHeight: 1.55,
+    boxShadow: "0 1px 4px rgba(99,102,241,.06)",
   },
   userBubble: {
-    maxWidth:        "80%",
-    background:      "linear-gradient(135deg, #2563eb, #1d4ed8)",
-    borderRadius:    "14px 14px 4px 14px",
-    padding:         "10px 13px",
-    fontSize:        "13px",
-    color:           "#ffffff",
-    lineHeight:      1.55,
-    fontWeight:      "500",
+    maxWidth: "80%", alignSelf: "flex-end",
+    background: "linear-gradient(135deg,#4f46e5,#6366f1)",
+    borderRadius: "14px 14px 4px 14px",
+    padding: "9px 12px", fontSize: 13, color: "#fff",
+    fontWeight: 500, lineHeight: 1.55,
+    boxShadow: "0 3px 10px rgba(99,102,241,.3)",
   },
 
   /* Typing */
-  typingWrap: {
-    display:     "flex",
-    alignItems:  "flex-end",
-    gap:         "8px",
-  },
   dotsBubble: {
-    display:         "flex",
-    gap:             "4px",
-    alignItems:      "center",
-    backgroundColor: "#ffffff",
-    border:          "1px solid #e2e8f0",
-    borderRadius:    "14px 14px 14px 4px",
-    padding:         "12px 14px",
-    boxShadow:       "0 1px 4px rgba(0,0,0,0.05)",
+    display: "flex", gap: 4, alignItems: "center",
+    backgroundColor: "#fff", border: "1px solid #e0e7ff",
+    borderRadius: "14px 14px 14px 4px", padding: "10px 13px",
+    boxShadow: "0 1px 4px rgba(0,0,0,.04)",
   },
   dot: {
-    display:         "inline-block",
-    width:           "7px",
-    height:          "7px",
-    borderRadius:    "50%",
-    backgroundColor: "#94a3b8",
-    animation:       "ai-bounce 1.2s ease-in-out infinite",
+    display: "inline-block", width: 7, height: 7, borderRadius: "50%",
+    backgroundColor: "#a5b4fc",
+    animation: "ai-bounce 1.2s ease-in-out infinite",
   },
 
   /* Input */
-  inputArea: {
-    display:         "flex",
-    alignItems:      "flex-end",
-    gap:             "8px",
-    padding:         "12px 14px",
-    borderTop:       "1px solid #f1f5f9",
-    backgroundColor: "#ffffff",
-    flexShrink:      0,
+  inputRow: {
+    padding: "10px 12px 10px", borderTop: "1px solid #f1f5f9",
+    backgroundColor: "#fff", flexShrink: 0,
+  },
+  inputWrap: {
+    display: "flex", alignItems: "flex-end", gap: 8,
+    backgroundColor: "#f8fafc", borderRadius: 13,
+    border: "1px solid #e0e7ff", padding: "6px 6px 6px 12px",
   },
   textarea: {
-    flex:            1,
-    padding:         "9px 12px",
-    borderRadius:    "12px",
-    border:          "1px solid #e2e8f0",
-    fontSize:        "13px",
-    fontFamily:      "inherit",
-    color:           "#0f172a",
-    backgroundColor: "#f8fafc",
-    resize:          "none",
-    outline:         "none",
-    lineHeight:      1.5,
-    maxHeight:       "90px",
-    overflowY:       "auto",
+    flex: 1, border: "none", background: "transparent", outline: "none",
+    fontSize: 13, fontFamily: "inherit", color: "#0f172a",
+    resize: "none", lineHeight: 1.5, maxHeight: 80, overflowY: "auto",
+    paddingTop: 2,
   },
   sendBtn: {
-    width:           "36px",
-    height:          "36px",
-    borderRadius:    "10px",
-    background:      "linear-gradient(135deg, #2563eb, #1d4ed8)",
-    border:          "none",
-    display:         "flex",
-    alignItems:      "center",
-    justifyContent:  "center",
-    transition:      "all 0.15s ease",
-    flexShrink:      0,
-    boxShadow:       "0 2px 8px rgba(37,99,235,0.3)",
+    width: 32, height: 32, borderRadius: 9,
+    background: "linear-gradient(135deg,#4f46e5,#6366f1)",
+    border: "none", cursor: "pointer", flexShrink: 0,
+    display: "flex", alignItems: "center", justifyContent: "center",
+    boxShadow: "0 2px 8px rgba(99,102,241,.4)",
+    transition: "opacity .15s",
   },
-
-  footer: {
-    fontSize:    "10px",
-    color:       "#94a3b8",
-    textAlign:   "center",
-    padding:     "6px 0 10px",
-    margin:      0,
-    backgroundColor: "#ffffff",
-    flexShrink:  0,
+  hint: {
+    fontSize: 10.5, color: "#a5b4fc", textAlign: "center",
+    margin: "6px 0 0", fontWeight: 500,
   },
 };
 

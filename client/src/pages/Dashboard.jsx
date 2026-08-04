@@ -33,13 +33,23 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = async (isRetry = false) => {
     try {
+      setError("");
       setLoading(true);
       const res = await API.get("/dashboard/summary");
       setData(res.data);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to load dashboard metrics");
+      // On first 401/network error, wait 800ms and auto-retry once
+      if (!isRetry && (err.response?.status === 401 || !err.response)) {
+        setTimeout(() => fetchDashboardData(true), 800);
+        return;
+      }
+      const msg =
+        err.response?.status === 401
+          ? "Session expired. Please refresh the page or log in again."
+          : err.response?.data?.message || "Failed to load dashboard. Check your server connection.";
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -55,12 +65,36 @@ const Dashboard = () => {
 
   if (error) {
     return (
-      <div style={styles.errorBanner}>
-        <AlertTriangle size={20} />
-        <span>{error}</span>
-        <button onClick={fetchDashboardData} className="btn btn-secondary">
-          Retry
-        </button>
+      <div style={{
+        display: "flex", flexDirection: "column", alignItems: "center",
+        justifyContent: "center", minHeight: "60vh", gap: "16px", padding: "24px",
+      }}>
+        <div style={{
+          backgroundColor: "#fef2f2", border: "1px solid #fecaca",
+          borderRadius: "20px", padding: "32px 40px", textAlign: "center",
+          maxWidth: "420px", width: "100%",
+        }}>
+          <div style={{
+            width: "56px", height: "56px", borderRadius: "16px",
+            backgroundColor: "#fee2e2", display: "flex", alignItems: "center",
+            justifyContent: "center", margin: "0 auto 16px",
+          }}>
+            <AlertTriangle size={28} color="#ef4444" />
+          </div>
+          <h3 style={{ fontSize: "18px", fontWeight: "800", color: "#0f172a", margin: "0 0 8px" }}>
+            Dashboard Failed to Load
+          </h3>
+          <p style={{ fontSize: "14px", color: "#64748b", margin: "0 0 20px", lineHeight: 1.5 }}>
+            {error}
+          </p>
+          <button
+            onClick={() => fetchDashboardData()}
+            className="btn btn-primary"
+            style={{ width: "100%", justifyContent: "center" }}
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
