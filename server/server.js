@@ -23,8 +23,6 @@ connectDB();
 
 const app = express();
 
-const isDev = process.env.NODE_ENV !== "production";
-
 app.use(
   cors({
     origin: true,
@@ -52,8 +50,12 @@ app.use("/api/ai",         aiRoutes);
 const clientDistPath = path.join(__dirname, "../client/dist");
 if (fs.existsSync(clientDistPath)) {
   app.use(express.static(clientDistPath));
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(clientDistPath, "index.html"));
+  // Express 5 compatible SPA fallback middleware
+  app.use((req, res, next) => {
+    if (req.method === "GET") {
+      return res.sendFile(path.join(clientDistPath, "index.html"));
+    }
+    next();
   });
 } else {
   app.get("/", (req, res) => {
