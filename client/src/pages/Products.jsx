@@ -25,6 +25,7 @@ import Loader from "../components/Loader";
 import ConfirmModal from "../components/ConfirmModal";
 import Toast from "../components/Toast";
 import { compactNumber } from "../utils/formatNumber";
+import { getImageUrl } from "../utils/getImageUrl";
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -143,13 +144,7 @@ const Products = () => {
       warehouse: prod.warehouse?._id || prod.warehouse || "",
     });
     setImageFile(null);
-    setImagePreview(
-      prod.image
-        ? prod.image.startsWith("http")
-          ? prod.image
-          : `http://localhost:5000/${prod.image}`
-        : null
-    );
+    setImagePreview(getImageUrl(prod.image));
     setFormError("");
     setIsModalOpen(true);
   };
@@ -310,11 +305,7 @@ const Products = () => {
     {
       header: "Product",
       render: (row) => {
-        const imageUrl = row.image
-          ? row.image.startsWith("http")
-            ? row.image
-            : `http://localhost:5000/${row.image}`
-          : null;
+        const imageUrl = getImageUrl(row.image);
 
         return (
           <div style={{ display: "flex", alignItems: "center", gap: "16px", padding: "4px 0" }}>

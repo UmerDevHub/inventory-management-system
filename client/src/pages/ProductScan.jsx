@@ -78,7 +78,7 @@ const ProductScan = () => {
   const imageUrl = product.image
     ? product.image.startsWith("http")
       ? product.image
-      : `http://localhost:5000/${product.image}`
+      : `/${product.image.replace(/^\//, '')}`
     : null;
 
   const badge = getStockBadge(product.quantity, product.reorderLevel);

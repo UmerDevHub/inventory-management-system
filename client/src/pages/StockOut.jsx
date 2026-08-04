@@ -207,7 +207,7 @@ const StockOut = () => {
         const imageUrl = row.product?.image
           ? row.product.image.startsWith("http")
             ? row.product.image
-            : `http://localhost:5000/${row.product.image}`
+            : `/${row.product.image.replace(/^\//, '')}`
           : null;
 
         return (

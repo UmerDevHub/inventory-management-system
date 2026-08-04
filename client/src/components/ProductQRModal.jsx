@@ -23,7 +23,7 @@ const ProductQRModal = ({ product, onClose }) => {
   const imageUrl = product.image
     ? product.image.startsWith("http")
       ? product.image
-      : `http://localhost:5000/${product.image}`
+      : `/${product.image.replace(/^\//, '')}`
     : null;
 
   // ── Download ──────────────────────────────────────────────
