@@ -6,14 +6,12 @@ import {
   EyeOff,
   Lock,
   Mail,
-  CheckCircle2,
   ShieldCheck,
-  Zap,
   ArrowRight,
-  Sparkles,
   TrendingUp,
   Package,
   Bot,
+  UserCheck,
 } from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
 import API from "../api/axios";
@@ -36,7 +34,7 @@ const Login = () => {
     setPassword("123456");
     setError("");
     setDemoApplied(true);
-    setTimeout(() => setDemoApplied(false), 2500);
+    setTimeout(() => setDemoApplied(false), 2000);
   };
 
   const handleSubmit = async (e) => {
@@ -71,7 +69,7 @@ const Login = () => {
 
   return (
     <div className="login-container" style={styles.container}>
-      {/* ── Left Hero Banner (Compact Modern Dark Canvas) ── */}
+      {/* ── Left Hero Banner (Authentic Enterprise Canvas) ── */}
       <div className="login-left-banner" style={styles.leftBanner}>
         <div style={styles.heroGlow1} />
         <div style={styles.heroGlow2} />
@@ -84,7 +82,7 @@ const Login = () => {
             </div>
             <div>
               <span style={styles.brandName}>WarehouseOS</span>
-              <span style={styles.brandTag}>Smart Inventory System</span>
+              <span style={styles.brandTag}>Smart Inventory Platform</span>
             </div>
           </div>
 
@@ -137,95 +135,47 @@ const Login = () => {
         </div>
       </div>
 
-      {/* ── Right Form Area (Compact & Balanced Card) ── */}
+      {/* ── Right Form Area (Authentic Human Enterprise Card) ── */}
       <div className="login-right-area" style={styles.rightArea}>
         <div style={styles.rightGlow1} />
         <div style={styles.rightGlow2} />
 
         <div className="login-form-card" style={styles.formCard}>
-          {/* Card Title Header */}
-          <div style={styles.cardHeader}>
-            <div style={styles.welcomePill}>
-              <span>Welcome back</span>
-              <span>👋</span>
+          {/* Card Brand Header */}
+          <div style={styles.cardBrandHeader}>
+            <div style={styles.brandHeaderLeft}>
+              <div style={styles.cardLogoBox}>
+                <Boxes size={20} color="#ffffff" />
+              </div>
+              <div>
+                <span style={styles.cardBrandTitle}>WarehouseOS</span>
+                <span style={styles.cardBrandSub}>Enterprise Portal</span>
+              </div>
             </div>
-            <h2 style={styles.cardTitle}>Sign In to Dashboard</h2>
+            <span style={styles.adminBadge}>ADMIN</span>
+          </div>
+
+          {/* Title & Subtitle */}
+          <div style={styles.titleSection}>
+            <h2 style={styles.cardTitle}>Sign in to your account</h2>
             <p style={styles.cardSub}>
-              Enter your credentials to access your inventory portal
+              Enter your credentials to manage warehouse inventory
             </p>
           </div>
 
-          {/* ⚡ Instant Demo Fill Banner (Compact & Sleek) */}
-          <div
-            onClick={handleDemoFill}
-            style={{
-              ...styles.demoBanner,
-              borderColor: demoApplied ? "#10b981" : "#bfdbfe",
-              background: demoApplied
-                ? "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)"
-                : "linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%)",
-            }}
-          >
-            <div style={styles.demoBannerContent}>
-              <div
-                style={{
-                  ...styles.demoIconSquare,
-                  background: demoApplied
-                    ? "linear-gradient(135deg, #10b981, #059669)"
-                    : "linear-gradient(135deg, #2563eb, #1d4ed8)",
-                }}
-              >
-                {demoApplied ? (
-                  <CheckCircle2 size={15} color="#ffffff" />
-                ) : (
-                  <Zap size={15} color="#ffffff" />
-                )}
-              </div>
-
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                  <span
-                    style={{
-                      ...styles.demoHeadline,
-                      color: demoApplied ? "#065f46" : "#1e293b",
-                    }}
-                  >
-                    {demoApplied ? "Demo Credentials Loaded!" : "Instant Demo Credentials"}
-                  </span>
-                  <Sparkles size={13} color={demoApplied ? "#10b981" : "#2563eb"} />
-                </div>
-
-                <div style={styles.demoPillsWrapper}>
-                  <span style={styles.demoMonoPill}>admin@gmail.com</span>
-                  <span style={styles.demoDot}>•</span>
-                  <span style={styles.demoMonoPill}>123456</span>
-                </div>
-              </div>
-
-              <span
-                style={{
-                  ...styles.fillBtnBadge,
-                  backgroundColor: demoApplied ? "#10b981" : "#2563eb",
-                }}
-              >
-                {demoApplied ? "Filled ✓" : "1-Tap Fill"}
-              </span>
-            </div>
-          </div>
-
-          {/* Error Alert */}
+          {/* Error Message */}
           {error && <div style={styles.errorAlert}>{error}</div>}
 
-          {/* Form Fields */}
+          {/* Form */}
           <form onSubmit={handleSubmit}>
             <div style={styles.fieldGroup}>
               <label style={styles.fieldLabel}>Email Address</label>
               <div style={styles.inputWrap}>
-                <Mail size={16} color="#64748b" style={styles.fieldIcon} />
+                <Mail size={17} color="#64748b" style={styles.fieldIcon} />
                 <input
                   type="email"
                   className="form-input"
-                  placeholder="admin@gmail.com"
+                  placeholder="name@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   style={styles.fieldInput}
@@ -235,9 +185,11 @@ const Login = () => {
             </div>
 
             <div style={styles.fieldGroup}>
-              <label style={styles.fieldLabel}>Password</label>
+              <div style={styles.labelRow}>
+                <label style={styles.fieldLabel}>Password</label>
+              </div>
               <div style={styles.inputWrap}>
-                <Lock size={16} color="#64748b" style={styles.fieldIcon} />
+                <Lock size={17} color="#64748b" style={styles.fieldIcon} />
                 <input
                   type={showPassword ? "text" : "password"}
                   className="form-input"
@@ -254,9 +206,9 @@ const Login = () => {
                   title={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
-                    <EyeOff size={16} color="#64748b" />
+                    <EyeOff size={17} color="#64748b" />
                   ) : (
-                    <Eye size={16} color="#64748b" />
+                    <Eye size={17} color="#64748b" />
                   )}
                 </button>
               </div>
@@ -270,10 +222,11 @@ const Login = () => {
                   onChange={(e) => setRememberMe(e.target.checked)}
                   style={styles.checkboxInput}
                 />
-                <span>Remember this device for 7 days</span>
+                <span>Remember this device</span>
               </label>
             </div>
 
+            {/* Main Sign In Button */}
             <button
               type="submit"
               className="btn btn-primary"
@@ -281,7 +234,7 @@ const Login = () => {
               style={styles.submitBtn}
             >
               {loading ? (
-                "Signing in..."
+                "Authenticating..."
               ) : (
                 <>
                   <span>Sign In to Dashboard</span>
@@ -289,12 +242,27 @@ const Login = () => {
                 </>
               )}
             </button>
+
+            {/* Clean Human Demo Sign-In Action (No AI sparkles/boxes) */}
+            <button
+              type="button"
+              onClick={handleDemoFill}
+              style={{
+                ...styles.demoOutlineBtn,
+                borderColor: demoApplied ? "#10b981" : "#e2e8f0",
+                backgroundColor: demoApplied ? "#f0fdf4" : "#ffffff",
+                color: demoApplied ? "#15803d" : "#475569",
+              }}
+            >
+              <UserCheck size={16} color={demoApplied ? "#10b981" : "#64748b"} />
+              <span>{demoApplied ? "Demo Credentials Loaded ✓" : "Use Demo Admin Account"}</span>
+            </button>
           </form>
 
-          {/* Security Note Footer */}
+          {/* Security Footer */}
           <div style={styles.securityFooter}>
-            <ShieldCheck size={13} color="#94a3b8" />
-            <span>Protected by Role-Based Access Control & SSL</span>
+            <ShieldCheck size={14} color="#94a3b8" />
+            <span>256-bit SSL Encrypted • Role Based Access Control</span>
           </div>
         </div>
       </div>
@@ -302,7 +270,7 @@ const Login = () => {
   );
 };
 
-/* ────────────────────────── Proportional Compact Styles ────────────────────────── */
+/* ────────────────────────── Authentic Human Styles ────────────────────────── */
 const styles = {
   container: {
     display: "flex",
@@ -520,96 +488,78 @@ const styles = {
     maxWidth: "400px",
     backgroundColor: "#ffffff",
     border: "1px solid #e2e8f0",
-    borderRadius: "22px",
-    padding: "1.75rem 2rem",
+    borderRadius: "20px",
+    padding: "2.25rem 2.25rem",
     boxShadow: "0 20px 45px -10px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(226, 232, 240, 0.8)",
     position: "relative",
     zIndex: 3,
   },
-  cardHeader: {
-    marginBottom: "1.25rem",
-  },
-  welcomePill: {
-    display: "inline-flex",
+
+  /* Card Brand Header */
+  cardBrandHeader: {
+    display: "flex",
     alignItems: "center",
-    gap: "5px",
-    backgroundColor: "#f1f5f9",
-    padding: "3px 10px",
-    borderRadius: "999px",
+    justifyContent: "space-between",
+    marginBottom: "1.5rem",
+    paddingBottom: "1rem",
+    borderBottom: "1px solid #f1f5f9",
+  },
+  brandHeaderLeft: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+  },
+  cardLogoBox: {
+    width: "36px",
+    height: "36px",
+    borderRadius: "10px",
+    background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    boxShadow: "0 4px 14px rgba(37, 99, 235, 0.3)",
+  },
+  cardBrandTitle: {
+    fontSize: "15px",
+    fontWeight: "800",
+    color: "#0f172a",
+    letterSpacing: "-0.02em",
+    display: "block",
+    lineHeight: 1.1,
+  },
+  cardBrandSub: {
     fontSize: "11px",
-    fontWeight: "700",
-    color: "#475569",
-    marginBottom: "8px",
+    color: "#64748b",
+    fontWeight: "500",
+    display: "block",
+  },
+  adminBadge: {
+    fontSize: "10px",
+    fontWeight: "800",
+    color: "#2563eb",
+    backgroundColor: "#eff6ff",
+    border: "1px solid #dbeafe",
+    padding: "2px 8px",
+    borderRadius: "6px",
+    letterSpacing: "0.05em",
+  },
+
+  /* Title section */
+  titleSection: {
+    marginBottom: "1.5rem",
   },
   cardTitle: {
     fontSize: "1.45rem",
     fontWeight: "800",
     color: "#0f172a",
     margin: "0 0 4px",
-    letterSpacing: "-0.03em",
+    letterSpacing: "-0.025em",
   },
   cardSub: {
-    fontSize: "0.825rem",
+    fontSize: "0.85rem",
     color: "#64748b",
     lineHeight: 1.4,
     margin: 0,
-  },
-
-  /* ⚡ Instant Demo Credentials Banner */
-  demoBanner: {
-    padding: "10px 14px",
-    borderRadius: "14px",
-    border: "1px solid #bfdbfe",
-    cursor: "pointer",
-    marginBottom: "1.25rem",
-    transition: "all 0.2s ease",
-  },
-  demoBannerContent: {
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-  },
-  demoIconSquare: {
-    width: "32px",
-    height: "32px",
-    borderRadius: "10px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  demoHeadline: {
-    fontSize: "12.5px",
-    fontWeight: "800",
-    lineHeight: 1.2,
-  },
-  demoPillsWrapper: {
-    display: "flex",
-    alignItems: "center",
-    gap: "5px",
-    marginTop: "2px",
-  },
-  demoMonoPill: {
-    fontSize: "10px",
-    fontWeight: "700",
-    fontFamily: "monospace",
-    color: "#1e293b",
-    backgroundColor: "#ffffff",
-    border: "1px solid #cbd5e1",
-    padding: "1px 5px",
-    borderRadius: "4px",
-  },
-  demoDot: {
-    fontSize: "9px",
-    color: "#94a3b8",
-  },
-  fillBtnBadge: {
-    fontSize: "10px",
-    fontWeight: "800",
-    color: "#ffffff",
-    padding: "5px 11px",
-    borderRadius: "999px",
-    flexShrink: 0,
   },
 
   /* Controls */
@@ -625,6 +575,11 @@ const styles = {
   },
   fieldGroup: {
     marginBottom: "1rem",
+  },
+  labelRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   fieldLabel: {
     display: "block",
@@ -651,10 +606,11 @@ const styles = {
     borderRadius: "12px",
     fontSize: "13.5px",
     fontWeight: "500",
-    border: "1.5px solid #cbd5e1",
-    backgroundColor: "#f8fafc",
+    border: "1.5px solid #e2e8f0",
+    backgroundColor: "#ffffff",
     color: "#0f172a",
     outline: "none",
+    boxShadow: "0 1px 2px rgba(15, 23, 42, 0.03)",
   },
   eyeButton: {
     position: "absolute",
@@ -703,6 +659,23 @@ const styles = {
     cursor: "pointer",
     border: "none",
     color: "#ffffff",
+  },
+  demoOutlineBtn: {
+    width: "100%",
+    height: "42px",
+    marginTop: "10px",
+    fontSize: "0.85rem",
+    fontWeight: "700",
+    borderRadius: "12px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "8px",
+    border: "1.5px solid #e2e8f0",
+    backgroundColor: "#ffffff",
+    color: "#475569",
+    cursor: "pointer",
+    transition: "all 0.15s ease",
   },
   securityFooter: {
     display: "flex",
