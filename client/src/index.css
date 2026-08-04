@@ -585,7 +585,8 @@ button, input, select, textarea {
     flex-wrap: nowrap !important;
     align-items: center !important;
     justify-content: space-between !important;
-    padding: 14px 16px !important;
+    padding: 16px 18px !important;
+    height: auto !important;
     min-height: 96px !important;
     overflow: hidden !important;
     position: relative !important;
@@ -594,32 +595,42 @@ button, input, select, textarea {
   [style*="statCardLeft"],
   [style*="cardMain"],
   .stat-card-left {
-    flex: 1 1 auto !important;
+    flex: 1 1 0% !important;
     min-width: 0 !important;
+    max-width: calc(100% - 54px) !important;
   }
 
   [style*="statCardValue"],
   [style*="cardValue"] {
     font-size: 28px !important;
     line-height: 1.1 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  [style*="statCardLabel"] {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
 
   [style*="iconCircle56"],
   [style*="iconCircle"],
   .stat-card-icon {
-    width: 46px !important;
-    height: 46px !important;
+    width: 44px !important;
+    height: 44px !important;
     border-radius: 12px !important;
     flex-shrink: 0 !important;
-    margin-left: 10px !important;
+    margin-left: 8px !important;
     align-self: center !important;
   }
 
   [style*="iconCircle56"] svg,
   [style*="iconCircle"] svg,
   .stat-card-icon svg {
-    width: 22px !important;
-    height: 22px !important;
+    width: 20px !important;
+    height: 20px !important;
   }
 
   /* Navbar Mobile Brand display */
