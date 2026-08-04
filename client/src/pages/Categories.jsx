@@ -510,6 +510,7 @@ const styles = {
     height: "auto",
     padding: "20px 24px",
     display: "flex",
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     flexWrap: "nowrap",
@@ -521,6 +522,8 @@ const styles = {
   statCardLeft: {
     display: "flex",
     flexDirection: "column",
+    flex: "1 1 0%",
+    minWidth: 0,
   },
   statCardLabel: {
     fontSize: "11px",
@@ -542,6 +545,8 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    flexShrink: 0,
+    marginLeft: "auto",
   },
   toolbar: {
     display: "flex",

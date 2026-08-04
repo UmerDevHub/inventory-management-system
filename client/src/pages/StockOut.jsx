@@ -540,6 +540,7 @@ const styles = {
     height: "auto",
     padding: "20px 24px",
     display: "flex",
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     flexWrap: "nowrap",
@@ -551,6 +552,8 @@ const styles = {
   statCardLeft: {
     display: "flex",
     flexDirection: "column",
+    flex: "1 1 0%",
+    minWidth: 0,
   },
   statCardLabel: {
     fontSize: "11px",
@@ -559,10 +562,10 @@ const styles = {
     letterSpacing: "0.05em",
   },
   statCardValue: {
-    fontSize: "42px",
+    fontSize: "36px",
     fontWeight: "800",
     color: "#0f172a",
-    lineHeight: 1.05,
+    lineHeight: 1.1,
     marginTop: "4px",
     marginBottom: "4px",
   },
@@ -580,6 +583,7 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
+    marginLeft: "auto",
   },
   toolbar: {
     display: "flex",
