@@ -4,16 +4,17 @@ const cors = require("cors");
 const path = require("path");
 
 const connectDB = require("./config/db");
-const authRoutes = require("./routes/authRoutes");
+const authRoutes     = require("./routes/authRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const supplierRoutes = require("./routes/supplierRoutes");
-const warehouseRoutes = require("./routes/warehouseRoutes");
-const productRoutes = require("./routes/productRoutes");
-const stockInRoutes = require("./routes/stockInRoutes");
+const warehouseRoutes= require("./routes/warehouseRoutes");
+const productRoutes  = require("./routes/productRoutes");
+const stockInRoutes  = require("./routes/stockInRoutes");
 const stockOutRoutes = require("./routes/stockOutRoutes");
 const purchaseRoutes = require("./routes/purchaseRoutes");
-const dashboardRoutes = require("./routes/dashboardRoutes");
-const reportRoutes = require("./routes/reportRoutes");
+const dashboardRoutes= require("./routes/dashboardRoutes");
+const reportRoutes   = require("./routes/reportRoutes");
+const aiRoutes       = require("./routes/aiRoutes");
 
 dotenv.config();
 
@@ -45,16 +46,17 @@ app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
-app.use("/api/auth", authRoutes);
+app.use("/api/auth",       authRoutes);
 app.use("/api/categories", categoryRoutes);
-app.use("/api/suppliers", supplierRoutes);
+app.use("/api/suppliers",  supplierRoutes);
 app.use("/api/warehouses", warehouseRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/stock-in", stockInRoutes);
-app.use("/api/stock-out", stockOutRoutes);
-app.use("/api/purchases", purchaseRoutes);
-app.use("/api/dashboard", dashboardRoutes);
-app.use("/api/reports", reportRoutes);
+app.use("/api/products",   productRoutes);
+app.use("/api/stock-in",   stockInRoutes);
+app.use("/api/stock-out",  stockOutRoutes);
+app.use("/api/purchases",  purchaseRoutes);
+app.use("/api/dashboard",  dashboardRoutes);
+app.use("/api/reports",    reportRoutes);
+app.use("/api/ai",         aiRoutes);
 
 const PORT = process.env.PORT || 5000;
 

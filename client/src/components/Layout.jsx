@@ -2,6 +2,7 @@ import React, { useState, useCallback } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
+import AIAssistant from "./AIAssistant";
 
 const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -28,6 +29,9 @@ const Layout = () => {
           <Outlet />
         </main>
       </div>
+
+      {/* AI floating assistant — available on every page */}
+      <AIAssistant />
     </div>
   );
 };
