@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const path = require("path");
+const fs = require("fs");
 
 const connectDB = require("./config/db");
 const authRoutes     = require("./routes/authRoutes");
@@ -22,18 +23,11 @@ connectDB();
 
 const app = express();
 
-// Open CORS in dev, strict allowlist in production
 const isDev = process.env.NODE_ENV !== "production";
 
 app.use(
   cors({
-    origin: isDev
-      ? true // allow all in development
-      : [
-          "http://localhost:5173",
-          "http://localhost:4173",
-          process.env.FRONTEND_URL,
-        ].filter(Boolean),
+    origin: true,
     credentials: true,
   })
 );
@@ -41,11 +35,7 @@ app.use(
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-
-app.get("/", (req, res) => {
-  res.send("API is running...");
-});
-
+// API Routes
 app.use("/api/auth",       authRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/suppliers",  supplierRoutes);
@@ -57,6 +47,19 @@ app.use("/api/purchases",  purchaseRoutes);
 app.use("/api/dashboard",  dashboardRoutes);
 app.use("/api/reports",    reportRoutes);
 app.use("/api/ai",         aiRoutes);
+
+// Serve Frontend React Static Files in Production
+const clientDistPath = path.join(__dirname, "../client/dist");
+if (fs.existsSync(clientDistPath)) {
+  app.use(express.static(clientDistPath));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(clientDistPath, "index.html"));
+  });
+} else {
+  app.get("/", (req, res) => {
+    res.send("API is running...");
+  });
+}
 
 const PORT = process.env.PORT || 5000;
 
