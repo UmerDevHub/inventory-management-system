@@ -1206,7 +1206,8 @@ button, input, select, textarea {
   .stockout-mobile-cards-container,
   .purchase-mobile-cards-container,
   .supplier-mobile-cards-container,
-  .warehouse-mobile-cards-container {
+  .warehouse-mobile-cards-container,
+  .report-mobile-cards-container {
     display: flex !important;
     flex-direction: column !important;
     gap: 12px !important;
@@ -1317,7 +1318,8 @@ button, input, select, textarea {
   .stockout-mobile-cards-container,
   .purchase-mobile-cards-container,
   .supplier-mobile-cards-container,
-  .warehouse-mobile-cards-container {
+  .warehouse-mobile-cards-container,
+  .report-mobile-cards-container {
     display: none !important;
   }
 }

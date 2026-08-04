@@ -370,8 +370,10 @@ const Reports = () => {
   };
 
   const renderTable = () => {
+    let columns = [];
+
     if (activeTab === "stock") {
-      const columns = [
+      columns = [
         { header: "Product", render: (r) => <span style={{ fontWeight: "700", color: "#0f172a" }}>{r.name}</span> },
         { header: "SKU", render: (r) => <span style={{ fontFamily: "monospace", color: "#64748b" }}>{r.sku?.toUpperCase()}</span> },
         { header: "Category", render: (r) => <span className="badge badge-primary">{r.category?.name || "N/A"}</span> },
@@ -387,11 +389,8 @@ const Reports = () => {
           ),
         },
       ];
-      return <Table columns={columns} data={currentDisplayedDataset} />;
-    }
-
-    if (activeTab === "purchases") {
-      const columns = [
+    } else if (activeTab === "purchases") {
+      columns = [
         { header: "Date", render: (r) => new Date(r.purchaseDate || r.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) },
         { header: "Product", render: (r) => <span style={{ fontWeight: "700" }}>{r.product?.name || "Deleted"}</span> },
         { header: "Supplier", render: (r) => <span>{r.supplier?.name || "N/A"}</span> },
@@ -399,33 +398,24 @@ const Reports = () => {
         { header: "Quantity", render: (r) => <span className="badge badge-primary">+{r.quantity}</span> },
         { header: "Total Spent", render: (r) => <span style={{ fontWeight: "800", fontSize: "16px" }}>${Number(r.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span> },
       ];
-      return <Table columns={columns} data={currentDisplayedDataset} />;
-    }
-
-    if (activeTab === "stock-in") {
-      const columns = [
+    } else if (activeTab === "stock-in") {
+      columns = [
         { header: "Received Date", render: (r) => new Date(r.receivedDate || r.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) },
         { header: "Product", render: (r) => <span style={{ fontWeight: "700" }}>{r.product?.name || "Deleted"}</span> },
         { header: "SKU", render: (r) => <span style={{ fontFamily: "monospace" }}>{r.product?.sku?.toUpperCase() || "N/A"}</span> },
         { header: "Quantity Added", render: (r) => <span className="badge badge-success">+{r.quantity} units</span> },
         { header: "Notes", render: (r) => <span style={{ color: "#64748b" }}>{r.notes || "No notes"}</span> },
       ];
-      return <Table columns={columns} data={currentDisplayedDataset} />;
-    }
-
-    if (activeTab === "stock-out") {
-      const columns = [
+    } else if (activeTab === "stock-out") {
+      columns = [
         { header: "Issued Date", render: (r) => new Date(r.issuedDate || r.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) },
         { header: "Product", render: (r) => <span style={{ fontWeight: "700" }}>{r.product?.name || "Deleted"}</span> },
         { header: "SKU", render: (r) => <span style={{ fontFamily: "monospace" }}>{r.product?.sku?.toUpperCase() || "N/A"}</span> },
         { header: "Quantity Issued", render: (r) => <span className="badge badge-danger">-{r.quantity} units</span> },
         { header: "Notes", render: (r) => <span style={{ color: "#64748b" }}>{r.notes || "No notes"}</span> },
       ];
-      return <Table columns={columns} data={currentDisplayedDataset} />;
-    }
-
-    if (activeTab === "low-stock") {
-      const columns = [
+    } else if (activeTab === "low-stock") {
+      columns = [
         { header: "Product", render: (r) => <span style={{ fontWeight: "700" }}>{r.name}</span> },
         { header: "SKU", render: (r) => <span style={{ fontFamily: "monospace" }}>{r.sku?.toUpperCase()}</span> },
         { header: "Category", render: (r) => <span className="badge badge-primary">{r.category?.name || "N/A"}</span> },
@@ -433,10 +423,111 @@ const Reports = () => {
         { header: "Reorder Threshold", render: (r) => <span>{r.reorderLevel}</span> },
         { header: "Status", render: () => <span className="badge badge-danger">● Low Stock</span> },
       ];
-      return <Table columns={columns} data={currentDisplayedDataset} />;
     }
 
-    return null;
+    return (
+      <>
+        {/* Desktop Table View (≥ 768px) */}
+        <div className="desktop-table-container">
+          <Table columns={columns} data={currentDisplayedDataset} />
+        </div>
+
+        {/* Mobile Stacked Cards View (< 768px) */}
+        <div className="report-mobile-cards-container">
+          {currentDisplayedDataset.map((r, idx) => (
+            <div key={r._id || idx} className="card" style={{ padding: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
+              {activeTab === "stock" && (
+                <>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <div>
+                      <h4 style={{ fontSize: "15px", fontWeight: "700", color: "#0f172a", margin: 0 }}>{r.name}</h4>
+                      {r.sku && <span style={{ fontSize: "11px", color: "#64748b", fontFamily: "monospace" }}>SKU: {r.sku}</span>}
+                    </div>
+                    <span style={{ fontSize: "15px", fontWeight: "800", color: "#0f172a" }}>
+                      ${(r.quantity * r.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#64748b" }}>
+                    <span>🏷️ {r.category?.name || "Uncategorized"}</span>
+                    <span>Stock: <strong>{r.quantity} units</strong> (${r.price}/unit)</span>
+                  </div>
+                </>
+              )}
+
+              {activeTab === "purchases" && (
+                <>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <div>
+                      <h4 style={{ fontSize: "15px", fontWeight: "700", color: "#0f172a", margin: 0 }}>{r.product?.name || "Procured Item"}</h4>
+                      <span style={{ fontSize: "11px", color: "#64748b" }}>Vendor: {r.supplier?.name || "Supplier Partner"}</span>
+                    </div>
+                    <span style={{ fontSize: "15px", fontWeight: "800", color: "#0f172a" }}>
+                      ${Number(r.totalAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#64748b" }}>
+                    <span>📅 {new Date(r.purchaseDate || r.createdAt).toLocaleDateString("en-GB")}</span>
+                    <span>Qty: +{r.quantity} units</span>
+                  </div>
+                </>
+              )}
+
+              {activeTab === "stock-in" && (
+                <>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <div>
+                      <h4 style={{ fontSize: "15px", fontWeight: "700", color: "#0f172a", margin: 0 }}>{r.product?.name || "Received Product"}</h4>
+                      {r.product?.sku && <span style={{ fontSize: "11px", color: "#64748b", fontFamily: "monospace" }}>SKU: {r.product.sku}</span>}
+                    </div>
+                    <span style={{ fontSize: "14px", fontWeight: "800", color: "#10b981", backgroundColor: "#eafbf3", padding: "4px 8px", borderRadius: "6px" }}>
+                      +{r.quantity} Units
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#64748b" }}>
+                    <span>📅 {new Date(r.receivedDate || r.createdAt).toLocaleDateString("en-GB")}</span>
+                    {r.notes && <span style={{ fontStyle: "italic" }}>"{r.notes}"</span>}
+                  </div>
+                </>
+              )}
+
+              {activeTab === "stock-out" && (
+                <>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <div>
+                      <h4 style={{ fontSize: "15px", fontWeight: "700", color: "#0f172a", margin: 0 }}>{r.product?.name || "Issued Product"}</h4>
+                      {r.product?.sku && <span style={{ fontSize: "11px", color: "#64748b", fontFamily: "monospace" }}>SKU: {r.product.sku}</span>}
+                    </div>
+                    <span style={{ fontSize: "14px", fontWeight: "800", color: "#ef4444", backgroundColor: "#fdeeee", padding: "4px 8px", borderRadius: "6px" }}>
+                      -{r.quantity} Units
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#64748b" }}>
+                    <span>📅 {new Date(r.issuedDate || r.createdAt).toLocaleDateString("en-GB")}</span>
+                    {r.notes && <span style={{ fontStyle: "italic" }}>"{r.notes}"</span>}
+                  </div>
+                </>
+              )}
+
+              {activeTab === "low-stock" && (
+                <>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                    <div>
+                      <h4 style={{ fontSize: "15px", fontWeight: "700", color: "#0f172a", margin: 0 }}>{r.name}</h4>
+                      {r.sku && <span style={{ fontSize: "11px", color: "#64748b", fontFamily: "monospace" }}>SKU: {r.sku}</span>}
+                    </div>
+                    <span className="badge badge-danger">● Low Stock</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#64748b" }}>
+                    <span>🏷️ {r.category?.name || "Uncategorized"}</span>
+                    <span>Stock: <strong style={{ color: "#ef4444" }}>{r.quantity}</strong> / Min: {r.reorderLevel}</span>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      </>
+    );
   };
 
   return (
