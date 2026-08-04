@@ -700,11 +700,13 @@ button, input, select, textarea {
     letter-spacing: -0.02em !important;
   }
 
-  /* ─── Login Screen Mobile Optimization ─────────────────────── */
+  /* ─── Mobile Login Screen Premium Optimization ─────────────────── */
   .login-container {
     flex-direction: column !important;
     min-height: 100vh !important;
-    background-color: #f8fafc !important;
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 45%, #1e40af 100%) !important;
+    position: relative !important;
+    overflow: hidden !important;
   }
 
   .login-left-banner {
@@ -712,21 +714,26 @@ button, input, select, textarea {
   }
 
   .login-right-area {
-    padding: 24px 16px !important;
+    padding: 32px 18px !important;
     width: 100% !important;
     min-height: 100vh !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    position: relative !important;
+    z-index: 2 !important;
   }
 
   .login-form-card {
-    padding: 28px 20px !important;
-    border-radius: 24px !important;
+    padding: 32px 24px !important;
+    border-radius: 28px !important;
     width: 100% !important;
-    max-width: 100% !important;
-    box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08) !important;
-    border: 1px solid #e2e8f0 !important;
+    max-width: 420px !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    box-shadow: 0 25px 60px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.5) inset !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
     margin: auto 0 !important;
   }
 
@@ -919,21 +926,104 @@ button, input, select, textarea {
 
   /* AI Assistant Floating Widget on Mobile */
   .ai-assistant-fab {
-    bottom: 18px !important;
-    right: 18px !important;
-    width: 52px !important;
-    height: 52px !important;
+    bottom: 74px !important;
+    right: 16px !important;
+    width: 50px !important;
+    height: 50px !important;
   }
 
   .ai-assistant-panel {
-    bottom: 78px !important;
+    bottom: 132px !important;
     right: 12px !important;
     left: 12px !important;
     width: auto !important;
     max-width: calc(100vw - 24px) !important;
-    height: calc(100vh - 100px) !important;
-    max-height: 540px !important;
+    height: calc(100vh - 160px) !important;
+    max-height: 500px !important;
     border-radius: 20px !important;
+  }
+}
+
+/* ─── Mobile Bottom Navigation Bar Styles ─────────────────────── */
+.mobile-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-bottom-nav {
+    display: block !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 999 !important;
+    background: rgba(255, 255, 255, 0.94) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    border-top: 1px solid rgba(226, 232, 240, 0.8) !important;
+    box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.06) !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+  }
+
+  .mobile-bottom-nav__container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-around !important;
+    height: 62px !important;
+    max-width: 500px !important;
+    margin: 0 auto !important;
+    padding: 0 8px !important;
+  }
+
+  .mobile-bottom-nav__item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 3px !important;
+    text-decoration: none !important;
+    color: #64748b !important;
+    flex: 1 !important;
+    padding: 6px 0 !important;
+    transition: all 0.15s ease !important;
+  }
+
+  .mobile-bottom-nav__item--active {
+    color: #2563eb !important;
+  }
+
+  .mobile-bottom-nav__icon-wrap {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .mobile-bottom-nav__item--active .mobile-bottom-nav__icon-wrap svg {
+    color: #2563eb !important;
+    transform: translateY(-1px) !important;
+  }
+
+  .mobile-bottom-nav__dot {
+    position: absolute !important;
+    bottom: -4px !important;
+    width: 4px !important;
+    height: 4px !important;
+    border-radius: 50% !important;
+    background-color: #2563eb !important;
+    box-shadow: 0 0 6px rgba(37, 99, 235, 0.8) !important;
+  }
+
+  .mobile-bottom-nav__label {
+    font-size: 10.5px !important;
+    font-weight: 600 !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  .mobile-bottom-nav__item--active .mobile-bottom-nav__label {
+    font-weight: 700 !important;
+    color: #2563eb !important;
   }
 }
 

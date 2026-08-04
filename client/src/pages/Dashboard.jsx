@@ -432,29 +432,29 @@ const Dashboard = () => {
               </p>
             </div>
           ) : (
-            <div style={{ width: "100%", overflow: "hidden" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px" }}>
+            <div style={{ width: "100%", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px", minWidth: "320px" }}>
                 <thead>
                   <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
-                    <th style={styles.thLeft}>PRODUCT</th>
-                    <th style={styles.thRight}>CURRENT</th>
-                    <th style={styles.thRight}>REORDER</th>
-                    <th style={styles.thRight}>STATUS</th>
+                    <th style={{ ...styles.thLeft, paddingRight: "12px" }}>PRODUCT</th>
+                    <th style={{ ...styles.thRight, paddingLeft: "8px", paddingRight: "8px" }}>QTY</th>
+                    <th style={{ ...styles.thRight, paddingLeft: "8px", paddingRight: "8px" }}>REORDER</th>
+                    <th style={{ ...styles.thRight, paddingLeft: "8px" }}>STATUS</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.lowStockProducts.slice(0, 5).map((prod) => (
                     <tr key={prod._id} style={{ borderBottom: "1px solid #f8fafc" }}>
-                      <td style={{ padding: "14px 0", fontWeight: "700", color: "#0f172a" }}>
+                      <td style={{ padding: "12px 12px 12px 0", fontWeight: "700", color: "#0f172a" }}>
                         {prod.name}
                       </td>
-                      <td style={{ padding: "14px 0", textAlign: "right", fontWeight: "800", color: "#ef4444" }}>
+                      <td style={{ padding: "12px 8px", textAlign: "right", fontWeight: "800", color: "#ef4444" }}>
                         {prod.quantity}
                       </td>
-                      <td style={{ padding: "14px 0", textAlign: "right", color: "#64748b" }}>
+                      <td style={{ padding: "12px 8px", textAlign: "right", color: "#64748b" }}>
                         {prod.reorderLevel}
                       </td>
-                      <td style={{ padding: "14px 0", textAlign: "right" }}>
+                      <td style={{ padding: "12px 0 12px 8px", textAlign: "right" }}>
                         <span className="badge badge-danger">Low</span>
                       </td>
                     </tr>

@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Navbar from "./Navbar";
 import AIAssistant from "./AIAssistant";
+import MobileBottomNav from "./MobileBottomNav";
 
 const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -32,6 +33,9 @@ const Layout = () => {
 
       {/* AI floating assistant — available on every page */}
       <AIAssistant />
+
+      {/* Mobile bottom navigation bar */}
+      <MobileBottomNav />
     </div>
   );
 };
