@@ -71,9 +71,8 @@ const Login = () => {
 
   return (
     <div className="login-container" style={styles.container}>
-      {/* ── Left Hero Banner (Warm Modern Dark Canvas with Live Floating Preview Cards) ── */}
+      {/* ── Left Hero Banner (Warm Modern Dark Canvas) ── */}
       <div className="login-left-banner" style={styles.leftBanner}>
-        {/* Subtle mesh background glows */}
         <div style={styles.heroGlow1} />
         <div style={styles.heroGlow2} />
 
@@ -85,16 +84,16 @@ const Login = () => {
             </div>
             <div>
               <span style={styles.brandName}>WarehouseOS</span>
-              <span style={styles.brandTag}>Smart Inventory System</span>
+              <span style={styles.brandTag}>Smart Inventory Platform</span>
             </div>
           </div>
 
-          {/* Warm Human Heading */}
+          {/* Hero Heading */}
           <h1 style={styles.heroHeading}>
             Intelligent inventory built for modern teams.
           </h1>
           <p style={styles.heroSub}>
-            Everything you need to track stock, streamline multi-warehouse operations, and make data-driven decisions with AI intelligence.
+            Track stock levels in real time, automate purchase orders, manage warehouses, and query your inventory with live AI intelligence.
           </p>
 
           {/* Floating Live Stock Preview Card */}
@@ -113,7 +112,7 @@ const Login = () => {
               </div>
               <div style={{ flex: 1 }}>
                 <span style={styles.previewItemName}>Wireless Ergonomic Mouse</span>
-                <span style={styles.previewItemSub}>Warehouse A • Shelf 4B</span>
+                <span style={styles.previewItemSub}>Main Warehouse • Rack 4B</span>
               </div>
               <span style={styles.stockPillSuccess}>142 In Stock</span>
             </div>
@@ -130,7 +129,7 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Human Trust Footer */}
+          {/* Trust Footer */}
           <div style={styles.trustRow}>
             <ShieldCheck size={16} color="#38bdf8" />
             <span>Encrypted 256-bit Session • Multi-Warehouse Ready</span>
@@ -138,44 +137,58 @@ const Login = () => {
         </div>
       </div>
 
-      {/* ── Right Form Area (Warm Light Mesh Background & Human Touch Card) ── */}
+      {/* ── Right Form Area (Modern Clean Card) ── */}
       <div className="login-right-area" style={styles.rightArea}>
-        {/* Soft background ambient mesh glows */}
         <div style={styles.rightGlow1} />
         <div style={styles.rightGlow2} />
 
         <div className="login-form-card" style={styles.formCard}>
-          {/* Header */}
+          {/* Card Header Branding */}
           <div style={styles.cardHeader}>
-            <div style={styles.welcomeRow}>
-              <span style={styles.welcomeText}>Welcome back</span>
-              <span style={styles.handWave}>👋</span>
+            <div style={styles.cardHeaderTop}>
+              <div style={styles.cardLogoBox}>
+                <Boxes size={22} color="#ffffff" />
+              </div>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <span style={styles.cardBrandName}>WarehouseOS</span>
+                  <span style={styles.adminTag}>ADMIN</span>
+                </div>
+                <span style={styles.cardBrandSub}>Enterprise Portal</span>
+              </div>
+            </div>
+
+            <div style={styles.welcomePill}>
+              <span>Welcome back</span>
+              <span>👋</span>
             </div>
             <h2 style={styles.cardTitle}>Sign In to Dashboard</h2>
             <p style={styles.cardSub}>
-              Enter your credentials to manage your inventory
+              Enter your admin credentials to access inventory
             </p>
           </div>
 
-          {/* ⚡ Human-Centric Demo Auto-Fill Card */}
+          {/* ⚡ World-Class Instant Demo Auto-Fill Banner */}
           <div
             onClick={handleDemoFill}
             style={{
-              ...styles.demoCard,
-              borderColor: demoApplied ? "#10b981" : "#e2e8f0",
-              backgroundColor: demoApplied ? "#f0fdf4" : "#ffffff",
+              ...styles.demoBanner,
+              borderColor: demoApplied ? "#10b981" : "#bfdbfe",
+              background: demoApplied
+                ? "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)"
+                : "linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%)",
               boxShadow: demoApplied
-                ? "0 8px 20px rgba(16, 185, 129, 0.15)"
-                : "0 4px 14px rgba(15, 23, 42, 0.04)",
+                ? "0 6px 18px rgba(16, 185, 129, 0.15)"
+                : "0 4px 16px rgba(37, 99, 235, 0.08)",
             }}
           >
-            <div style={styles.demoCardLeft}>
+            <div style={styles.demoBannerContent}>
               <div
                 style={{
-                  ...styles.demoZapIcon,
+                  ...styles.demoIconSquare,
                   background: demoApplied
                     ? "linear-gradient(135deg, #10b981, #059669)"
-                    : "linear-gradient(135deg, #3b82f6, #1d4ed8)",
+                    : "linear-gradient(135deg, #2563eb, #1d4ed8)",
                 }}
               >
                 {demoApplied ? (
@@ -184,40 +197,47 @@ const Login = () => {
                   <Zap size={16} color="#ffffff" />
                 )}
               </div>
-              <div>
+
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                  <span style={styles.demoHeading}>
-                    {demoApplied ? "Demo Credentials Loaded!" : "Instant Demo Access"}
+                  <span
+                    style={{
+                      ...styles.demoHeadline,
+                      color: demoApplied ? "#065f46" : "#1e293b",
+                    }}
+                  >
+                    {demoApplied ? "Demo Credentials Loaded!" : "Instant Demo Credentials"}
                   </span>
                   <Sparkles size={14} color={demoApplied ? "#10b981" : "#2563eb"} />
                 </div>
-                <div style={styles.demoPillsGroup}>
-                  <span style={styles.demoCodePill}>admin@gmail.com</span>
+
+                <div style={styles.demoPillsWrapper}>
+                  <span style={styles.demoMonoPill}>admin@gmail.com</span>
                   <span style={styles.demoDot}>•</span>
-                  <span style={styles.demoCodePill}>123456</span>
+                  <span style={styles.demoMonoPill}>123456</span>
                 </div>
               </div>
+
+              <span
+                style={{
+                  ...styles.fillBtnBadge,
+                  backgroundColor: demoApplied ? "#10b981" : "#2563eb",
+                }}
+              >
+                {demoApplied ? "Filled ✓" : "1-Tap Fill"}
+              </span>
             </div>
-            <span
-              style={{
-                ...styles.tapActionPill,
-                backgroundColor: demoApplied ? "#dcfce7" : "#eff6ff",
-                color: demoApplied ? "#15803d" : "#2563eb",
-              }}
-            >
-              {demoApplied ? "Filled ✓" : "Tap to fill"}
-            </span>
           </div>
 
           {/* Error Message */}
           {error && <div style={styles.errorAlert}>{error}</div>}
 
-          {/* Form */}
+          {/* Form Controls */}
           <form onSubmit={handleSubmit}>
             <div style={styles.fieldGroup}>
               <label style={styles.fieldLabel}>Email Address</label>
               <div style={styles.inputWrap}>
-                <Mail size={18} color="#94a3b8" style={styles.fieldIcon} />
+                <Mail size={18} color="#64748b" style={styles.fieldIcon} />
                 <input
                   type="email"
                   className="form-input"
@@ -233,7 +253,7 @@ const Login = () => {
             <div style={styles.fieldGroup}>
               <label style={styles.fieldLabel}>Password</label>
               <div style={styles.inputWrap}>
-                <Lock size={18} color="#94a3b8" style={styles.fieldIcon} />
+                <Lock size={18} color="#64748b" style={styles.fieldIcon} />
                 <input
                   type={showPassword ? "text" : "password"}
                   className="form-input"
@@ -250,9 +270,9 @@ const Login = () => {
                   title={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
-                    <EyeOff size={18} color="#94a3b8" />
+                    <EyeOff size={18} color="#64748b" />
                   ) : (
-                    <Eye size={18} color="#94a3b8" />
+                    <Eye size={18} color="#64748b" />
                   )}
                 </button>
               </div>
@@ -277,7 +297,7 @@ const Login = () => {
               style={styles.submitBtn}
             >
               {loading ? (
-                "Signing in..."
+                "Authenticating..."
               ) : (
                 <>
                   <span>Sign In to Dashboard</span>
@@ -287,7 +307,7 @@ const Login = () => {
             </button>
           </form>
 
-          {/* Footer Security Note */}
+          {/* Security Note Footer */}
           <div style={styles.securityFooter}>
             <ShieldCheck size={14} color="#94a3b8" />
             <span>Protected by Role-Based Access Control & SSL Encryption</span>
@@ -298,16 +318,16 @@ const Login = () => {
   );
 };
 
-/* ────────────────────────── Human Aesthetics Styles ────────────────────────── */
+/* ────────────────────────── Styles ────────────────────────── */
 const styles = {
   container: {
     display: "flex",
     minHeight: "100vh",
-    backgroundColor: "#fafbfc",
+    backgroundColor: "#f8fafc",
     fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif",
   },
 
-  /* ── Left Hero Banner ── */
+  /* Left Hero */
   leftBanner: {
     flex: "1.1",
     background: "linear-gradient(145deg, #090d16 0%, #0f172a 40%, #1e1b4b 100%)",
@@ -478,7 +498,7 @@ const styles = {
     fontWeight: "500",
   },
 
-  /* ── Right Form Area ── */
+  /* Right Area */
   rightArea: {
     flex: "1",
     display: "flex",
@@ -508,36 +528,72 @@ const styles = {
     background: "radial-gradient(circle, rgba(236, 72, 153, 0.06) 0%, rgba(0,0,0,0) 70%)",
     pointerEvents: "none",
   },
+
+  /* Form Card */
   formCard: {
     width: "100%",
     maxWidth: "460px",
     backgroundColor: "#ffffff",
     border: "1px solid #e2e8f0",
     borderRadius: "28px",
-    padding: "2.75rem 2.5rem",
+    padding: "2.5rem",
     boxShadow: "0 25px 60px -15px rgba(15, 23, 42, 0.10), 0 0 0 1px rgba(226, 232, 240, 0.8)",
     position: "relative",
     zIndex: 3,
   },
   cardHeader: {
-    marginBottom: "1.75rem",
+    marginBottom: "1.5rem",
   },
-  welcomeRow: {
+  cardHeaderTop: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    marginBottom: "1.5rem",
+    paddingBottom: "1.25rem",
+    borderBottom: "1px solid #f1f5f9",
+  },
+  cardLogoBox: {
+    width: "42px",
+    height: "42px",
+    borderRadius: "12px",
+    background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    boxShadow: "0 6px 18px rgba(37, 99, 235, 0.3)",
+  },
+  cardBrandName: {
+    fontSize: "18px",
+    fontWeight: "800",
+    color: "#0f172a",
+    letterSpacing: "-0.02em",
+  },
+  adminTag: {
+    fontSize: "10px",
+    fontWeight: "800",
+    color: "#2563eb",
+    backgroundColor: "#eff6ff",
+    border: "1px solid #dbeafe",
+    padding: "2px 6px",
+    borderRadius: "6px",
+    letterSpacing: "0.05em",
+  },
+  cardBrandSub: {
+    fontSize: "12px",
+    color: "#64748b",
+    fontWeight: "500",
+  },
+  welcomePill: {
     display: "inline-flex",
     alignItems: "center",
     gap: "6px",
     backgroundColor: "#f1f5f9",
     padding: "4px 12px",
     borderRadius: "999px",
-    marginBottom: "12px",
-  },
-  welcomeText: {
     fontSize: "12px",
     fontWeight: "700",
     color: "#475569",
-  },
-  handWave: {
-    fontSize: "14px",
+    marginBottom: "10px",
   },
   cardTitle: {
     fontSize: "1.75rem",
@@ -553,27 +609,23 @@ const styles = {
     margin: 0,
   },
 
-  /* ⚡ Demo Card */
-  demoCard: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
+  /* ⚡ Instant Demo Credentials Banner */
+  demoBanner: {
     padding: "14px 16px",
     borderRadius: "18px",
-    border: "1.5px solid #e2e8f0",
+    border: "1.5px solid #bfdbfe",
     cursor: "pointer",
     marginBottom: "1.75rem",
     transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
   },
-  demoCardLeft: {
+  demoBannerContent: {
     display: "flex",
     alignItems: "center",
     gap: "12px",
-    minWidth: 0,
   },
-  demoZapIcon: {
-    width: "36px",
-    height: "36px",
+  demoIconSquare: {
+    width: "38px",
+    height: "38px",
     borderRadius: "12px",
     display: "flex",
     alignItems: "center",
@@ -581,44 +633,45 @@ const styles = {
     flexShrink: 0,
     boxShadow: "0 4px 12px rgba(37, 99, 235, 0.25)",
   },
-  demoHeading: {
+  demoHeadline: {
     fontSize: "13.5px",
     fontWeight: "800",
-    color: "#0f172a",
     lineHeight: 1.2,
   },
-  demoPillsGroup: {
+  demoPillsWrapper: {
     display: "flex",
     alignItems: "center",
     gap: "6px",
     marginTop: "4px",
     flexWrap: "wrap",
   },
-  demoCodePill: {
+  demoMonoPill: {
     fontSize: "11px",
     fontWeight: "700",
     fontFamily: "monospace",
-    color: "#334155",
-    backgroundColor: "#f8fafc",
-    border: "1px solid #e2e8f0",
+    color: "#1e293b",
+    backgroundColor: "#ffffff",
+    border: "1px solid #cbd5e1",
     padding: "2px 7px",
     borderRadius: "6px",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.03)",
   },
   demoDot: {
     fontSize: "10px",
     color: "#94a3b8",
   },
-  tapActionPill: {
+  fillBtnBadge: {
     fontSize: "11px",
     fontWeight: "800",
-    padding: "5px 12px",
+    color: "#ffffff",
+    padding: "6px 14px",
     borderRadius: "999px",
     letterSpacing: "0.02em",
     flexShrink: 0,
-    marginLeft: "8px",
+    boxShadow: "0 2px 8px rgba(37, 99, 235, 0.25)",
   },
 
-  /* Form Controls */
+  /* Controls */
   errorAlert: {
     backgroundColor: "#fef2f2",
     border: "1px solid #fecaca",
