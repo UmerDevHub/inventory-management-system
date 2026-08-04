@@ -289,7 +289,7 @@ const Warehouses = () => {
           </p>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <div className="page-actions-row">
           <button onClick={() => window.print()} className="btn btn-secondary" style={styles.quickActionBtn}>
             <Printer size={16} />
             <span>Print</span>

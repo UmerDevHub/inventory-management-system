@@ -450,7 +450,7 @@ const Reports = () => {
           </p>
         </div>
 
-        <div style={styles.btnGroup} className="no-print">
+        <div className="page-actions-row no-print">
           <button onClick={() => window.print()} className="btn btn-secondary" style={styles.actionBtn}>
             <Printer size={16} />
             <span>Print Report</span>
