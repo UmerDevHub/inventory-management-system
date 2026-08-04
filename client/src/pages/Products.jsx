@@ -24,6 +24,7 @@ import SearchBar from "../components/SearchBar";
 import Loader from "../components/Loader";
 import ConfirmModal from "../components/ConfirmModal";
 import Toast from "../components/Toast";
+import ImageWithFallback from "../components/ImageWithFallback";
 import { compactNumber } from "../utils/formatNumber";
 import { getImageUrl } from "../utils/getImageUrl";
 
@@ -304,27 +305,19 @@ const Products = () => {
   const columns = [
     {
       header: "Product",
-      render: (row) => {
-        const imageUrl = getImageUrl(row.image);
-
-        return (
-          <div style={{ display: "flex", alignItems: "center", gap: "16px", padding: "4px 0" }}>
-            <div style={styles.imageThumbLarge}>
-              {imageUrl ? (
-                <img src={imageUrl} alt={row.name} style={styles.img} />
-              ) : (
-                <Package size={26} color="#2563eb" />
-              )}
-            </div>
-            <div>
-              <div style={{ fontWeight: "700", fontSize: "15px", color: "#0f172a" }}>
-                {row.name}
-              </div>
-              <span style={styles.skuBadge}>SKU: {row.sku}</span>
-            </div>
+      render: (row) => (
+        <div style={{ display: "flex", alignItems: "center", gap: "16px", padding: "4px 0" }}>
+          <div style={styles.imageThumbLarge}>
+            <ImageWithFallback src={row.image} alt={row.name} size={26} color="#2563eb" />
           </div>
-        );
-      },
+          <div>
+            <div style={{ fontWeight: "700", fontSize: "15px", color: "#0f172a" }}>
+              {row.name}
+            </div>
+            <span style={styles.skuBadge}>SKU: {row.sku}</span>
+          </div>
+        </div>
+      ),
     },
     {
       header: "Category",
