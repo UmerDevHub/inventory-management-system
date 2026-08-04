@@ -157,9 +157,9 @@ const Navbar = ({ onMenuClick }) => {
   const crumbs = getBreadcrumb(location.pathname);
 
   return (
-    <header style={styles.navbar}>
+    <header className="navbar-header" style={styles.navbar}>
       {/* Left: Hamburger (mobile) + Mobile Logo + Breadcrumb */}
-      <div style={styles.leftNavSection}>
+      <div className="navbar-left-section" style={styles.leftNavSection}>
         {/* Hamburger — visible only on mobile via CSS */}
         <button
           className="navbar-hamburger"
@@ -199,7 +199,7 @@ const Navbar = ({ onMenuClick }) => {
       </div>
 
       {/* Right Controls Section */}
-      <div style={styles.rightSection}>
+      <div className="navbar-right-section" style={styles.rightSection}>
         {/* Notifications Icon Button */}
         <div style={{ position: "relative" }}>
           <button
@@ -276,11 +276,12 @@ const Navbar = ({ onMenuClick }) => {
           )}
         </div>
 
-        <div style={styles.divider}></div>
+        <div className="navbar-divider" style={styles.divider}></div>
 
         {/* Premium Enterprise User Profile Pill & Dropdown */}
         <div style={{ position: "relative" }}>
           <div
+            className="navbar-user-pill"
             onClick={() => {
               setShowUserMenu(!showUserMenu);
               setShowNotifications(false);
