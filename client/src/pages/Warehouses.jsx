@@ -368,7 +368,7 @@ const Warehouses = () => {
         </div>
       </div>
 
-      {/* Main Table View */}
+      {/* Main Table View (Desktop ≥ 768px) */}
       {loading ? (
         <Loader message="Loading warehouse facilities..." />
       ) : filteredWarehouses.length === 0 ? (
@@ -387,11 +387,70 @@ const Warehouses = () => {
         </div>
       ) : (
         <>
-          <Table
-            columns={columns}
-            data={currentDisplayedWarehouses}
-            emptyMessage="No warehouses found."
-          />
+          <div className="desktop-table-container">
+            <Table
+              columns={columns}
+              data={currentDisplayedWarehouses}
+              emptyMessage="No warehouses found."
+            />
+          </div>
+
+          {/* Mobile Cards View (< 768px) */}
+          <div className="warehouse-mobile-cards-container">
+            {currentDisplayedWarehouses.map((wh) => (
+              <div key={wh._id} className="card warehouse-mobile-card">
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <div
+                    style={{
+                      width: "44px",
+                      height: "44px",
+                      borderRadius: "10px",
+                      backgroundColor: "#eff6ff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <WarehouseIcon size={20} color="#2563eb" />
+                  </div>
+                  <div>
+                    <h4 style={{ fontSize: "15px", fontWeight: "700", color: "#0f172a", margin: 0 }}>
+                      {wh.name}
+                    </h4>
+                    {wh.location && (
+                      <span style={{ fontSize: "11px", color: "#64748b" }}>
+                        📍 {wh.location}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <p style={{ fontSize: "13px", color: "#475569", margin: "4px 0", lineHeight: 1.4 }}>
+                  {wh.description || "No description provided."}
+                </p>
+
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", paddingTop: "4px" }}>
+                  <button
+                    onClick={() => handleOpenEditModal(wh)}
+                    className="btn btn-secondary btn-sm"
+                    style={{ padding: "6px 12px", fontSize: "12px" }}
+                  >
+                    <Edit3 size={14} color="#2563eb" />
+                    <span>Edit</span>
+                  </button>
+                  <button
+                    onClick={() => promptDelete(wh._id, wh.name)}
+                    className="btn btn-secondary btn-sm"
+                    style={{ padding: "6px 12px", fontSize: "12px", color: "#ef4444" }}
+                  >
+                    <Trash2 size={14} color="#ef4444" />
+                    <span>Delete</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
 
           {/* Pagination Footer */}
           {filteredWarehouses.length > 0 && (

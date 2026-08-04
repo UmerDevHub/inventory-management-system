@@ -379,7 +379,7 @@ const Suppliers = () => {
         </div>
       </div>
 
-      {/* Main Table View */}
+      {/* Main Table View (Desktop ≥ 768px) */}
       {loading ? (
         <Loader message="Loading suppliers directory..." />
       ) : filteredSuppliers.length === 0 ? (
@@ -398,11 +398,79 @@ const Suppliers = () => {
         </div>
       ) : (
         <>
-          <Table
-            columns={columns}
-            data={currentDisplayedSuppliers}
-            emptyMessage="No suppliers found."
-          />
+          <div className="desktop-table-container">
+            <Table
+              columns={columns}
+              data={currentDisplayedSuppliers}
+              emptyMessage="No suppliers found."
+            />
+          </div>
+
+          {/* Mobile Cards View (< 768px) */}
+          <div className="supplier-mobile-cards-container">
+            {currentDisplayedSuppliers.map((sup) => (
+              <div key={sup._id} className="card supplier-mobile-card">
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <div
+                    style={{
+                      width: "44px",
+                      height: "44px",
+                      borderRadius: "10px",
+                      backgroundColor: "#eff6ff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Truck size={20} color="#2563eb" />
+                  </div>
+                  <div>
+                    <h4 style={{ fontSize: "15px", fontWeight: "700", color: "#0f172a", margin: 0 }}>
+                      {sup.name}
+                    </h4>
+                    {sup.address && (
+                      <span style={{ fontSize: "11px", color: "#64748b" }}>
+                        📍 {sup.address}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px", fontSize: "13px" }}>
+                  {sup.email && (
+                    <a href={`mailto:${sup.email}`} style={{ color: "#2563eb", textDecoration: "none" }}>
+                      ✉️ {sup.email}
+                    </a>
+                  )}
+                  {sup.phone && (
+                    <a href={`tel:${sup.phone}`} style={{ color: "#0f172a", textDecoration: "none" }}>
+                      📞 {sup.phone}
+                    </a>
+                  )}
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", paddingTop: "4px" }}>
+                  <button
+                    onClick={() => handleOpenEditModal(sup)}
+                    className="btn btn-secondary btn-sm"
+                    style={{ padding: "6px 12px", fontSize: "12px" }}
+                  >
+                    <Edit3 size={14} color="#2563eb" />
+                    <span>Edit</span>
+                  </button>
+                  <button
+                    onClick={() => promptDelete(sup._id, sup.name)}
+                    className="btn btn-secondary btn-sm"
+                    style={{ padding: "6px 12px", fontSize: "12px", color: "#ef4444" }}
+                  >
+                    <Trash2 size={14} color="#ef4444" />
+                    <span>Delete</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
 
           {/* Pagination Footer */}
           {filteredSuppliers.length > 0 && (

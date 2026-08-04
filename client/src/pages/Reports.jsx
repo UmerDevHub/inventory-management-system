@@ -468,8 +468,8 @@ const Reports = () => {
         </div>
       </div>
 
-      {/* Tabs Bar */}
-      <div style={styles.tabsContainer} className="no-print">
+      {/* Tabs Bar (Horizontally scrollable strip on mobile) */}
+      <div style={styles.tabsContainer} className="no-print reports-tab-strip">
         {tabs.map((t) => {
           const Icon = t.icon;
           const isActive = activeTab === t.key;

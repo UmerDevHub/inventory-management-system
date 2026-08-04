@@ -343,30 +343,109 @@ const Categories = () => {
         </div>
       </div>
 
-      {/* Main Table View */}
+      {/* Main Table View (Desktop ≥ 768px) */}
       {loading ? (
         <Loader message="Loading categories..." />
       ) : filteredCategories.length === 0 ? (
         <div style={styles.emptyCard} className="card">
           <div style={styles.emptyIconCircle}>
-            <Tags size={32} color="#94a3b8" />
+            <AlertCircle size={28} color="#94a3b8" />
           </div>
-          <h3 style={styles.emptyTitle}>No categories found</h3>
-          <p style={styles.emptySub}>
-            Create your first category to start organizing products cleanly.
+          <h3 style={styles.emptyTitle}>No Categories Found</h3>
+          <p style={styles.emptySubtitle}>
+            {searchTerm
+              ? `No category matching "${searchTerm}"`
+              : "Create your first category to start organizing inventory."}
           </p>
-          <button onClick={handleOpenAddModal} className="btn btn-primary" style={{ marginTop: "16px" }}>
-            <Plus size={18} />
-            <span>Add Category</span>
-          </button>
+          {!searchTerm && (
+            <button onClick={handleOpenAddModal} className="btn btn-primary" style={{ marginTop: "12px" }}>
+              <Plus size={16} />
+              <span>Add Category</span>
+            </button>
+          )}
         </div>
       ) : (
         <>
-          <Table
-            columns={columns}
-            data={currentDisplayedCategories}
-            emptyMessage="No categories found."
-          />
+          <div className="desktop-table-container">
+            <Table columns={columns} data={currentDisplayedCategories} />
+          </div>
+
+          {/* Mobile Cards View (< 768px) */}
+          <div className="category-mobile-cards-container">
+            {currentDisplayedCategories.map((cat) => {
+              const assignedCount = products.filter(
+                (p) => (p.category?._id || p.category) === cat._id
+              ).length;
+
+              return (
+                <div key={cat._id} className="card category-mobile-card">
+                  {/* Category Header */}
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <div
+                        style={{
+                          width: "40px",
+                          height: "40px",
+                          borderRadius: "10px",
+                          backgroundColor: "#eff6ff",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Tags size={20} color="#2563eb" />
+                      </div>
+                      <div>
+                        <h4 style={{ fontSize: "15px", fontWeight: "700", color: "#0f172a", margin: 0 }}>
+                          {cat.name}
+                        </h4>
+                        <span style={{ fontSize: "11px", color: "#64748b" }}>
+                          Created: {new Date(cat.createdAt).toLocaleDateString("en-GB")}
+                        </span>
+                      </div>
+                    </div>
+
+                    <span
+                      className="badge"
+                      style={{
+                        backgroundColor: "#ecfdf5",
+                        color: "#059669",
+                        fontSize: "11px",
+                        padding: "2px 8px",
+                      }}
+                    >
+                      {assignedCount} Products
+                    </span>
+                  </div>
+
+                  {/* Description */}
+                  <p style={{ fontSize: "13px", color: "#475569", margin: "4px 0 8px", lineHeight: 1.4 }}>
+                    {cat.description || "No description provided."}
+                  </p>
+
+                  {/* Action Row */}
+                  <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", paddingTop: "4px" }}>
+                    <button
+                      onClick={() => handleOpenEditModal(cat)}
+                      className="btn btn-secondary btn-sm"
+                      style={{ padding: "6px 12px", fontSize: "12px" }}
+                    >
+                      <Edit3 size={14} color="#2563eb" />
+                      <span>Edit</span>
+                    </button>
+                    <button
+                      onClick={() => promptDelete(cat._id, cat.name)}
+                      className="btn btn-secondary btn-sm"
+                      style={{ padding: "6px 12px", fontSize: "12px", color: "#ef4444" }}
+                    >
+                      <Trash2 size={14} color="#ef4444" />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
 
           {/* Pagination Footer */}
           {filteredCategories.length > 0 && (

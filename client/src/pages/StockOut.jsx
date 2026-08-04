@@ -346,7 +346,7 @@ const StockOut = () => {
         </div>
       </div>
 
-      {/* Main Table View */}
+      {/* Main Table View (Desktop ≥ 768px) */}
       {loading ? (
         <Loader message="Loading stock out history..." />
       ) : filteredRecords.length === 0 ? (
@@ -365,11 +365,63 @@ const StockOut = () => {
         </div>
       ) : (
         <>
-          <Table
-            columns={columns}
-            data={currentDisplayedRecords}
-            emptyMessage="No stock out records found."
-          />
+          <div className="desktop-table-container">
+            <Table
+              columns={columns}
+              data={currentDisplayedRecords}
+              emptyMessage="No stock out records found."
+            />
+          </div>
+
+          {/* Mobile Cards View (< 768px) */}
+          <div className="stockout-mobile-cards-container">
+            {currentDisplayedRecords.map((item) => (
+              <div key={item._id} className="card stockout-mobile-card">
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div>
+                    <h4 style={{ fontSize: "15px", fontWeight: "700", color: "#0f172a", margin: 0 }}>
+                      {item.product?.name || "Inventory Product"}
+                    </h4>
+                    {item.product?.sku && (
+                      <span style={{ fontSize: "11px", color: "#64748b", fontFamily: "monospace" }}>
+                        SKU: {item.product.sku}
+                      </span>
+                    )}
+                  </div>
+                  <span
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "800",
+                      color: "#ef4444",
+                      backgroundColor: "#fdeeee",
+                      padding: "4px 10px",
+                      borderRadius: "8px",
+                    }}
+                  >
+                    -{item.quantity} Units
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#64748b" }}>
+                  <span>
+                    📅 {new Date(item.issuedDate || item.createdAt).toLocaleDateString("en-GB")}
+                  </span>
+                  {item.notes && <span style={{ fontStyle: "italic" }}>"{item.notes}"</span>}
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: "4px" }}>
+                  <button
+                    onClick={() => promptDelete(item._id)}
+                    className="btn btn-secondary btn-sm"
+                    style={{ padding: "4px 10px", fontSize: "12px", color: "#ef4444" }}
+                  >
+                    <Trash2 size={14} color="#ef4444" />
+                    <span>Delete Log</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
 
           {/* Pagination Footer */}
           {filteredRecords.length > 0 && (

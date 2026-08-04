@@ -115,7 +115,7 @@ const Profile = () => {
       </div>
 
       {/* User Card Overview */}
-      <div className="card" style={styles.userBanner}>
+      <div className="card profile-info-card" style={styles.userBanner}>
         <div style={styles.avatarLarge}>
           <User size={36} color="#2563eb" />
         </div>
@@ -133,7 +133,7 @@ const Profile = () => {
       </div>
 
       {/* Forms Grid */}
-      <div style={styles.formsGrid}>
+      <div className="profile-layout-grid" style={styles.formsGrid}>
         {/* Form 1: Update Profile Details */}
         <div className="card">
           <div style={styles.cardHeader}>

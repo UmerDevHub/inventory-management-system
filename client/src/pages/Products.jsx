@@ -572,16 +572,190 @@ const Products = () => {
         </div>
       </div>
 
-      {/* Main Table */}
+      {/* Main Table Container (Desktop ≥ 768px) */}
       {loading ? (
         <Loader message="Loading products inventory..." />
       ) : (
         <>
-          <Table
-            columns={columns}
-            data={currentDisplayedProducts}
-            emptyMessage="No products found matching your search and filter criteria."
-          />
+          <div className="desktop-table-container">
+            <Table
+              columns={columns}
+              data={currentDisplayedProducts}
+              emptyMessage="No products found matching your search and filter criteria."
+            />
+          </div>
+
+          {/* Mobile Cards View (< 768px) */}
+          <div className="product-mobile-cards-container">
+            {currentDisplayedProducts.length === 0 ? (
+              <div className="card" style={{ padding: "32px 16px", textAlign: "center", color: "#64748b" }}>
+                No products found matching your search and filter criteria.
+              </div>
+            ) : (
+              currentDisplayedProducts.map((prod) => {
+                const isLow = prod.quantity > 0 && prod.quantity <= (prod.reorderLevel || 10);
+                const isOut = prod.quantity === 0;
+
+                return (
+                  <div key={prod._id} className="card product-mobile-card">
+                    {/* Top Header: Image, Title, SKU */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <div
+                        style={{
+                          width: "48px",
+                          height: "48px",
+                          borderRadius: "10px",
+                          overflow: "hidden",
+                          backgroundColor: "#eff6ff",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <ImageWithFallback
+                          src={prod.image}
+                          alt={prod.name}
+                          size={22}
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        />
+                      </div>
+
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <h4
+                          style={{
+                            fontSize: "15px",
+                            fontWeight: "700",
+                            color: "#0f172a",
+                            margin: 0,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {prod.name}
+                        </h4>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
+                          <span
+                            style={{
+                              fontSize: "11px",
+                              fontFamily: "monospace",
+                              backgroundColor: "#f1f5f9",
+                              color: "#475569",
+                              padding: "2px 6px",
+                              borderRadius: "4px",
+                            }}
+                          >
+                            {prod.sku || "N/A"}
+                          </span>
+                          <span
+                            className={`badge ${
+                              isOut ? "badge-danger" : isLow ? "badge-warning" : "badge-success"
+                            }`}
+                            style={{ fontSize: "10px", padding: "2px 6px" }}
+                          >
+                            {isOut ? "Out of Stock" : isLow ? "Low Stock" : "In Stock"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Category & Warehouse Metadata pills */}
+                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", fontSize: "12px" }}>
+                      <span
+                        style={{
+                          backgroundColor: "#eff6ff",
+                          color: "#2563eb",
+                          padding: "3px 8px",
+                          borderRadius: "6px",
+                          fontWeight: "600",
+                          fontSize: "11px",
+                        }}
+                      >
+                        🏷️ {prod.category?.name || "Uncategorized"}
+                      </span>
+                      <span
+                        style={{
+                          backgroundColor: "#f8fafc",
+                          color: "#64748b",
+                          border: "1px solid #e2e8f0",
+                          padding: "3px 8px",
+                          borderRadius: "6px",
+                          fontSize: "11px",
+                        }}
+                      >
+                        🏢 {prod.warehouse?.name || "Main Warehouse"}
+                      </span>
+                    </div>
+
+                    {/* 2-Column Mini-Grid: Price & Stock */}
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: "8px",
+                        backgroundColor: "#f8fafc",
+                        padding: "10px 12px",
+                        borderRadius: "10px",
+                        border: "1px solid #f1f5f9",
+                      }}
+                    >
+                      <div>
+                        <span style={{ fontSize: "10px", color: "#64748b", fontWeight: "700", display: "block" }}>
+                          SELLING PRICE
+                        </span>
+                        <span style={{ fontSize: "15px", fontWeight: "800", color: "#0f172a" }}>
+                          ${prod.price || 0}
+                        </span>
+                      </div>
+                      <div>
+                        <span style={{ fontSize: "10px", color: "#64748b", fontWeight: "700", display: "block" }}>
+                          STOCK / MIN
+                        </span>
+                        <span
+                          style={{
+                            fontSize: "15px",
+                            fontWeight: "800",
+                            color: isOut ? "#ef4444" : isLow ? "#d97706" : "#059669",
+                          }}
+                        >
+                          {prod.quantity} <span style={{ fontSize: "11px", color: "#94a3b8", fontWeight: "normal" }}>/ {prod.reorderLevel || 10}</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Bottom Action Bar */}
+                    <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", paddingTop: "4px" }}>
+                      <button
+                        onClick={() => setQrProduct(prod)}
+                        className="btn btn-secondary btn-sm"
+                        style={{ padding: "6px 12px", fontSize: "12px" }}
+                      >
+                        <QrCode size={14} color="#16a34a" />
+                        <span>QR Label</span>
+                      </button>
+                      <button
+                        onClick={() => handleOpenEditModal(prod)}
+                        className="btn btn-secondary btn-sm"
+                        style={{ padding: "6px 12px", fontSize: "12px" }}
+                      >
+                        <Edit3 size={14} color="#2563eb" />
+                        <span>Edit</span>
+                      </button>
+                      <button
+                        onClick={() => promptDelete(prod._id, prod.name)}
+                        className="btn btn-secondary btn-sm"
+                        style={{ padding: "6px 12px", fontSize: "12px", color: "#ef4444" }}
+                      >
+                        <Trash2 size={14} color="#ef4444" />
+                        <span>Delete</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
 
           {/* Pagination Footer */}
           {filteredProducts.length > 0 && (

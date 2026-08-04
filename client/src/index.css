@@ -1138,8 +1138,128 @@ button, input, select, textarea {
   to { transform: rotate(360deg); }
 }
 
+/* ─── Screen Mobile Responsiveness Overrides (< 768px) ──────────────── */
+@media (max-width: 767px) {
+  /* Common mobile card container */
+  .mobile-cards-container,
+  .product-mobile-cards-container,
+  .category-mobile-cards-container,
+  .stockin-mobile-cards-container,
+  .stockout-mobile-cards-container,
+  .purchase-mobile-cards-container,
+  .supplier-mobile-cards-container,
+  .warehouse-mobile-cards-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .desktop-table-container {
+    display: none !important;
+  }
+
+  /* 1. Products Page Mobile Styles */
+  .products-toolbar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .products-filter-group {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  .product-mobile-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  }
+
+  /* 2. Categories Page Mobile Styles */
+  .categories-summary-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  /* 3A. Stock In Page Mobile Styles */
+  .stockin-summary-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  /* 3B. Stock Out Page Mobile Styles */
+  .stockout-summary-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  /* 4A. Purchases Page Mobile Styles */
+  .purchases-summary-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  /* 5. Reports Page Mobile Styles */
+  .reports-tab-strip {
+    display: flex !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px !important;
+    gap: 8px !important;
+  }
+
+  .reports-tab-strip button {
+    flex-shrink: 0 !important;
+  }
+
+  .reports-controls-grid {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .reports-export-row {
+    width: 100% !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .reports-export-row button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* 6. Profile Page Mobile Styles */
+  .profile-layout-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .profile-info-card {
+    text-align: center !important;
+    align-items: center !important;
+  }
+}
+
+/* Hide mobile card wrappers on desktop (≥ 768px) */
 @media (min-width: 768px) {
-  .dashboard-low-stock-mobile-cards {
+  .dashboard-low-stock-mobile-cards,
+  .mobile-cards-container,
+  .product-mobile-cards-container,
+  .category-mobile-cards-container,
+  .stockin-mobile-cards-container,
+  .stockout-mobile-cards-container,
+  .purchase-mobile-cards-container,
+  .supplier-mobile-cards-container,
+  .warehouse-mobile-cards-container {
     display: none !important;
   }
 }

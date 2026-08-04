@@ -467,7 +467,7 @@ const Purchases = () => {
         </div>
       </div>
 
-      {/* Main Table View */}
+      {/* Main Table View (Desktop ≥ 768px) */}
       {loading ? (
         <Loader message="Loading purchase history..." />
       ) : filteredPurchases.length === 0 ? (
@@ -486,11 +486,65 @@ const Purchases = () => {
         </div>
       ) : (
         <>
-          <Table
-            columns={columns}
-            data={currentDisplayedPurchases}
-            emptyMessage="No purchase orders found."
-          />
+          <div className="desktop-table-container">
+            <Table
+              columns={columns}
+              data={currentDisplayedPurchases}
+              emptyMessage="No purchase orders found."
+            />
+          </div>
+
+          {/* Mobile Cards View (< 768px) */}
+          <div className="purchase-mobile-cards-container">
+            {currentDisplayedPurchases.map((item) => (
+              <div key={item._id} className="card purchase-mobile-card">
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div>
+                    <h4 style={{ fontSize: "15px", fontWeight: "700", color: "#0f172a", margin: 0 }}>
+                      {item.product?.name || "Procured Item"}
+                    </h4>
+                    <span style={{ fontSize: "11px", color: "#64748b" }}>
+                      Vendor: {item.supplier?.name || "Supplier Partner"}
+                    </span>
+                  </div>
+                  <span style={{ fontSize: "15px", fontWeight: "800", color: "#0f172a" }}>
+                    ${item.totalAmount || 0}
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "12px" }}>
+                  <span style={{ color: "#64748b" }}>
+                    Qty: {item.quantity} units (${item.price}/unit)
+                  </span>
+                  <span style={{ color: "#94a3b8", fontSize: "11px" }}>
+                    📅 {new Date(item.purchaseDate || item.createdAt).toLocaleDateString("en-GB")}
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: "8px", paddingTop: "4px" }}>
+                  <button
+                    onClick={() => {
+                      setViewPurchase(item);
+                      setIsViewOpen(true);
+                    }}
+                    className="btn btn-secondary btn-sm"
+                    style={{ padding: "6px 12px", fontSize: "12px" }}
+                  >
+                    <Eye size={14} color="#2563eb" />
+                    <span>View Detail</span>
+                  </button>
+                  <button
+                    onClick={() => promptDelete(item._id)}
+                    className="btn btn-secondary btn-sm"
+                    style={{ padding: "6px 12px", fontSize: "12px", color: "#ef4444" }}
+                  >
+                    <Trash2 size={14} color="#ef4444" />
+                    <span>Delete</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
 
           {/* Pagination Footer */}
           {filteredPurchases.length > 0 && (
