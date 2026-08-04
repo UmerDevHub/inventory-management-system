@@ -15,7 +15,8 @@ const protect = async (req, res, next) => {
       return res.status(401).json({ message: "Not Authorized — invalid token format" });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const secret = process.env.JWT_SECRET || "super_secret_warehouse_jwt_key_9988";
+    const decoded = jwt.verify(token, secret);
 
     const user = await User.findById(decoded.id).select("-password");
 
